@@ -8,16 +8,17 @@ from __future__ import annotations
 import logging
 import os
 import queue
+import threading
 import tkinter as tk
-import webbrowser
 from pathlib import Path
 
 import pystray
 from PIL import Image, ImageDraw
 
-from . import __version__, autostart
+from . import __version__, autostart, updates
 from .config import CONFIG_PATH, DATA_DIR
 from .stats_window import StatsWindow
+from .update_window import UpdateWindow
 
 log = logging.getLogger(__name__)
 
@@ -46,6 +47,7 @@ class TrayUI:
         self.root.title("GR7 Presence")
         self._queue: queue.Queue = queue.Queue()
         self._stats_window: StatsWindow | None = None
+        self._update_window: UpdateWindow | None = None
         self._images = {True: _icon_image(True), False: _icon_image(False)}
         self.icon = pystray.Icon("gr7_presence", self._images[False], "GR7 Presence", menu=self._menu())
         app.on_status = lambda text, active: self._queue.put(("status", text, active))
@@ -57,7 +59,7 @@ class TrayUI:
         return pystray.Menu(
             pystray.MenuItem(lambda _i: self.app.status_text, None, enabled=False),
             pystray.MenuItem(lambda _i: self.app.t("menu_update", version=update().version) if update() else "",
-                             self._open_update, visible=lambda _i: update() is not None),
+                             lambda: self._queue.put(("update_window",)), visible=lambda _i: update() is not None),
             pystray.Menu.SEPARATOR,
             pystray.MenuItem(t("menu_pause"), self._toggle_pause, checked=lambda _i: self.app.paused),
             pystray.MenuItem(t("menu_stats"), lambda: self._queue.put(("stats",)), default=True),
@@ -68,10 +70,6 @@ class TrayUI:
             pystray.MenuItem(lambda _i: self.app.t("menu_version", version=__version__), None, enabled=False),
             pystray.MenuItem(t("menu_quit"), lambda: self._queue.put(("quit",))),
         )
-
-    def _open_update(self) -> None:
-        if self.app.updates.available:
-            webbrowser.open(self.app.updates.available.url)
 
     # ---- ações do menu (thread do pystray) -----------------------------------------------
     def _toggle_pause(self) -> None:
@@ -108,6 +106,13 @@ class TrayUI:
                                          self.app.t("update_title", version=version))
                     except Exception:   # o item do menu já basta se a notificação falhar
                         log.exception("Não consegui mostrar a notificação de versão nova")
+                elif msg[0] == "update_window":
+                    self._show_update()
+                elif msg[0] == "update_ready":
+                    self._hand_over_to_updater(msg[1], msg[2])
+                elif msg[0] == "update_error":
+                    if self._update_window:
+                        self._update_window.show_error(msg[1])
                 elif msg[0] == "stats":
                     self._show_stats()
                 elif msg[0] == "quit":
@@ -124,9 +129,57 @@ class TrayUI:
             return
         self._stats_window = StatsWindow(self.root, self.app.stats, self.app.t)
 
+    # ---- atualização com um clique ---------------------------------------------------------
+    def _show_update(self) -> None:
+        release = self.app.updates.available
+        if release is None:
+            return
+        if self._update_window and self._update_window.alive:
+            self._update_window.focus()
+            return
+        self._update_window = UpdateWindow(self.root, release, __version__, self.app.t,
+                                           on_confirm=lambda: self._download(release))
+
+    def _download(self, release: updates.Release) -> None:
+        def run():
+            try:
+                path = updates.download(release)
+            except updates.UpdateError as exc:
+                log.warning("Atualização não baixada: %s", exc)
+                self._queue.put(("update_error", str(exc)))
+                return
+            self._queue.put(("update_ready", path, release))
+        threading.Thread(target=run, name="download", daemon=True).start()
+
+    def _hand_over_to_updater(self, path: Path, release: updates.Release) -> None:
+        """O atualizador espera este processo fechar; daqui em diante é com ele."""
+        try:
+            updates.start_updater(path, release)
+        except OSError as exc:
+            log.exception("Não consegui iniciar o atualizador")
+            if self._update_window:
+                self._update_window.show_error(str(exc))
+            return
+        self._queue.put(("quit",))
+
+    def _announce_last_update(self) -> None:
+        result = updates.pop_last_result()
+        if not result:
+            return
+        if result.get("ok"):
+            title, body = self.app.t("update_done_title"), self.app.t("update_done_body", version=result.get("para"))
+        else:
+            title = self.app.t("update_rollback_title")
+            body = self.app.t("update_rollback_body", version=result.get("de"), error=result.get("erro") or "?")
+        try:
+            self.icon.notify(body, title)
+        except Exception:
+            log.exception("Não consegui mostrar o resultado da atualização")
+
     def run(self) -> None:
         self.icon.run_detached()
         self.root.after(250, self._drain)
+        self.root.after(3000, self._announce_last_update)   # o ícone precisa estar na bandeja
         try:
             self.root.mainloop()
         finally:

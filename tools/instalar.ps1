@@ -1,6 +1,7 @@
 ﻿# Instalador do GR7 Presence (chamado pelo instalar.bat).
-#   -Teste  instala só o ambiente Python: não cria atalhos nem abre o programa
-param([switch]$Teste)
+#   -Teste        instala só o ambiente Python: não cria atalhos nem abre o programa
+#   -Atualizacao  usado pelo tools\atualizar.py: sem perguntas, mantém os atalhos e abre o programa
+param([switch]$Teste, [switch]$Atualizacao)
 
 $ErrorActionPreference = 'Stop'
 trap {
@@ -54,6 +55,8 @@ Write-Host "  === GR7 Presence: Discord Rich Presence para o Guitar Rig 7 ===" -
 Step "[1/5] Procurando o Python..."
 if (Test-Path $Venv) {
     Ok "Ambiente Python já existe (.venv)."
+} elseif ($Atualizacao) {
+    throw "Ambiente Python (.venv) não encontrado; rode o instalar.bat."
 } else {
     $python = Find-Python
     if (-not $python) {
@@ -114,6 +117,13 @@ if (Get-Process -Name Discord, DiscordPTB, DiscordCanary -ErrorAction SilentlyCo
 if ($Teste) {
     Write-Host ""
     Ok "Modo teste: sem atalhos e sem abrir o programa."
+    exit 0
+}
+
+# Na atualização, os atalhos já apontam para esta pasta e o início com o Windows fica como está.
+if ($Atualizacao) {
+    Start-Process -FilePath $VenvW -ArgumentList '-m', 'gr7_presence' -WorkingDirectory $Root
+    Ok "Atualização instalada; abrindo o GR7 Presence."
     exit 0
 }
 
