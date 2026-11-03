@@ -35,10 +35,13 @@ class TrayUI:
         self._queue: queue.Queue = queue.Queue()
         self._stats_window: StatsWindow | None = None
         self._update_window: UpdateWindow | None = None
+        self._notes: list[tuple[str, str]] = []   # (título, texto) esperando o ícone aparecer
         self._images = {True: app_icon.tray_image(True), False: app_icon.tray_image(False)}
         self.icon = pystray.Icon("gr7_presence", self._images[False], "GR7 Presence", menu=self._menu())
         app.on_status = lambda text, active: self._queue.put(("status", text, active))
         app.on_update = lambda release: self._queue.put(("update", release))
+        if app.updates.available:   # achada antes de a bandeja existir: o aviso não pode se perder
+            self._queue.put(("update", app.updates.available))
 
     def _menu(self) -> pystray.Menu:
         t = lambda key: (lambda _item: self.app.t(key))   # textos seguem o idioma do config
@@ -88,11 +91,7 @@ class TrayUI:
                 elif msg[0] == "update":
                     version = msg[1].version
                     self.icon.update_menu()
-                    try:
-                        self.icon.notify(self.app.t("update_body", version=version),
-                                         self.app.t("update_title", version=version))
-                    except Exception:   # o item do menu já basta se a notificação falhar
-                        log.exception("Não consegui mostrar a notificação de versão nova")
+                    self._notify(self.app.t("update_title", version=version), self.app.t("update_body", version=version))
                 elif msg[0] == "update_window":
                     self._show_update()
                 elif msg[0] == "update_ready":
@@ -108,7 +107,24 @@ class TrayUI:
                     return
         except queue.Empty:
             pass
+        self._flush_notes()
         self.root.after(250, self._drain)
+
+    def _notify(self, title: str, body: str) -> None:
+        self._notes.append((title, body))
+        self._flush_notes()
+
+    def _flush_notes(self) -> None:
+        # O pystray põe o ícone na bandeja numa thread própria, um instante depois de abrir; até lá
+        # uma notificação some sem erro nenhum (a 1.1.0 perdeu assim o aviso da 1.2.0).
+        if not self.icon.visible:
+            return
+        while self._notes:
+            title, body = self._notes.pop(0)
+            try:
+                self.icon.notify(body, title)
+            except Exception:   # o item do menu já basta se a notificação falhar
+                log.exception("Não consegui mostrar a notificação %r", title)
 
     def _show_stats(self) -> None:
         if self._stats_window and self._stats_window.alive:
@@ -158,15 +174,12 @@ class TrayUI:
         else:
             title = self.app.t("update_rollback_title")
             body = self.app.t("update_rollback_body", version=result.get("de"), error=result.get("erro") or "?")
-        try:
-            self.icon.notify(body, title)
-        except Exception:
-            log.exception("Não consegui mostrar o resultado da atualização")
+        self._notify(title, body)
 
     def run(self) -> None:
         self.icon.run_detached()
         self.root.after(250, self._drain)
-        self.root.after(3000, self._announce_last_update)   # o ícone precisa estar na bandeja
+        self.root.after(1000, self._announce_last_update)
         try:
             self.root.mainloop()
         finally:
