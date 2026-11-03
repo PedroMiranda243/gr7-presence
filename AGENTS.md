@@ -75,7 +75,7 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
 | `stats.py` / `stats_window.py` | Sessões de prática e a janela de estatísticas | — |
 | `tray.py` | Ícone, menu, notificações | Lógica de presença |
-| `app_icon.py` | O ícone do programa (o pedal de `tools/icone_pedal.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
+| `app_icon.py` | O ícone do programa (o selo gerado por `tools/icone.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
 | `updates.py` | Consulta a última release, baixa o zip conferindo o sha256, entrega ao atualizador | Trocar arquivos ou atualizar sem a pessoa confirmar |
 | `update_window.py` | A janela "Atualizar o GR7 Presence" (notas e botão) | Baixar ou instalar |
 | `tools/atualizar.py` | Roda depois que o programa fecha: troca os arquivos, roda o instalador, volta se falhar | Importar o programa ou qualquer pacote fora da biblioteca padrão |
@@ -165,6 +165,22 @@ AppUserModelID próprio o Windows agrupa as janelas sob o Python, mesmo com `ico
 O `__main__.py` chama `app_icon.set_app_id()` antes da primeira janela, e a bandeja põe o ícone com
 `iconbitmap(default=...)` no `tk.Tk()` oculto, que vale para todas as janelas. Conferido capturando a
 barra de tarefas: sem o ID, o ícone do Python; com ele, o pedal.
+
+**A notificação "Saiu a versão X" não aparece.** A 1.1.0 achou a 1.2.0 um segundo depois de abrir e
+o aviso não apareceu. O log mostrava "Versão nova disponível", e o item do menu existia. Duas corridas
+na abertura podiam causar isso:
+1. **O loop começava antes de a bandeja ligar o `app.on_update`.** O `__main__.py` iniciava a thread
+   do loop, que já consulta o GitHub, antes de criar a `TrayUI`. Se a consulta terminava primeiro, o
+   aviso ia para ninguém. Agora a bandeja é criada antes do loop e ainda anuncia, ao nascer, uma versão
+   que já tenha sido achada.
+2. **O ícone ainda não estava na bandeja.** O pystray põe o ícone numa thread própria, e
+   `icon.notify()` antes disso some sem erro. A bandeja guarda as notificações até `icon.visible` ser
+   verdadeiro.
+
+Para conferir por captura de tela, capture o **monitor principal**: é nele que o Windows mostra as
+notificações, e com dois monitores ele não precisa ser o da esquerda. Uma conferência foi dada como
+"Windows bloqueando notificações" porque a captura era do outro monitor. O item do menu da bandeja não
+depende de notificação.
 
 **`Start-Process -Wait` não volta.** Ele espera também os filhos (o `pythonw` da bandeja). Não use para
 abrir o programa em script.

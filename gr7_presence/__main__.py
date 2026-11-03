@@ -88,9 +88,10 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     from .tray import TrayUI
+    ui = TrayUI(app)           # antes do loop: os avisos do loop (versão nova, status) já têm para onde ir
     worker = threading.Thread(target=app.run, name="presence", daemon=True)
     worker.start()
-    TrayUI(app).run()          # bloqueia até "Sair"
+    ui.run()                   # bloqueia até "Sair"
     app.stop()
     worker.join(timeout=10)
     return 0

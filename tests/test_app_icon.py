@@ -4,13 +4,30 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from gr7_presence import app_icon, autostart
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 
 import empacotar  # noqa: E402
+import icone  # noqa: E402
+
+
+class ImportArtTest(unittest.TestCase):
+    def test_white_background_becomes_transparent(self):
+        art = Image.new("RGB", (400, 400), (254, 254, 254))
+        ImageDraw.Draw(art).ellipse((60, 40, 340, 320), fill=(120, 10, 10))
+        out = icone.import_art(art)
+        self.assertEqual(out.size, (1024, 1024))
+        self.assertEqual(out.getpixel((5, 5))[3], 0)           # canto: transparente, sem franja branca
+        self.assertEqual(out.getpixel((512, 512))[3], 255)     # centro: o selo
+        self.assertLess(max(out.getpixel((512, 20))[:3]), 200)  # perto da borda: ainda vermelho
+
+    def test_small_sizes_zoom_the_pedal(self):
+        source = Image.open(Path(__file__).resolve().parent.parent / "assets" / "gr7_presence_fonte.png").convert("RGBA")
+        self.assertEqual(icone.render(source, 16).size, (16, 16))
+        self.assertEqual(icone.render(source, 256).size, (256, 256))
 
 
 class IconFilesTest(unittest.TestCase):
