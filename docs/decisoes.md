@@ -78,6 +78,12 @@ arte nova num gerador de imagens: um selo vermelho com o pedal de expressão bra
 fica em `assets/gr7_presence_fonte.png`, e o `tools/icone.py` recorta o círculo e gera os tamanhos. Até
 32 px, o pedal é ampliado dentro do selo, para não virar um risco fino.
 
+**Adendo (2026-11-03): de volta ao pedal visto de cima.** Depois de usar a 1.3.0, o dono do projeto
+comparou os dois ícones na própria máquina e ficou com o pedal visto de cima da 1.2.0. Voltam o
+`tools/icone_pedal.py` e os arquivos do ícone daquela versão; o selo e a ferramenta que importava arte
+de fora (`tools/icone.py`) saem. A correção do aviso de versão nova, que veio junto com o selo na
+1.3.0, fica.
+
 ## D6. Distribuição como zip com instalador, não como executável
 
 **Decisão.** Um zip com o código, um `instalar.bat` que cria o ambiente Python e instala as
