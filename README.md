@@ -47,6 +47,7 @@ Precisa de Windows 10 ou 11, do Guitar Rig 7 e do Discord desktop (o Discord no 
 - **Modo plugin.** Com o Guitar Rig 7 aberto como VST3 numa DAW (REAPER, FL Studio, Ableton, Studio One, Cubase, Bitwig, Cakewalk…), mostra "🎛️ Guitar Rig 7 no REAPER".
 - **Estatísticas de prática.** Tempo de hoje, da semana e total, sequência de dias seguidos 🔥 (vale a partir de 5 min por dia), recorde, presets e amps mais usados. Tudo fica no seu PC.
 - **Bandeja do sistema.** Ponto verde quando está no Discord, cinza quando está esperando. Menu com pausar, estatísticas, configurações, iniciar com o Windows e a versão instalada.
+- **Ícone próprio.** Um pedal vermelho na bandeja, na barra de tarefas e nos atalhos, diferente do ícone do Guitar Rig 7 para não confundir os dois abertos ao mesmo tempo.
 - **Robusto.** Se o Discord fechar, ele reconecta sozinho. Um arquivo corrompido não derruba nada, e só uma cópia do programa roda por vez.
 
 ## Configuração
@@ -78,7 +79,6 @@ Dê dois cliques em `desinstalar.bat` e depois apague a pasta.
 - **Não aparece nada.** Confira o ícone da bandeja. Cinza com "Discord não encontrado" quer dizer que o Discord desktop está fechado. Veja também o log em `dados\gr7_presence.log` (botão direito na bandeja › **Abrir pasta de dados**).
 - **O preset não mudou.** Confira se o Guitar Rig não está minimizado: minimizado, ele não desenha a janela, e o perfil fica no último preset lido.
 - **Imagens em branco ou ícone de dado no lugar do logo.** O Discord guarda as imagens em cache. Se uma imagem não for reconhecida, o programa passa a mandar o link direto dela sozinho. O ícone pequeno ao lado do seu nome só atualiza recarregando o Discord com **Ctrl+R**.
-- **A bandeja mostra um círculo laranja em vez do logo.** O instalador não achou o Guitar Rig 7 no local padrão para copiar o ícone. O resto funciona normalmente.
 - **Achou um defeito?** [Abra uma issue](https://github.com/PedroMiranda243/gr7-presence/issues/new/choose) com a versão (aparece no menu da bandeja) e um trecho do log.
 
 ## Para quem desenvolve

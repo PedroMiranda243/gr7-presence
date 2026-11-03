@@ -75,6 +75,7 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
 | `stats.py` / `stats_window.py` | Sessões de prática e a janela de estatísticas | — |
 | `tray.py` | Ícone, menu, notificações | Lógica de presença |
+| `app_icon.py` | O ícone do programa (o pedal de `tools/icone_pedal.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
 | `updates.py` | Consulta a última release, baixa o zip conferindo o sha256, entrega ao atualizador | Trocar arquivos ou atualizar sem a pessoa confirmar |
 | `update_window.py` | A janela "Atualizar o GR7 Presence" (notas e botão) | Baixar ou instalar |
 | `tools/atualizar.py` | Roda depois que o programa fecha: troca os arquivos, roda o instalador, volta se falhar | Importar o programa ou qualquer pacote fora da biblioteca padrão |
@@ -158,6 +159,12 @@ atualiza com Ctrl+R no Discord.
 
 **Ler o pipe do Discord numa thread trava a escrita.** O pipe é síncrono no Windows e serializa as
 operações: o `discord_ipc.py` consulta com `PeekNamedPipe` em vez de deixar uma leitura pendurada.
+
+**A barra de tarefas mostra o ícone do Python.** O programa roda no `pythonw.exe`, e sem um
+AppUserModelID próprio o Windows agrupa as janelas sob o Python, mesmo com `iconbitmap` na janela.
+O `__main__.py` chama `app_icon.set_app_id()` antes da primeira janela, e a bandeja põe o ícone com
+`iconbitmap(default=...)` no `tk.Tk()` oculto, que vale para todas as janelas. Conferido capturando a
+barra de tarefas: sem o ID, o ícone do Python; com ele, o pedal.
 
 **`Start-Process -Wait` não volta.** Ele espera também os filhos (o `pythonw` da bandeja). Não use para
 abrir o programa em script.
