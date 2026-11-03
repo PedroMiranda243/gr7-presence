@@ -1,11 +1,12 @@
 """Gera o ícone do programa e as imagens do Rich Presence.
 
-    .venv\\Scripts\\python tools\\make_assets.py            # todas
-    .venv\\Scripts\\python tools\\make_assets.py --icone    # só o ícone do programa (não precisa do Guitar Rig)
-    .venv\\Scripts\\python tools\\make_assets.py --locais   # só as tiradas do Guitar Rig
+    .venv\\Scripts\\python tools\\make_assets.py                         # todas
+    .venv\\Scripts\\python tools\\make_assets.py --icone                 # só o ícone do programa
+    .venv\\Scripts\\python tools\\make_assets.py --icone-de arte.png     # troca a arte do ícone
+    .venv\\Scripts\\python tools\\make_assets.py --locais                # só as tiradas do Guitar Rig
 
-- gr7_presence.ico / .png: o ícone do programa (barra de tarefas, janelas, bandeja, atalhos), um
-  pedal vermelho desenhado em tools/icone_pedal.py. Arte do projeto, versionada.
+- gr7_presence.ico / .png: o ícone do programa (barra de tarefas, janelas, bandeja, atalhos), feito
+  a partir de gr7_presence_fonte.png por tools/icone.py. Arte do projeto, versionada.
 - gr7_logo.png / app_icon.png / tray.ico: ícone oficial tirado do "Guitar Rig 7.exe", só para o app
   do Discord (docs/app-do-discord.md). É arte da Native Instruments: não vai para o repositório nem
   para o zip, e o programa não depende dela.
@@ -22,7 +23,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).parent))
-import icone_pedal  # noqa: E402
+import icone  # noqa: E402
 from exe_icon import extract_ico  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -156,10 +157,15 @@ def daw() -> Image.Image:
 
 
 def main() -> None:
+    assets = ROOT / "assets"
+    if "--icone-de" in sys.argv:
+        art = Path(sys.argv[sys.argv.index("--icone-de") + 1])
+        icone.import_art(Image.open(art)).save(assets / "gr7_presence_fonte.png")
+        print("Arte nova recortada em", assets / "gr7_presence_fonte.png")
     if "--locais" not in sys.argv:
-        icone_pedal.save(ROOT / "assets" / "gr7_presence.ico", ROOT / "assets" / "gr7_presence.png")
-        print("Ícone do programa gerado em", ROOT / "assets")
-        if "--icone" in sys.argv:
+        icone.save(assets / "gr7_presence_fonte.png", assets / "gr7_presence.ico", assets / "gr7_presence.png")
+        print("Ícone do programa gerado em", assets)
+        if "--icone" in sys.argv or "--icone-de" in sys.argv:
             return
     OUT.mkdir(parents=True, exist_ok=True)
     if not Path(EXE).exists():
