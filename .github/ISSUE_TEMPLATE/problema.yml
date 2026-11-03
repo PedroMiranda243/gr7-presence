@@ -1,0 +1,46 @@
+name: Algo não funciona
+description: O perfil não aparece, mostra a coisa errada, o instalador falhou...
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por avisar! Antes, confira a seção **Solução de problemas** do README.
+        Falha de segurança não vai aqui: veja o SECURITY.md.
+  - type: textarea
+    id: aconteceu
+    attributes:
+      label: O que aconteceu
+      description: O que você viu, e o que esperava ver.
+    validations:
+      required: true
+  - type: textarea
+    id: passos
+    attributes:
+      label: Como fazer acontecer de novo
+      placeholder: |
+        1. Abri o Guitar Rig 7
+        2. Carreguei o preset ...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: versao
+    attributes:
+      label: Versão do GR7 Presence
+      description: Aparece no menu do ícone da bandeja (botão direito), por exemplo "GR7 Presence 1.0.0".
+    validations:
+      required: true
+  - type: input
+    id: ambiente
+    attributes:
+      label: Windows, Guitar Rig e Discord
+      placeholder: Windows 11, Guitar Rig 7.0.2 Pro, Discord desktop
+  - type: textarea
+    id: log
+    attributes:
+      label: Trecho do log
+      description: |
+        Botão direito na bandeja > "Abrir pasta de dados" > gr7_presence.log. Cole as últimas linhas.
+        O log pode ter nomes de presets e de faixas: apague o que não quiser mostrar.
+      render: text

@@ -1,0 +1,46 @@
+# Publica uma versão quando uma tag vX.Y.Z chega ao GitHub (roteiro em docs/lancar-versao.md).
+# Nada é publicado se qualquer passo falhar.
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write   # criar a release e anexar o zip
+
+env:
+  PYTHONUTF8: "1"
+
+jobs:
+  publicar:
+    name: Publicar a versão
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Instalar dependências
+        run: python -m pip install -r requirements.txt
+
+      - name: Testes
+        run: python -m unittest discover -s tests -t .
+
+      - name: Conferir a versão e separar as notas do CHANGELOG
+        run: python tools/notas_da_versao.py "${{ github.ref_name }}" --saida notas.md
+
+      # Exige a lista privada: uma release nunca sai sem procurar dados pessoais.
+      - name: Gerar o zip
+        env:
+          GR7_PALAVRAS_PRIVADAS: ${{ secrets.GR7_PALAVRAS_PRIVADAS }}
+        run: python tools/empacotar.py --exigir-palavras
+
+      # Nome fixo do anexo: o link "releases/latest/download/GR7-Presence.zip" do README sempre
+      # aponta para a versão mais nova.
+      - name: Publicar a release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/GR7-Presence.zip --title "GR7 Presence ${{ github.ref_name }}" --notes-file notas.md --verify-tag

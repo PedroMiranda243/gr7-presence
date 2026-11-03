@@ -1,0 +1,16 @@
+name: Ideia ou pedido
+description: Algo que o GR7 Presence poderia mostrar ou fazer.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: ideia
+    attributes:
+      label: O que você gostaria
+      description: Se for algo no perfil do Discord, descreva (ou desenhe) como ficaria.
+    validations:
+      required: true
+  - type: textarea
+    id: porque
+    attributes:
+      label: Para quê
+      description: Em que situação isso ajudaria. É o que mais pesa na hora de decidir.

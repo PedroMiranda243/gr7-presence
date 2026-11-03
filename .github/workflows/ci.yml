@@ -1,0 +1,77 @@
+# Roda em todo Pull Request e em todo push na main. Os nomes dos jobs são os checks exigidos
+# pela proteção da main: renomear um job exige atualizar a regra no GitHub.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+env:
+  PYTHONUTF8: "1"   # acentos nas mensagens, sem depender da página de código do Windows
+
+jobs:
+  testes:
+    name: Testes (Python ${{ matrix.python }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # O instalador aceita do 3.10 ao 3.13 e prefere o 3.11.
+        python: ["3.10", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Instalar dependências
+        run: python -m pip install -r requirements.txt
+
+      # Sem o Guitar Rig e sem o OCR na máquina da CI: os testes de instalação real ficam pulados.
+      - name: Testes
+        run: python -m unittest discover -s tests -t . -v
+
+  higiene:
+    name: Nada pessoal no repositório
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      # A lista de palavras vem de um secret; em PR de fork ele não existe, e a conferência dos
+      # caminhos de usuário roda mesmo assim.
+      - name: Dados pessoais e caminhos de usuário
+        env:
+          GR7_PALAVRAS_PRIVADAS: ${{ secrets.GR7_PALAVRAS_PRIVADAS }}
+        run: python tools/empacotar.py --verificar
+
+      - name: Nenhum arquivo do Guitar Rig nem arte da Native Instruments
+        run: |
+          if git ls-files | grep -Ei '\.(ngrr|tle)$|(^|/)tray\.ico$|gr7_logo\.png$|app_icon\.png$|preview\.png$'; then
+            echo "::error::Arquivo do Guitar Rig ou arte da Native Instruments versionado (ver .gitignore e docs/decisoes.md, D5)."
+            exit 1
+          fi
+          echo "OK: nenhum."
+
+      - name: Nenhum arquivo acima de 1 MB
+        run: |
+          grandes=""
+          while IFS= read -r -d '' f; do
+            if [ -f "$f" ] && [ "$(wc -c < "$f")" -gt 1048576 ]; then grandes="$grandes $f"; fi
+          done < <(git ls-files -z)
+          if [ -n "$grandes" ]; then
+            echo "::error::Arquivos acima de 1 MB versionados:$grandes"
+            exit 1
+          fi
+          echo "OK: nenhum."
