@@ -1,0 +1,41 @@
+GR7 Presence - mostra no seu perfil do Discord que você está tocando no Guitar Rig 7
+==================================================================================
+
+Precisa de: Windows 10 ou 11, Guitar Rig 7 e o Discord desktop (o Discord no navegador não mostra).
+Versões novas: https://github.com/PedroMiranda243/gr7-presence/releases
+
+COMO INSTALAR
+1. Clique com o botão direito no .zip > "Extrair tudo...". Escolha uma pasta fixa,
+   por exemplo Documentos. O programa roda dessa pasta, então não apague nem mude ela de lugar depois.
+2. Na pasta extraída, dê dois cliques em "instalar.bat".
+   - Se o Windows mostrar "O Windows protegeu o computador", clique em
+     "Mais informações" > "Executar assim mesmo".
+   - Se você não tiver o Python, o instalador oferece instalar sozinho (é só responder S).
+     Se preferir fazer à mão: baixe o Python 3.11 em python.org e, na primeira tela,
+     MARQUE "Add python.exe to PATH". Depois rode o instalar.bat de novo.
+3. No fim ele pergunta se deve abrir junto com o Windows e já abre o programa na bandeja
+   (perto do relógio; se não aparecer, clique na setinha ^).
+4. Abra o Guitar Rig 7 e veja seu perfil no Discord.
+
+NO DISCORD
+Configurações > Privacidade de atividade > "Compartilhar sua atividade detectada com outras pessoas"
+precisa estar ligada.
+
+NO DIA A DIA
+- Botão direito no ícone da bandeja: pausar, estatísticas, configurações, iniciar com o Windows, sair.
+  A versão instalada aparece no fim do menu.
+- Duplo clique no ícone: suas estatísticas de prática (ficam só no seu PC, na pasta "dados").
+- Com o Guitar Rig minimizado, o perfil fica no último preset lido até você restaurar a janela.
+
+PARA ATUALIZAR
+O programa avisa quando sai versão nova (notificação e o item "Baixar a versão ..." no menu da bandeja).
+1. Botão direito no ícone da bandeja > "Sair".
+2. Baixe o zip novo e extraia NA MESMA PASTA, aceitando substituir os arquivos.
+3. Rode o "instalar.bat" de novo.
+Suas estatísticas e configurações continuam: a pasta "dados" não vem no zip.
+
+PARA DESINSTALAR
+Dê dois cliques em "desinstalar.bat" e depois apague a pasta.
+
+Mais detalhes no README.md.
+Projeto de fã, sem ligação com a Native Instruments. Guitar Rig é marca da Native Instruments.
