@@ -13,30 +13,13 @@ import tkinter as tk
 from pathlib import Path
 
 import pystray
-from PIL import Image, ImageDraw
 
-from . import __version__, autostart, updates
+from . import __version__, app_icon, autostart, updates
 from .config import CONFIG_PATH, DATA_DIR
 from .stats_window import StatsWindow
 from .update_window import UpdateWindow
 
 log = logging.getLogger(__name__)
-
-LOGO = Path(__file__).resolve().parent.parent / "assets" / "discord" / "gr7_logo.png"
-
-
-def _icon_image(active: bool) -> Image.Image:
-    # O logo sai do "Guitar Rig 7.exe" na instalação (tools/make_assets.py --locais) e não vai para o
-    # repositório. Sem ele, um círculo na cor do Guitar Rig.
-    try:
-        base = Image.open(LOGO).convert("RGBA").resize((64, 64), Image.LANCZOS)
-    except OSError:
-        base = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
-        ImageDraw.Draw(base).ellipse((2, 2, 61, 61), fill="#F2572B")
-    d = ImageDraw.Draw(base)
-    color = "#23A55A" if active else "#80848E"   # verde do Discord / cinza
-    d.ellipse((40, 40, 63, 63), fill=color, outline="black", width=3)
-    return base
 
 
 class TrayUI:
@@ -45,10 +28,14 @@ class TrayUI:
         self.root = tk.Tk()
         self.root.withdraw()
         self.root.title("GR7 Presence")
+        try:
+            self.root.iconbitmap(default=str(app_icon.ICO))   # vale para todas as janelas do programa
+        except tk.TclError:
+            log.warning("Sem o ícone %s", app_icon.ICO)
         self._queue: queue.Queue = queue.Queue()
         self._stats_window: StatsWindow | None = None
         self._update_window: UpdateWindow | None = None
-        self._images = {True: _icon_image(True), False: _icon_image(False)}
+        self._images = {True: app_icon.tray_image(True), False: app_icon.tray_image(False)}
         self.icon = pystray.Icon("gr7_presence", self._images[False], "GR7 Presence", menu=self._menu())
         app.on_status = lambda text, active: self._queue.put(("status", text, active))
         app.on_update = lambda release: self._queue.put(("update", release))

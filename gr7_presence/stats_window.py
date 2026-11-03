@@ -3,14 +3,12 @@ from __future__ import annotations
 
 import tkinter as tk
 from datetime import datetime
-from pathlib import Path
 
 from PIL import Image, ImageTk
 
+from .app_icon import PNG as LOGO
 from .i18n import Translator, format_duration
 from .stats import Stats
-
-LOGO = Path(__file__).resolve().parent.parent / "assets" / "discord" / "gr7_logo.png"
 
 BG = "#1E1F22"
 PANEL = "#2B2D31"
@@ -32,11 +30,7 @@ class StatsWindow:
         self.win.configure(bg=BG)
         self.win.geometry("560x820")
         self.win.minsize(480, 520)
-        self.win.protocol("WM_DELETE_WINDOW", self.close)
-        try:
-            self.win.iconbitmap(str(LOGO.parent.parent / "tray.ico"))
-        except tk.TclError:
-            pass
+        self.win.protocol("WM_DELETE_WINDOW", self.close)   # o ícone vem do iconbitmap(default=) da bandeja
         self.alive = True
         self._logo = None
         self.body = tk.Frame(self.win, bg=BG)
@@ -71,7 +65,7 @@ class StatsWindow:
             pass
         titles = tk.Frame(header, bg=BG)
         titles.pack(side="left", padx=12)
-        tk.Label(titles, text="Guitar Rig 7", font=(FONT, 16, "bold"), fg=TEXT, bg=BG).pack(anchor="w")
+        tk.Label(titles, text="GR7 Presence", font=(FONT, 16, "bold"), fg=TEXT, bg=BG).pack(anchor="w")
         tk.Label(titles, text=t("stats_title").split("·")[-1].strip(), font=(FONT, 10), fg=MUTED, bg=BG).pack(anchor="w")
 
         tiles = tk.Frame(self.body, bg=BG)

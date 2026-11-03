@@ -7,7 +7,7 @@ import webbrowser
 from typing import Callable
 
 from .i18n import Translator
-from .stats_window import ACCENT, BG, FONT, LOGO, MUTED, PANEL, TEXT
+from .stats_window import ACCENT, BG, FONT, MUTED, PANEL, TEXT
 from .updates import Release
 
 
@@ -34,11 +34,7 @@ class UpdateWindow:
         scale = max(1.0, self.win.winfo_fpixels("1i") / 96)
         self.win.geometry(f"{int(560 * scale)}x{int(540 * scale)}")
         self.win.minsize(int(440 * scale), int(400 * scale))
-        self.win.protocol("WM_DELETE_WINDOW", self.close)
-        try:
-            self.win.iconbitmap(str(LOGO.parent.parent / "tray.ico"))
-        except tk.TclError:
-            pass
+        self.win.protocol("WM_DELETE_WINDOW", self.close)   # o ícone vem do iconbitmap(default=) da bandeja
 
         body = tk.Frame(self.win, bg=BG)
         body.pack(fill="both", expand=True, padx=18, pady=16)

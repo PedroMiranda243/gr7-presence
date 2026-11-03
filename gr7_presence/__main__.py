@@ -53,9 +53,11 @@ def main(argv: list[str] | None = None) -> int:
     if sys.stdout and hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8", errors="replace")
     _setup_logging(args.debug, args.console or args.preview)
+    from .app_icon import set_app_id
     from .live import set_dpi_aware
     from .migrate import migrate
     set_dpi_aware()
+    set_app_id()   # antes de qualquer janela: senão a barra de tarefas mostra o ícone do Python
     migrate()
     config = Config()
 
