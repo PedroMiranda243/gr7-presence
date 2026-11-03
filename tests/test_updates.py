@@ -1,4 +1,5 @@
 import copy
+import hashlib
 import io
 import json
 import tempfile
@@ -6,13 +7,19 @@ import threading
 import unittest
 import urllib.error
 from pathlib import Path
+from unittest import mock
 
+from gr7_presence import updates
 from gr7_presence.app import PresenceApp
 from gr7_presence.config import DEFAULTS
 from gr7_presence.gr7_state import PresetReader
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
-from gr7_presence.updates import CHECK_EVERY, Release, UpdateChecker, fetch_latest, is_newer, parse_version
+from gr7_presence.update_window import plain_notes
+from gr7_presence.updates import (CHECK_EVERY, Release, UpdateChecker, UpdateError, download, fetch_latest, is_newer,
+                                  parse_version, pop_last_result)
+
+ZIP_URL = updates.DOWNLOAD_PREFIX + "v1.1.0/GR7-Presence.zip"
 
 
 def opener_returning(payload):
@@ -49,6 +56,16 @@ class FetchTest(unittest.TestCase):
         self.assertIsNone(fetch_latest(opener_returning({"tag_name": "teste"})))
         self.assertIsNone(fetch_latest(opener_returning([1, 2])))
 
+    def test_zip_and_checksum_from_the_release(self):
+        release = fetch_latest(opener_returning({
+            "tag_name": "v1.1.0", "html_url": "https://github.com/x/y/releases/tag/v1.1.0", "body": "### Novidades",
+            "assets": [{"name": "outro.txt", "browser_download_url": "https://x/outro.txt", "digest": "sha256:00"},
+                       {"name": "GR7-Presence.zip", "browser_download_url": ZIP_URL, "digest": "sha256:ABC123"}],
+        }))
+        self.assertEqual((release.zip_url, release.sha256, release.notes), (ZIP_URL, "abc123", "### Novidades"))
+        no_zip = fetch_latest(opener_returning({"tag_name": "v1.1.0", "assets": []}))
+        self.assertEqual((no_zip.zip_url, no_zip.sha256), (None, None))
+
     def test_network_problems_are_quiet(self):
         def offline(request, timeout):
             raise urllib.error.URLError("sem internet")
@@ -80,6 +97,75 @@ class CheckerTest(unittest.TestCase):
         self.release = Release("1.0.0", "https://exemplo/1.0.0")
         self.assertIsNone(self.checker.check())
         self.assertIsNone(self.checker.available)
+
+
+class DownloadTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.folder = Path(self.tmp.name)
+        self.content = b"PK zip de mentira" * 1000
+
+    def release(self, **kw):
+        base = dict(version="1.1.0", url="https://exemplo", zip_url=ZIP_URL,
+                    sha256=hashlib.sha256(self.content).hexdigest())
+        base.update(kw)
+        return Release(**base)
+
+    def test_checked_download(self):
+        path = download(self.release(), self.folder, opener_returning(self.content))
+        self.assertEqual(path.read_bytes(), self.content)
+        self.assertEqual(path.name, "GR7-Presence-1.1.0.zip")
+
+    def test_mismatch_is_deleted(self):
+        with self.assertRaises(UpdateError):
+            download(self.release(), self.folder, opener_returning(self.content + b"alterado"))
+        self.assertEqual(list(self.folder.iterdir()), [])
+
+    def test_refuses_without_checksum_or_from_elsewhere(self):
+        with self.assertRaises(UpdateError):
+            download(self.release(sha256=None), self.folder, opener_returning(self.content))
+        with self.assertRaises(UpdateError):
+            download(self.release(zip_url="https://outro-site.com/GR7-Presence.zip"), self.folder,
+                     opener_returning(self.content))
+
+    def test_network_error_leaves_nothing(self):
+        def offline(request, timeout):
+            raise urllib.error.URLError("caiu")
+        with self.assertRaises(UpdateError):
+            download(self.release(), self.folder, offline)
+        self.assertEqual(list(self.folder.iterdir()), [])
+
+
+class StartUpdaterTest(unittest.TestCase):
+    def test_runs_a_copy_and_waits_for_this_process(self):
+        with tempfile.TemporaryDirectory() as tmp, mock.patch.object(updates.subprocess, "Popen") as popen:
+            folder = Path(tmp)
+            updates.start_updater(folder / "GR7-Presence-1.1.0.zip", Release("1.1.0", "u"), current="1.0.0",
+                                  project_dir=Path("C:/programa"), python=Path("pythonw.exe"), pid=4321, folder=folder)
+            self.assertTrue((folder / "atualizar.py").exists())   # cópia, fora da pasta do programa
+            args = popen.call_args.args[0]
+            self.assertEqual(args[1], str(folder / "atualizar.py"))
+            self.assertEqual(args[args.index("--esperar-pid") + 1], "4321")
+            self.assertEqual(args[args.index("--versao") + 1], "1.1.0")
+            self.assertEqual(args[args.index("--versao-atual") + 1], "1.0.0")
+
+
+class LastResultTest(unittest.TestCase):
+    def test_read_once(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "atualizacao.json"
+            path.write_text('{"ok": true, "para": "1.1.0"}', encoding="utf-8")
+            self.assertEqual(pop_last_result(path), {"ok": True, "para": "1.1.0"})
+            self.assertIsNone(pop_last_result(path))   # só avisa uma vez
+            path.write_text("lixo", encoding="utf-8")
+            self.assertIsNone(pop_last_result(path))
+
+
+class NotesTest(unittest.TestCase):
+    def test_plain_text(self):
+        notes = "### Novidades\n- **Aviso** de versão: `check_updates`\n- Outro item"
+        self.assertEqual(plain_notes(notes), "Novidades\n• Aviso de versão: check_updates\n• Outro item")
 
 
 class FakeConfig(dict):
