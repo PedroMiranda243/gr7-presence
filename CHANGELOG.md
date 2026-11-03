@@ -9,6 +9,14 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+## [1.3.1] - 2026-11-03
+
+### Como atualizar
+- **Da 1.1.0 em diante:** botão direito no ícone da bandeja › **⬆️ Atualizar para a versão 1.3.1** ›
+  **Atualizar agora**.
+- **Da 1.0.0 ou de antes:** à mão. Botão direito na bandeja › **Sair**, extraia o zip **na mesma
+  pasta**, substituindo os arquivos, e rode o `instalar.bat`.
+
 ### Mudanças
 - **O ícone volta a ser o pedal vermelho visto de cima**, o mesmo da 1.2.0, no lugar do selo da 1.3.0.
   A correção do aviso de versão nova continua.
@@ -80,7 +88,8 @@ Primeira versão publicada no GitHub.
 - O ícone oficial do Guitar Rig deixou de vir no zip, porque é arte da Native Instruments. O
   instalador copia o ícone do Guitar Rig instalado no seu PC.
 
-[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.3.0...HEAD
+[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.0.0...v1.1.0
