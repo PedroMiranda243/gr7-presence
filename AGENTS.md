@@ -75,7 +75,7 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
 | `stats.py` / `stats_window.py` | Sessões de prática e a janela de estatísticas | — |
 | `tray.py` | Ícone, menu, notificações | Lógica de presença |
-| `app_icon.py` | O ícone do programa (o selo gerado por `tools/icone.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
+| `app_icon.py` | O ícone do programa (o pedal de `tools/icone_pedal.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
 | `updates.py` | Consulta a última release, baixa o zip conferindo o sha256, entrega ao atualizador | Trocar arquivos ou atualizar sem a pessoa confirmar |
 | `update_window.py` | A janela "Atualizar o GR7 Presence" (notas e botão) | Baixar ou instalar |
 | `tools/atualizar.py` | Roda depois que o programa fecha: troca os arquivos, roda o instalador, volta se falhar | Importar o programa ou qualquer pacote fora da biblioteca padrão |

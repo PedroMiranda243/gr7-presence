@@ -9,6 +9,10 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Mudanças
+- **O ícone volta a ser o pedal vermelho visto de cima**, o mesmo da 1.2.0, no lugar do selo da 1.3.0.
+  A correção do aviso de versão nova continua.
+
 ## [1.3.0] - 2026-11-03
 
 ### Como atualizar

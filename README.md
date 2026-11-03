@@ -47,7 +47,7 @@ Precisa de Windows 10 ou 11, do Guitar Rig 7 e do Discord desktop (o Discord no 
 - **Modo plugin.** Com o Guitar Rig 7 aberto como VST3 numa DAW (REAPER, FL Studio, Ableton, Studio One, Cubase, Bitwig, Cakewalk…), mostra "🎛️ Guitar Rig 7 no REAPER".
 - **Estatísticas de prática.** Tempo de hoje, da semana e total, sequência de dias seguidos 🔥 (vale a partir de 5 min por dia), recorde, presets e amps mais usados. Tudo fica no seu PC.
 - **Bandeja do sistema.** Ponto verde quando está no Discord, cinza quando está esperando. Menu com pausar, estatísticas, configurações, iniciar com o Windows e a versão instalada.
-- **Ícone próprio.** Um selo vermelho com um pedal de expressão branco, na bandeja, na barra de tarefas e nos atalhos. É diferente do ícone do Guitar Rig 7, para não confundir os dois abertos ao mesmo tempo.
+- **Ícone próprio.** Um pedal vermelho na bandeja, na barra de tarefas e nos atalhos, diferente do ícone do Guitar Rig 7 para não confundir os dois abertos ao mesmo tempo.
 - **Robusto.** Se o Discord fechar, ele reconecta sozinho. Um arquivo corrompido não derruba nada, e só uma cópia do programa roda por vez.
 
 ## Configuração

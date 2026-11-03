@@ -1,4 +1,4 @@
-"""O ícone do GR7 Presence (o selo vermelho gerado por tools/icone.py) e a identidade na barra de tarefas.
+"""O ícone do GR7 Presence (o pedal vermelho de tools/icone_pedal.py) e a identidade na barra de tarefas.
 
 O programa roda no pythonw.exe. Sem um AppUserModelID próprio, o Windows agrupa as janelas dele sob o
 Python e mostra o ícone do Python na barra de tarefas, mesmo com o ícone certo na janela.
