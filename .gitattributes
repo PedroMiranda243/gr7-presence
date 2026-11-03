@@ -1,0 +1,14 @@
+# Fim de linha fixado no repositório. O Windows grava CRLF e o git normaliza na leitura, então
+# sem este arquivo a diferença não aparece no diff, só no programa quebrado na máquina de alguém.
+* text=auto eol=lf
+
+# O que o Windows executa ou a pessoa abre no Bloco de Notas fica em CRLF. Um .bat com LF pode
+# perder linhas e rótulos do goto; o zip da release sai do checkout, já com CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+*.txt text eol=crlf
+
+*.png binary
+*.ico binary
+*.zip binary

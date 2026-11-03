@@ -1,0 +1,32 @@
+# Ambiente Python e caches
+.venv/
+__pycache__/
+*.pyc
+
+# Dados de quem usa: config, estatísticas, log e a lista de palavras privadas que o
+# tools/empacotar.py procura. Nunca vão para o repositório.
+dados/
+
+# Gerado pelo tools/empacotar.py; o zip oficial sai da release, pela CI
+dist/
+
+# Arte da Native Instruments: cada instalação gera a sua a partir do Guitar Rig instalado
+# (tools/make_assets.py --locais). Não pode ir para um repositório público.
+assets/tray.ico
+assets/preview.png
+assets/discord/gr7_logo.png
+assets/discord/app_icon.png
+
+# Ferramentas pessoais de presets: dependem de pacotes de presets de terceiros
+presets/
+
+# Arquivos do Guitar Rig: presets e estado salvo são de quem os criou ou da Native Instruments.
+# Os testes usam arquivos sintéticos (tests/sinteticos.py).
+*.ngrr
+*.tle
+
+# Sistema e editores
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
