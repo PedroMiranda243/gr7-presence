@@ -9,6 +9,13 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+## [1.1.0] - 2026-11-03
+
+### Como atualizar vindo da 1.0.0
+A 1.0.0 ainda não tem o botão, então esta atualização é à mão: botão direito no ícone da bandeja ›
+**Sair**, extraia o zip **na mesma pasta**, substituindo os arquivos, e rode o `instalar.bat`. Da
+próxima versão em diante, é um clique.
+
 ### Novidades
 - **Atualização com um clique.** O item "⬆️ Atualizar para a versão X" da bandeja abre uma janela com o
   que muda na versão nova. Em "Atualizar agora", o programa baixa a versão, confere se o arquivo é o
@@ -36,5 +43,6 @@ Primeira versão publicada no GitHub.
 - O ícone oficial do Guitar Rig deixou de vir no zip, porque é arte da Native Instruments. O
   instalador copia o ícone do Guitar Rig instalado no seu PC.
 
-[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.0.0...HEAD
+[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.1.0...HEAD
+[1.1.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PedroMiranda243/gr7-presence/releases/tag/v1.0.0
