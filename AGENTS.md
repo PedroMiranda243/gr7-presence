@@ -155,6 +155,11 @@ operações: o `discord_ipc.py` consulta com `PeekNamedPipe` em vez de deixar um
 **`Start-Process -Wait` não volta.** Ele espera também os filhos (o `pythonw` da bandeja). Não use para
 abrir o programa em script.
 
+**Teste que depende da data de modificação falha só às vezes.** A biblioteca de presets percebe preset
+novo pela data da pasta, e o `PresetReader` pela data do arquivo. Numa máquina rápida, como a da CI,
+duas gravações seguidas caem no mesmo instante e a data não muda: o teste passou quatro vezes e falhou
+na release 1.0.0. Nos testes, avance a data com `os.utime` em vez de contar com o relógio.
+
 **`.ps1` sem BOM estraga os acentos.** O PowerShell 5.1 lê UTF-8 sem BOM como ANSI. O `.editorconfig`
 fixa `utf-8-bom` para `.ps1`.
 

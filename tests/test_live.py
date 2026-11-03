@@ -1,3 +1,4 @@
+import os
 import tempfile
 import unittest
 from pathlib import Path
@@ -57,6 +58,11 @@ class LibraryAndPickTest(unittest.TestCase):
         library.RESCAN_SECONDS = 0
         self.assertIsNone(library.match("ABCD - Indie Lead 1"))
         write_preset(user / "Rack Presets" / "ABCD - Indie Lead 1.ngrr")
+        # A biblioteca percebe a mudança pela data da pasta. Numa máquina rápida, o arquivo nasce no
+        # mesmo instante da leitura anterior e a data não muda (falhou assim na CI da release 1.0.0);
+        # na vida real, entre uma leitura e outra passam 30 s. Avança a data, como o tempo faria.
+        later = (user / "Rack Presets").stat().st_mtime + 5
+        os.utime(user / "Rack Presets", (later, later))
         self.assertEqual(library.match("ABCD - Indie Lead 1")[0], "ABCD - Indie Lead 1")
         self.assertFalse(library.load("ABCD - Indie Lead 1").is_factory)
 
