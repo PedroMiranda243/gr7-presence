@@ -29,7 +29,9 @@ def release_notes(version: str) -> str:
     m = re.search(rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|^\[[^\]]+\]: |\Z)", changelog, re.M | re.S)
     if not m or not m[1].strip():
         sys.exit(f"O CHANGELOG.md não tem a seção '## [{version}]' com o que mudou.")
-    return m[1].strip() + "\n"
+    # Na página da release, cada quebra de linha vira quebra de verdade: junta as linhas de
+    # continuação dos itens (recuadas), que no CHANGELOG só existem para caber em 100 colunas.
+    return re.sub(r"\n[ ]{2,}(?=\S)", " ", m[1].strip()) + "\n"
 
 
 def main() -> None:
