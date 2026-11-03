@@ -97,7 +97,8 @@ Step "[4/5] Conferindo o computador..."
 if (Test-Path 'C:\Program Files\Native Instruments\Guitar Rig 7\Guitar Rig 7.exe') {
     Ok "Guitar Rig 7 encontrado."
     # O ícone oficial é da Native Instruments e não vem no zip: sai do Guitar Rig instalado aqui.
-    & $Venv tools\make_assets.py --locais | Out-Null
+    # -W ignore: o Pillow avisa que um tamanho do .ico difere do declarado, sem efeito no ícone.
+    & $Venv -W ignore tools\make_assets.py --locais | Out-Null
     if ($LASTEXITCODE -eq 0) { Ok "Ícone do Guitar Rig copiado para a bandeja." }
     else { Warn "Não consegui copiar o ícone do Guitar Rig; a bandeja usa um ícone simples." }
 } else {
