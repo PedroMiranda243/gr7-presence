@@ -87,6 +87,27 @@ erro ali quebra a instalação de todo mundo de uma vez.
 
 **Preço.** A atualização tem três passos manuais (sair, extrair por cima, rodar o instalador).
 
+**Adendo (2026-11-03): atualização com um clique.** O item do menu abre uma janela com o que muda e o
+botão "Atualizar agora". As duas condições acima foram atendidas assim:
+
+- **Integridade.** O zip só é baixado de uma release deste repositório e precisa bater com o sha256
+  que a API do GitHub informa para o anexo. Não bateu, é apagado; nada é extraído.
+- **Caminho de volta.** O `tools/atualizar.py` guarda os arquivos que vai trocar em
+  `dados\atualizacao\anterior` antes de extrair. Se o instalador falhar (ou qualquer outro passo), devolve
+  esses arquivos, apaga os que a versão nova criou e reabre a versão anterior.
+- **Quem troca os arquivos é o atualizador da versão instalada**, copiado para a pasta temporária, e não o
+  que vem no zip: um zip defeituoso não decide como ele mesmo é instalado.
+- **O atualizador espera o programa fechar e usa só a biblioteca padrão.** Enquanto o programa roda, os
+  `.pyd` do `psutil` e do `Pillow` ficam presos e o `pip` não consegue atualizá-los.
+- **Nunca toca em `dados\` nem em `.venv\`**; um zip com caminho fora do lugar é recusado inteiro.
+
+Testado de ponta a ponta numa cópia instalada, com um servidor local no papel do GitHub: 1.0.0 → 1.1.0
+instalou e reabriu; 1.1.0 → 1.2.0 com o instalador quebrado de propósito voltou sozinho para a 1.1.0.
+
+**Preço que fica.** O `pip` pode ter atualizado dependências antes da falha, e elas não voltam (o código
+antigo continua funcionando com versões mais novas das mesmas bibliotecas). Arquivos que uma versão
+nova deixou de usar não são apagados, como acontecia ao extrair o zip por cima.
+
 ## D8. Testes com arquivos sintéticos
 
 **Situação.** Os primeiros testes usavam um `LastEditBuffer.tle` real e um preset de fábrica da Native

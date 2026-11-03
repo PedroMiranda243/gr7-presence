@@ -21,6 +21,12 @@ Para avaliar o risco, é isto que o GR7 Presence faz no seu PC:
 - **Rede:** o pipe local do Discord (no seu PC), a lista pública de imagens do app no Discord e, uma
   vez por dia, a página pública da última release no GitHub. Nada do que você toca sai do seu PC, a
   não ser o que o Discord mostra no seu perfil.
-- **Escrita:** só na pasta `dados\` do programa e nos atalhos do Menu Iniciar e da Inicialização.
+- **Escrita:** só na pasta do programa (`dados\` e, numa atualização, os arquivos do programa), numa
+  pasta temporária `GR7 Presence atualizacao` e nos atalhos do Menu Iniciar e da Inicialização.
 
-O programa avisa de versões novas, mas não baixa nem instala nada sozinho.
+**Atualizações.** O programa só atualiza quando você clica em "Atualizar agora". O zip vem do anexo de
+uma release deste repositório (link de outro lugar é recusado) e precisa bater com o sha256 que a API do
+GitHub informa para ele; se não bater, é apagado sem ser usado. Quem troca os arquivos é o
+`tools\atualizar.py` da versão já instalada, que guarda uma cópia dos arquivos antigos, recusa qualquer
+caminho fora da pasta do programa, não toca em `dados\` nem em `.venv\` e devolve a versão anterior se
+algo falhar. O registro de cada atualização fica em `dados\atualizacao.log`.

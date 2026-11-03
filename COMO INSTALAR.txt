@@ -28,7 +28,11 @@ NO DIA A DIA
 - Com o Guitar Rig minimizado, o perfil fica no último preset lido até você restaurar a janela.
 
 PARA ATUALIZAR
-O programa avisa quando sai versão nova (notificação e o item "Baixar a versão ..." no menu da bandeja).
+O programa avisa quando sai versão nova (notificação e o item "Atualizar para a versão ..." no menu
+da bandeja). Clique no item e em "Atualizar agora": ele baixa, confere, fecha, instala e abre de novo
+sozinho. Se algo der errado, a versão que você tinha volta.
+
+À mão (ou vindo da versão 1.0.0, que ainda não tem esse botão):
 1. Botão direito no ícone da bandeja > "Sair".
 2. Baixe o zip novo e extraia NA MESMA PASTA, aceitando substituir os arquivos.
 3. Rode o "instalar.bat" de novo.

@@ -75,7 +75,9 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
 | `stats.py` / `stats_window.py` | Sessões de prática e a janela de estatísticas | — |
 | `tray.py` | Ícone, menu, notificações | Lógica de presença |
-| `updates.py` | Consulta a última release e compara versões | Baixar ou instalar nada |
+| `updates.py` | Consulta a última release, baixa o zip conferindo o sha256, entrega ao atualizador | Trocar arquivos ou atualizar sem a pessoa confirmar |
+| `update_window.py` | A janela "Atualizar o GR7 Presence" (notas e botão) | Baixar ou instalar |
+| `tools/atualizar.py` | Roda depois que o programa fecha: troca os arquivos, roda o instalador, volta se falhar | Importar o programa ou qualquer pacote fora da biblioteca padrão |
 | `config.py` / `migrate.py` | `dados\config.json` com recarga ao vivo; migração de versões antigas | — |
 | `tools/` | Instalador, empacotador, notas da release, ícones | Rodar junto com o programa |
 
@@ -144,6 +146,11 @@ estado "Timbre próprio" vale até outro preset ser carregado.
 
 **"Split", "Split B", "Split Mix", "CrossOver…" não são efeitos.** São os marcadores dos caminhos
 paralelos no XML do rack; ficam em `_CHAIN_IGNORE`.
+
+**A atualização não pode rodar com o programa aberto.** No Windows, um `.pyd` carregado fica preso:
+com o GR7 Presence aberto, o `pip` não consegue trocar os do `psutil` e do `Pillow`. Por isso o
+`tools/atualizar.py` espera o processo fechar e só importa a biblioteca padrão: ele mesmo roda com o
+Python do `.venv` enquanto o `pip` atualiza esse ambiente.
 
 **Ícone pequeno em branco no Discord.** O Discord guarda em cache a lista de imagens do app; se a
 chave não é reconhecida, o `assets.py` passa a mandar o link do CDN. O ícone ao lado do nome só
