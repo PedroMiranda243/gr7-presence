@@ -23,12 +23,12 @@ git clone https://github.com/PedroMiranda243/gr7-presence.git
 cd gr7-presence
 py -3.11 -m venv .venv
 .venv\Scripts\python -m pip install -r requirements.txt -r requirements-ocr.txt
-.venv\Scripts\python tools\make_assets.py --locais
 .venv\Scripts\python -m unittest discover -s tests -t .
 ```
 
-O `make_assets.py --locais` copia o ícone oficial do seu Guitar Rig para `assets\`. Esse arquivo não vai
-para o repositório (é arte da Native Instruments). Sem ele, a bandeja usa um círculo laranja.
+O ícone do programa (`assets\gr7_presence.ico` e `.png`, o pedal vermelho) é desenhado por
+`tools\icone_pedal.py` e já vem no repositório. Mudou o desenho? Gere de novo com
+`.venv\Scripts\python tools\make_assets.py --icone` e confira os tamanhos pequenos (16 a 32 px) antes do PR.
 
 Os testes usam arquivos sintéticos (`tests/sinteticos.py`). Os de `tests/test_instalacao_real.py` leem
 os presets de fábrica do seu Guitar Rig e são pulados onde ele não está instalado, como na CI.

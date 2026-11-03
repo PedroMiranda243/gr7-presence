@@ -99,11 +99,6 @@ if ($LASTEXITCODE -eq 0) {
 Step "[4/5] Conferindo o computador..."
 if (Test-Path 'C:\Program Files\Native Instruments\Guitar Rig 7\Guitar Rig 7.exe') {
     Ok "Guitar Rig 7 encontrado."
-    # O ícone oficial é da Native Instruments e não vem no zip: sai do Guitar Rig instalado aqui.
-    # -W ignore: o Pillow avisa que um tamanho do .ico difere do declarado, sem efeito no ícone.
-    & $Venv -W ignore tools\make_assets.py --locais | Out-Null
-    if ($LASTEXITCODE -eq 0) { Ok "Ícone do Guitar Rig copiado para a bandeja." }
-    else { Warn "Não consegui copiar o ícone do Guitar Rig; a bandeja usa um ícone simples." }
 } else {
     Warn "Não achei o Guitar Rig 7 no local padrão. Tudo bem se ele estiver em outra pasta:"
     Warn "o GR7 Presence reconhece o programa aberto, esteja onde estiver."
@@ -120,8 +115,12 @@ if ($Teste) {
     exit 0
 }
 
-# Na atualização, os atalhos já apontam para esta pasta e o início com o Windows fica como está.
+# Na atualização, os atalhos já apontam para esta pasta e o início com o Windows fica como está; só
+# são recriados os que existem, para pegarem o ícone desta versão.
 if ($Atualizacao) {
+    & $Venv -c "from gr7_presence import autostart as a; print(len(a.refresh_shortcuts()))" | Out-Null
+    if ($LASTEXITCODE -eq 0) { Ok "Atalhos atualizados." }
+    else { Warn "Não consegui atualizar os atalhos; eles continuam funcionando com o ícone antigo." }
     Start-Process -FilePath $VenvW -ArgumentList '-m', 'gr7_presence' -WorkingDirectory $Root
     Ok "Atualização instalada; abrindo o GR7 Presence."
     exit 0

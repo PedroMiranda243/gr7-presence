@@ -33,6 +33,7 @@ INCLUDE = [
     "instalar.bat", "desinstalar.bat", "COMO INSTALAR.txt", "README.md", "LICENSE", "CHANGELOG.md",
     "requirements.txt", "requirements-ocr.txt",
     "gr7_presence/*.py", "tools/*.py", "tools/*.ps1", "assets/discord/*.png",
+    "assets/gr7_presence.ico", "assets/gr7_presence.png",
 ]
 # Só servem para quem publica uma versão.
 EXCLUDE = {"tools/empacotar.py", "tools/notas_da_versao.py"}

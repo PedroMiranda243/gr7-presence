@@ -9,6 +9,14 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Mudanças
+- **Ícone próprio: um pedal de expressão vermelho.** Ele aparece na bandeja, na barra de tarefas, nas
+  janelas e nos atalhos do Menu Iniciar e da Inicialização, no lugar do logo do Guitar Rig, para não
+  confundir os dois programas abertos ao mesmo tempo. O perfil do Discord continua com o logo do
+  Guitar Rig 7.
+- A barra de tarefas não mostra mais o ícone do Python quando uma janela do programa está aberta.
+- Quem atualiza pelo botão ganha os atalhos com o ícone novo automaticamente.
+
 ## [1.1.0] - 2026-11-03
 
 ### Como atualizar vindo da 1.0.0

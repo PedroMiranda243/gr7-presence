@@ -64,6 +64,14 @@ durante a instalação. O `.gitignore` bloqueia esses arquivos, e o zip só leva
 
 **Preço.** Sem o Guitar Rig no caminho padrão, a bandeja usa um círculo laranja.
 
+**Adendo (2026-11-03): ícone próprio.** Com o logo do Guitar Rig na bandeja e nos atalhos, o GR7
+Presence se confundia com o próprio Guitar Rig aberto ao lado, e a barra de tarefas mostrava o ícone do
+Python. O programa ganhou um ícone próprio, um pedal de expressão vermelho desenhado em
+`tools/icone_pedal.py` e versionado (`assets/gr7_presence.ico` e `.png`). Ele vale para a barra de
+tarefas, as janelas, a bandeja e os atalhos. Com isso, o programa em uso não depende mais da arte da
+Native Instruments, e o instalador não a extrai mais: o `make_assets.py --locais` fica só para refazer as
+imagens do app do Discord, onde o perfil continua mostrando o logo do Guitar Rig 7.
+
 ## D6. Distribuição como zip com instalador, não como executável
 
 **Decisão.** Um zip com o código, um `instalar.bat` que cria o ambiente Python e instala as

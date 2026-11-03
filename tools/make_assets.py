@@ -1,13 +1,16 @@
-"""Gera as imagens do Rich Presence em assets/discord e o ícone da bandeja.
+"""Gera o ícone do programa e as imagens do Rich Presence.
 
     .venv\\Scripts\\python tools\\make_assets.py            # todas
-    .venv\\Scripts\\python tools\\make_assets.py --locais   # só as tiradas do Guitar Rig (o instalador usa)
+    .venv\\Scripts\\python tools\\make_assets.py --icone    # só o ícone do programa (não precisa do Guitar Rig)
+    .venv\\Scripts\\python tools\\make_assets.py --locais   # só as tiradas do Guitar Rig
 
-- gr7_logo.png / app_icon.png / tray.ico: ícone oficial tirado do "Guitar Rig 7.exe". É arte da
-  Native Instruments, então não vai para o repositório nem para o zip: cada instalação gera a sua
-  a partir do Guitar Rig instalado no próprio PC (ver LOCAIS no .gitignore).
-- amp, pedal, tape, clock, fire, metronome, daw: ícones pequenos desenhados aqui (o Discord recorta
-  em círculo). Estes são do projeto e ficam versionados.
+- gr7_presence.ico / .png: o ícone do programa (barra de tarefas, janelas, bandeja, atalhos), um
+  pedal vermelho desenhado em tools/icone_pedal.py. Arte do projeto, versionada.
+- gr7_logo.png / app_icon.png / tray.ico: ícone oficial tirado do "Guitar Rig 7.exe", só para o app
+  do Discord (docs/app-do-discord.md). É arte da Native Instruments: não vai para o repositório nem
+  para o zip, e o programa não depende dela.
+- amp, pedal, tape, clock, fire, metronome, daw: ícones pequenos do perfil, desenhados aqui (o
+  Discord recorta em círculo). Também do projeto e versionados.
 """
 from __future__ import annotations
 
@@ -19,6 +22,7 @@ from pathlib import Path
 from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).parent))
+import icone_pedal  # noqa: E402
 from exe_icon import extract_ico  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -151,22 +155,20 @@ def daw() -> Image.Image:
     return finish(img)
 
 
-def tray_icon(logo: Image.Image) -> None:
-    sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
-    logo.save(ROOT / "assets" / "tray.ico", sizes=sizes)
-
-
 def main() -> None:
+    if "--locais" not in sys.argv:
+        icone_pedal.save(ROOT / "assets" / "gr7_presence.ico", ROOT / "assets" / "gr7_presence.png")
+        print("Ícone do programa gerado em", ROOT / "assets")
+        if "--icone" in sys.argv:
+            return
     OUT.mkdir(parents=True, exist_ok=True)
     if not Path(EXE).exists():
-        sys.exit(f"Não achei o Guitar Rig 7 em {EXE}: sem o ícone oficial, a bandeja usa um ícone simples.")
+        sys.exit(f"Não achei o Guitar Rig 7 em {EXE}: as imagens do Discord tiradas dele não foram geradas.")
     icon = official_icon()
     icon.save(OUT / "app_icon.png")
-    logo = logo_for_presence(icon)
-    logo.save(OUT / "gr7_logo.png")
-    tray_icon(logo)
+    logo_for_presence(icon).save(OUT / "gr7_logo.png")
     if "--locais" in sys.argv:
-        print("Ícone do Guitar Rig copiado para", ROOT / "assets")
+        print("Ícone do Guitar Rig copiado para", OUT)
         return
     for name, make in (("amp", amp), ("pedal", pedal), ("tape", tape), ("clock", clock),
                        ("fire", fire), ("metronome", metronome), ("daw", daw)):

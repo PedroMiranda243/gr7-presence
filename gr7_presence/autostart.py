@@ -7,12 +7,15 @@ import subprocess
 import sys
 from pathlib import Path
 
+from .app_icon import ICO as ICON
+
 log = logging.getLogger(__name__)
 
 PROJECT_DIR = Path(__file__).resolve().parent.parent
-STARTUP_DIR = Path(os.environ.get("APPDATA", "")) / "Microsoft" / "Windows" / "Start Menu" / "Programs" / "Startup"
+PROGRAMS_DIR = Path(os.environ.get("APPDATA", "")) / "Microsoft" / "Windows" / "Start Menu" / "Programs"
+STARTUP_DIR = PROGRAMS_DIR / "Startup"
 SHORTCUT = STARTUP_DIR / "GR7 Presence.lnk"
-ICON = PROJECT_DIR / "assets" / "tray.ico"
+MENU_SHORTCUT = PROGRAMS_DIR / "GR7 Presence.lnk"
 
 
 def pythonw() -> Path:
@@ -44,6 +47,18 @@ def create_shortcut(path: Path, description: str = "Discord Rich Presence para o
 
 def is_enabled() -> bool:
     return SHORTCUT.exists()
+
+
+def refresh_shortcuts(paths: tuple[Path, ...] = (MENU_SHORTCUT, SHORTCUT), create=None) -> list[Path]:
+    """Recria os atalhos que já existem, para pegarem o ícone atual. Usado na atualização: um
+    atalho que a pessoa apagou (ou o início com o Windows desligado) continua não existindo."""
+    create = create or create_shortcut
+    done = []
+    for path in paths:
+        if path.exists():
+            create(path)
+            done.append(path)
+    return done
 
 
 def set_enabled(enabled: bool) -> None:
