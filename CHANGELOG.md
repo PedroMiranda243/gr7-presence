@@ -9,6 +9,13 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Novidades
+- **Atualização com um clique.** O item "⬆️ Atualizar para a versão X" da bandeja abre uma janela com o
+  que muda na versão nova. Em "Atualizar agora", o programa baixa a versão, confere se o arquivo é o
+  mesmo publicado no GitHub, fecha, instala e abre de novo sozinho. Se algo der errado, a versão
+  anterior volta, e o motivo fica em `dados\atualizacao.log`.
+- Depois de uma atualização, uma notificação avisa que deu certo (ou que a versão anterior foi mantida).
+
 ## [1.0.0] - 2026-11-03
 
 Primeira versão publicada no GitHub.

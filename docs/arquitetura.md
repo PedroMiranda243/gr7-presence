@@ -59,6 +59,21 @@ A cada 5 segundos, o `app.tick()`:
 | pystray | Ícone e menu da bandeja (`run_detached`) | Tem o próprio laço de mensagens do Windows |
 | `presence` | O loop do `app` | Captura, OCR e Discord não podem travar a interface |
 | `updates` | Uma consulta ao GitHub, e termina | Rede lenta não pode atrasar o loop |
+| `download` | Baixa e confere o zip depois do "Atualizar agora" | A janela continua respondendo durante o download |
+
+## Atualização com um clique
+
+1. A bandeja abre a `UpdateWindow` com as notas da release. Em "Atualizar agora", a thread `download`
+   baixa o anexo `GR7-Presence.zip` (só de uma release deste repositório) e confere o sha256 informado
+   pela API.
+2. `updates.start_updater` copia o `tools/atualizar.py` da versão instalada para a pasta temporária e o
+   inicia, separado, com o PID do programa. O programa fecha como no "Sair" (salva as estatísticas e limpa
+   o Discord).
+3. O atualizador espera o PID sumir, confere o zip, guarda os arquivos que vai trocar em
+   `dados\atualizacao\anterior`, extrai por cima e roda `tools\instalar.ps1 -Atualizacao`, que instala as
+   dependências, gera o ícone e abre o programa.
+4. Falhou qualquer passo: devolve os arquivos guardados, apaga os que a versão nova criou e reabre a
+   versão anterior. O resultado vai para `dados\atualizacao.json`, e a bandeja avisa na próxima abertura.
 
 As threads conversam pela fila do `TrayUI`, lida com `root.after` a cada 250 ms. Nenhuma outra
 thread mexe em widget do tkinter.
@@ -73,6 +88,9 @@ Tudo em `dados\`, dentro da pasta do programa (ver a decisão D3):
 | `stats.json` | Sessões de prática; um arquivo ilegível é guardado como `stats.corrompido-<horário>.json` |
 | `live_state.json` | Último preset lido na tela, para sobreviver a um reinício com o Guitar Rig minimizado |
 | `gr7_presence.log` | Log rotativo (512 KB, 3 arquivos) |
+| `atualizacao.log` | Passo a passo de cada atualização, com a saída do instalador |
+| `atualizacao.json` | Resultado da última atualização; a bandeja avisa e apaga |
+| `atualizacao\anterior\` | Os arquivos trocados na última atualização, para o caminho de volta |
 | `palavras-privadas.txt` | Só para quem publica versões: a lista que o `empacotar.py` procura |
 
 ## Formatos do Guitar Rig
@@ -94,7 +112,7 @@ flowchart LR
     PR[Pull Request] -- CI: testes + dados pessoais --> MAIN[main]
     MAIN -- tag vX.Y.Z --> REL[workflow Release]
     REL -- testes, notas, empacotar --> ZIP[GR7-Presence.zip na release]
-    ZIP -- aviso na bandeja em até 1 dia --> USO[quem usa: extrai por cima e roda instalar.bat]
+    ZIP -- aviso na bandeja em até 1 dia --> USO[quem usa: Atualizar agora]
 ```
 
 O zip leva só arquivos versionados, sem os testes e sem as ferramentas de publicação. O instalador

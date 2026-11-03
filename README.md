@@ -31,13 +31,10 @@ Precisa de Windows 10 ou 11, do Guitar Rig 7 e do Discord desktop (o Discord no 
 
 ## 🔔 Atualizações
 
-- **O programa avisa sozinho.** Uma vez por dia ele confere se saiu versão nova. Quando sai, aparece uma notificação e o item **⬆️ Baixar a versão X** no menu do ícone da bandeja.
-- **Para atualizar:**
-  1. Botão direito no ícone da bandeja › **Sair**.
-  2. Baixe o zip novo e extraia **na mesma pasta**, substituindo os arquivos.
-  3. Rode o `instalar.bat` de novo.
-
-  Suas estatísticas e configurações ficam guardadas, porque a pasta `dados` não vem no zip.
+- **O programa avisa sozinho.** Uma vez por dia ele confere se saiu versão nova. Quando sai, aparece uma notificação e o item **⬆️ Atualizar para a versão X** no menu do ícone da bandeja.
+- **Para atualizar, um clique:** o item abre uma janela com o que muda. Em **Atualizar agora**, o programa baixa a versão nova, confere se o arquivo é o mesmo publicado aqui, fecha, instala e abre de novo sozinho, em 1 ou 2 minutos. Se algo der errado, a versão que você tinha volta, e o motivo fica em `dados\atualizacao.log`.
+- **Suas estatísticas e configurações ficam guardadas.** A pasta `dados` não é tocada.
+- **Atualizar à mão também funciona** (e é o caminho para quem está na 1.0.0, que ainda não tem o botão): botão direito na bandeja › **Sair**, extraia o zip novo **na mesma pasta**, substituindo os arquivos, e rode o `instalar.bat` de novo.
 - **Quer um e-mail a cada versão?** Com uma conta no GitHub, clique em **Watch › Custom › Releases** no topo desta página.
 - **O que mudou em cada versão:** [página de releases](https://github.com/PedroMiranda243/gr7-presence/releases) ou o [`CHANGELOG.md`](CHANGELOG.md).
 
