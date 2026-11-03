@@ -1,8 +1,8 @@
 # OCR nativo do Windows: lê o nome do preset na janela do Guitar Rig (opcional)
-winrt-runtime>=2.0
-winrt-Windows.Media.Ocr>=2.0
-winrt-Windows.Graphics.Imaging>=2.0
-winrt-Windows.Storage.Streams>=2.0
-winrt-Windows.Foundation>=2.0
-winrt-Windows.Foundation.Collections>=2.0
-winrt-Windows.Globalization>=2.0
+winrt-runtime>=4.0.3
+winrt-Windows.Media.Ocr>=4!10.0.28000.2705
+winrt-Windows.Graphics.Imaging>=4!10.0.28000.2705
+winrt-Windows.Storage.Streams>=4!10.0.28000.2705
+winrt-Windows.Foundation>=4!10.0.28000.2705
+winrt-Windows.Foundation.Collections>=4!10.0.28000.2705
+winrt-Windows.Globalization>=4!10.0.28000.2705
