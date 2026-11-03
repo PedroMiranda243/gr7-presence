@@ -9,6 +9,14 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+## [1.2.0] - 2026-11-03
+
+### Como atualizar
+- **Da 1.1.0:** botão direito no ícone da bandeja › **⬆️ Atualizar para a versão 1.2.0** › **Atualizar
+  agora**. O programa fecha, instala e abre de novo sozinho.
+- **Da 1.0.0 ou de antes:** à mão. Botão direito na bandeja › **Sair**, extraia o zip **na mesma
+  pasta**, substituindo os arquivos, e rode o `instalar.bat`.
+
 ### Mudanças
 - **Ícone próprio: um pedal de expressão vermelho.** Ele aparece na bandeja, na barra de tarefas, nas
   janelas e nos atalhos do Menu Iniciar e da Inicialização, no lugar do logo do Guitar Rig, para não
@@ -51,6 +59,7 @@ Primeira versão publicada no GitHub.
 - O ícone oficial do Guitar Rig deixou de vir no zip, porque é arte da Native Instruments. O
   instalador copia o ícone do Guitar Rig instalado no seu PC.
 
-[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.1.0...HEAD
+[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/PedroMiranda243/gr7-presence/releases/tag/v1.0.0
