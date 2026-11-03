@@ -9,6 +9,15 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Mudanças
+- **Ícone novo: um selo vermelho com um pedal de expressão branco.** Ele fica mais fácil de reconhecer
+  na barra de tarefas do que o pedal visto de cima da 1.2.0. Nos tamanhos pequenos, o pedal aparece
+  ampliado dentro do selo.
+
+### Correções
+- O aviso "Saiu a versão X" não aparecia quando a versão nova era encontrada logo ao abrir o programa:
+  ele era disparado antes de a bandeja estar pronta. Agora ele espera a bandeja e aparece.
+
 ## [1.2.0] - 2026-11-03
 
 ### Como atualizar

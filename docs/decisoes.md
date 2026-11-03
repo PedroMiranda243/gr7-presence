@@ -72,6 +72,12 @@ tarefas, as janelas, a bandeja e os atalhos. Com isso, o programa em uso não de
 Native Instruments, e o instalador não a extrai mais: o `make_assets.py --locais` fica só para refazer as
 imagens do app do Discord, onde o perfil continua mostrando o logo do Guitar Rig 7.
 
+**Adendo (2026-11-03): selo no lugar do pedal visto de cima.** Na barra de tarefas, o pedal desenhado em
+código virava um retângulo vermelho com um bloco preto, difícil de reconhecer. O dono do projeto fez a
+arte nova num gerador de imagens: um selo vermelho com o pedal de expressão branco, visto de lado. Ela
+fica em `assets/gr7_presence_fonte.png`, e o `tools/icone.py` recorta o círculo e gera os tamanhos. Até
+32 px, o pedal é ampliado dentro do selo, para não virar um risco fino.
+
 ## D6. Distribuição como zip com instalador, não como executável
 
 **Decisão.** Um zip com o código, um `instalar.bat` que cria o ambiente Python e instala as
