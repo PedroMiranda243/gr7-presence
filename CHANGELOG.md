@@ -9,6 +9,15 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+## [1.4.0] - 2026-11-07
+
+### Como atualizar
+- **Da 1.1.0 em diante:** botão direito no ícone da bandeja › **⬆️ Atualizar para a versão 1.4.0** ›
+  **Atualizar agora**.
+- **Da 1.0.0 ou de antes:** à mão. Botão direito na bandeja › **Sair**, extraia o zip **na mesma
+  pasta**, substituindo os arquivos, e rode o `instalar.bat`.
+- Suas estatísticas e opções continuam: elas ficam na pasta `dados`, que a atualização não toca.
+
 ### Mudanças
 - **Interface nova, numa janela só.** O GR7 Presence ganhou uma janela escura, com uma barra lateral e
   quatro páginas: Painel, Estatísticas, Ajustes e Atualização. **Abrir o GR7 Presence**, no menu da
@@ -16,12 +25,10 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 - **Painel:** o preset que está tocando, em destaque, com a cadeia do rack; o cartão que o Discord está
   mostrando agora, com o tempo e quando troca para o próximo; a meta do dia; e se o Discord, o Guitar
   Rig e a leitura da tela estão funcionando. Com o Guitar Rig fechado, ele mostra a última sessão.
-- **Estatísticas com visual novo:**
-  - gráfico dos últimos 14 dias, com a luz na barra de hoje e a linha da meta, e também por semana
-    (16 semanas) ou por mês;
-  - conquistas: 7 e 30 dias seguidos, 10 e 100 horas, e meta batida 5 dias na mesma semana;
-  - calendário dos dias tocados nas últimas 16 semanas;
-  - presets, amplificadores e sessões recentes, com a sessão de agora marcada.
+- **Estatísticas com visual novo:** gráfico dos últimos 14 dias, com a luz na barra de hoje e a linha da
+  meta, e também por semana (16 semanas) ou por mês; calendário dos dias tocados nas últimas 16
+  semanas; presets, amplificadores e sessões recentes, com a sessão de agora marcada.
+- **Conquistas:** 7 e 30 dias seguidos, 10 e 100 horas, e meta batida 5 dias na mesma semana.
 - **Ajustes, no lugar do `config.json` no Bloco de Notas.** Tudo o que antes só dava para mudar no
   arquivo, com chaves, listas e campos. Do lado direito, a prévia mostra na hora como o seu perfil fica
   no Discord e como você aparece na lista de membros. As mudanças valem na hora, sem reiniciar. O
@@ -120,7 +127,8 @@ Primeira versão publicada no GitHub.
 - O ícone oficial do Guitar Rig deixou de vir no zip, porque é arte da Native Instruments. O
   instalador copia o ícone do Guitar Rig instalado no seu PC.
 
-[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.3.1...HEAD
+[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.3.1...v1.4.0
 [1.3.1]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.3.0...v1.3.1
 [1.3.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.1.0...v1.2.0
