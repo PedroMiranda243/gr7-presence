@@ -9,6 +9,16 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Mudanças
+- **Estatísticas com visual novo**, numa janela nova do GR7 Presence:
+  - gráfico dos últimos 14 dias, com a luz na barra de hoje e a linha da meta, e também por semana
+    (16 semanas) ou por mês;
+  - conquistas: 7 e 30 dias seguidos, 10 e 100 horas, e meta batida 5 dias na mesma semana;
+  - calendário dos dias tocados nas últimas 16 semanas;
+  - presets, amplificadores e sessões recentes, com a sessão de agora marcada.
+- **Meta diária de prática**, de 30 minutos. Por enquanto, para mudar, edite `daily_goal_minutes` no
+  `config.json` (Configurações na bandeja). A tela de Ajustes chega numa próxima versão.
+
 ## [1.3.1] - 2026-11-03
 
 ### Como atualizar

@@ -11,4 +11,5 @@
 
 *.png binary
 *.ico binary
+*.ttf binary
 *.zip binary

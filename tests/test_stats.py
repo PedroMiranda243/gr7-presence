@@ -94,5 +94,83 @@ class StreakTest(unittest.TestCase):
         self.assertEqual(_streaks({**old, day(0): full}, today), (1, 7))
 
 
+class PageNumbersTest(unittest.TestCase):
+    """Os números da página Estatísticas: barras, conquistas e listas por período."""
+
+    TODAY = date(2026, 11, 7)   # um sábado
+
+    def session(self, d: date, minutes: float, preset="P", amp="A") -> dict:
+        secs = minutes * 60
+        return {"start": ts(d, 20), "seconds": secs, "days": {d.isoformat(): secs},
+                "presets": {preset: secs}, "amps": {amp: secs}}
+
+    def test_week_starts_on_sunday(self):
+        self.assertEqual(stats_mod.week_start(self.TODAY), date(2026, 11, 1))
+        self.assertEqual(stats_mod.week_start(date(2026, 11, 1)), date(2026, 11, 1))
+
+    def test_day_totals_join_sessions(self):
+        d = self.TODAY
+        days = stats_mod.day_totals([self.session(d, 10), self.session(d, 5), {"start": ts(d), "seconds": 60}])
+        self.assertEqual(days, {d: 960})
+
+    def test_period_bars(self):
+        days = {self.TODAY: 600, self.TODAY - timedelta(days=13): 60, self.TODAY - timedelta(days=14): 999}
+        bars = stats_mod.period_bars(days, self.TODAY, "days")
+        self.assertEqual(len(bars), 14)
+        self.assertEqual((bars[0].seconds, bars[-1].seconds), (60, 600))
+        self.assertEqual([b.current for b in bars].count(True), 1)
+        self.assertTrue(bars[-1].current)
+
+        weeks = stats_mod.period_bars(days, self.TODAY, "weeks")
+        self.assertEqual(len(weeks), 16)
+        self.assertEqual(weeks[-1].start, date(2026, 11, 1))
+        self.assertEqual(weeks[-1].seconds, 600)
+        self.assertEqual(weeks[-2].seconds, 60)         # 25/10 abre a semana de 25/10
+        self.assertEqual(weeks[-3].seconds, 999)        # 24/10 ainda é da semana de 18/10
+
+        months = stats_mod.period_bars({date(2025, 12, 31): 5, date(2026, 11, 2): 7}, self.TODAY, "all")
+        self.assertEqual(len(months), 12)
+        self.assertEqual((months[0].start, months[0].seconds), (date(2025, 12, 1), 5))
+        self.assertEqual((months[-1].start, months[-1].seconds, months[-1].current), (date(2026, 11, 1), 7, True))
+
+    def test_top_in_period(self):
+        old = self.session(self.TODAY - timedelta(days=20), 300, preset="Antigo")
+        new = self.session(self.TODAY, 10, preset="Novo")
+        since = stats_mod.period_start(self.TODAY, "days")
+        self.assertEqual(stats_mod.top_in([old, new], "presets", since), [("Novo", 600)])
+        self.assertEqual(stats_mod.top_in([old, new], "presets", None)[0][0], "Antigo")
+        self.assertEqual(stats_mod.sessions_since([old, new], self.TODAY - timedelta(days=6)), 1)
+
+    def test_achievements(self):
+        full = 30 * 60
+        start = date(2026, 8, 1)
+        days = {start + timedelta(days=i): full for i in range(8)}                 # 8 dias seguidos
+        days.update({self.TODAY - timedelta(days=i): 3600 for i in range(2)})      # meta batida 2 dias nesta semana
+        got = {a.key: a for a in stats_mod.achievements(days, self.TODAY, goal_minutes=60)}
+        self.assertEqual(list(got), ["streak7", "hours10", "goal_week", "streak30", "hours100"])
+        self.assertEqual(got["streak7"].got, start + timedelta(days=6))            # o 7º dia
+        self.assertIsNone(got["streak30"].got)
+        self.assertEqual(got["streak30"].value, 8)
+        self.assertAlmostEqual(got["streak30"].progress, 8 / 30)
+        self.assertIsNone(got["hours10"].got)                                      # 4 h + 2 h
+        self.assertAlmostEqual(got["hours10"].value, 6)
+        self.assertEqual(got["goal_week"].value, 2)
+        self.assertIsNone(got["goal_week"].got)
+
+    def test_goal_week_reached_and_hidden_without_goal(self):
+        monday = date(2026, 10, 5)
+        days = {monday + timedelta(days=i): 3600 for i in range(5)}
+        got = {a.key: a for a in stats_mod.achievements(days, self.TODAY, goal_minutes=45)}
+        self.assertEqual(got["goal_week"].got, monday + timedelta(days=4))
+        self.assertEqual(got["hours10"].value, 5)
+        keys = [a.key for a in stats_mod.achievements(days, self.TODAY, goal_minutes=0)]
+        self.assertNotIn("goal_week", keys)
+
+    def test_hours_reached_date(self):
+        days = {date(2026, 9, 1): 6 * 3600, date(2026, 9, 3): 5 * 3600}
+        got = {a.key: a for a in stats_mod.achievements(days, self.TODAY, 0)}
+        self.assertEqual(got["hours10"].got, date(2026, 9, 3))
+
+
 if __name__ == "__main__":
     unittest.main()

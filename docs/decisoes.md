@@ -139,3 +139,24 @@ Guitar Rig não está instalado (como na CI).
 
 **Preço.** A CI não vê arquivos reais. Antes de uma release, rode os testes numa máquina com o Guitar
 Rig.
+
+## D9. Interface desenhada com o Pillow, sem biblioteca de interface
+
+**Situação.** As janelas eram Tkinter puro (blocos planos, sem cantos arredondados nem gráficos), e as
+configurações eram um `config.json` aberto no Bloco de Notas, difícil para quem não é programador.
+
+**Decisão.** Em 2026-11-07 o dono do projeto viu exemplos de quatro direções visuais e escolheu a
+"Palco", com o pedido de ficar exatamente como nos exemplos. A janela principal (`main_window.py`) tem
+uma barra lateral e uma página por assunto; cada página se desenha inteira numa imagem do Pillow
+(`ui_kit.py`), e o Tkinter só mostra a imagem, rola e repassa os cliques. Os títulos usam a fonte
+Archivo (licença OFL), que vai junto em `assets/fonts`. O contrato visual está em `PRODUCT.md` e em
+`.impeccable/surfaces/`.
+
+**Alternativas.** HTML numa janela (pywebview): liberdade total, mas acrescenta pywebview e pythonnet,
+depende do WebView2 do Windows e muda a base da bandeja. CustomTkinter: uma dependência pequena, com
+visual mais padrão. Tkinter com widgets comuns: sem cantos suaves, degradês nem a fonte dos exemplos.
+
+**Preço.** Texto desenhado em imagem não pode ser selecionado nem lido por leitores de tela. Os campos
+de texto (Ajustes) vão precisar de widgets do Tkinter por cima da imagem. A página se redesenha inteira a
+cada 10 segundos e a cada clique, em algumas dezenas de milissegundos. O zip cresce uns 650 KB por causa
+da fonte.

@@ -16,7 +16,8 @@ import pystray
 
 from . import __version__, app_icon, autostart, updates
 from .config import CONFIG_PATH, DATA_DIR
-from .stats_window import StatsWindow
+from .main_window import MainWindow
+from .stats_page import StatsPage
 from .update_window import UpdateWindow
 
 log = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ class TrayUI:
         except tk.TclError:
             log.warning("Sem o ícone %s", app_icon.ICO)
         self._queue: queue.Queue = queue.Queue()
-        self._stats_window: StatsWindow | None = None
+        self._main_window: MainWindow | None = None
         self._update_window: UpdateWindow | None = None
         self._notes: list[tuple[str, str]] = []   # (título, texto) esperando o ícone aparecer
         self._images = {True: app_icon.tray_image(True), False: app_icon.tray_image(False)}
@@ -127,10 +128,16 @@ class TrayUI:
                 log.exception("Não consegui mostrar a notificação %r", title)
 
     def _show_stats(self) -> None:
-        if self._stats_window and self._stats_window.alive:
-            self._stats_window.focus()
+        self._show_main("stats")
+
+    def _show_main(self, page: str) -> None:
+        if self._main_window and self._main_window.alive:
+            self._main_window.show(page)
             return
-        self._stats_window = StatsWindow(self.root, self.app.stats, self.app.t)
+        pages = [StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"])]
+        available = lambda: self.app.updates.available.version if self.app.updates.available else None
+        self._main_window = MainWindow(self.root, pages, lambda: self.app.t, available,
+                                       on_update=self._show_update, page=page)
 
     # ---- atualização com um clique ---------------------------------------------------------
     def _show_update(self) -> None:

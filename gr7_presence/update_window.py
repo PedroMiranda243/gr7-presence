@@ -7,8 +7,15 @@ import webbrowser
 from typing import Callable
 
 from .i18n import Translator
-from .stats_window import ACCENT, BG, FONT, MUTED, PANEL, TEXT
 from .updates import Release
+
+# As cores da janela de estatísticas antiga. Esta janela ganha o visual novo numa próxima etapa.
+BG = "#1E1F22"
+PANEL = "#2B2D31"
+TEXT = "#F2F3F5"
+MUTED = "#B5BAC1"
+ACCENT = "#F2572B"
+FONT = "Segoe UI"
 
 
 def plain_notes(markdown: str) -> str:
