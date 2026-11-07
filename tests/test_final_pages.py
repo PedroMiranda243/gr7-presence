@@ -12,10 +12,10 @@ from gr7_presence.gr7_state import PresetReader
 from gr7_presence.i18n import Translator
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
-from gr7_presence.tray import TrayUI
 from gr7_presence.update_page import UpdatePage
 from gr7_presence.updates import Release, UpdateChecker
 from gr7_presence.welcome_page import WelcomePage
+from tests.bandeja import tray_ui
 
 NOTES = "### Como atualizar\n- Pela bandeja.\n\n### Mudanças\n- **Painel** novo\n  - com o cartão\n"
 RELEASE = Release("1.4.0", "https://github.com/x/releases/tag/v1.4.0", "https://github.com/x.zip", "abc", NOTES,
@@ -105,7 +105,7 @@ class TrayMenuTest(unittest.TestCase):
         self.app = PresenceApp(FakeConfig(copy.deepcopy(DEFAULTS)), Stats(base / "s.json"), PresetReader(base / "x.tle"),
                                PresetLibrary(base, extra_dirs=[]), live_state_path=base / "l.json",
                                updates=UpdateChecker("1.3.1", fetch=lambda: None))
-        self.ui = TrayUI(self.app)
+        self.ui = tray_ui(self.app)
         self.addCleanup(self.ui.root.destroy)
         self.ui.icon = mock.Mock(visible=True)
 

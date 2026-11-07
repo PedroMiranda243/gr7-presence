@@ -202,6 +202,12 @@ novo pela data da pasta, e o `PresetReader` pela data do arquivo. Numa máquina 
 duas gravações seguidas caem no mesmo instante e a data não muda: o teste passou quatro vezes e falhou
 na release 1.0.0. Nos testes, avance a data com `os.utime` em vez de contar com o relógio.
 
+**Teste da bandeja falha só às vezes com "Class already exists".** O `pystray` registra a janela de
+cada ícone com um nome feito do endereço do objeto e nunca desfaz o registro. Um ícone novo que nasce
+no endereço de um que foi jogado fora é recusado pelo Windows (WinError 1410); derrubou a CI da `main`
+antes da 1.4.0. Nos testes, crie a bandeja com o `tray_ui` de `tests/bandeja.py`, que guarda os ícones
+até o fim da rodada. No programa há um ícone só.
+
 **A janela fica borrada ou com o texto pequeno em 125 % ou 150 %.** Tudo é desenhado em pixels de tela:
 as medidas do `ui_kit` são lógicas (as dos exemplos, numa janela de 960 × 640) e o `Painter` multiplica
 pela escala do Windows. Não desenhe com tamanhos fixos em pixels de tela, e confira em mais de uma
