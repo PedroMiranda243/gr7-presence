@@ -13,8 +13,8 @@ from gr7_presence.main_window import MainWindow, render_rail
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
 from gr7_presence.stats_page import StatsPage
-from gr7_presence.tray import TrayUI
 from gr7_presence.updates import Release, UpdateChecker
+from tests.bandeja import tray_ui
 
 
 class FakeConfig(dict):
@@ -70,7 +70,7 @@ class TrayOpensMainWindowTest(unittest.TestCase):
         app = PresenceApp(FakeConfig(copy.deepcopy(DEFAULTS)), Stats(base / "s.json"), PresetReader(base / "x.tle"),
                           PresetLibrary(base, extra_dirs=[]), live_state_path=base / "l.json",
                           updates=UpdateChecker("1.3.1", fetch=lambda: None))
-        ui = TrayUI(app)
+        ui = tray_ui(app)
         self.addCleanup(ui.root.destroy)
         ui._show_stats()
         first = ui._main_window

@@ -4,13 +4,16 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+import pystray
+from PIL import Image
+
 from gr7_presence.app import PresenceApp
 from gr7_presence.config import DEFAULTS
 from gr7_presence.gr7_state import PresetReader
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
-from gr7_presence.tray import TrayUI
 from gr7_presence.updates import Release, UpdateChecker
+from tests.bandeja import keep, tray_ui
 
 
 class FakeConfig(dict):
@@ -28,7 +31,7 @@ class NotificationTest(unittest.TestCase):
         app = PresenceApp(FakeConfig(copy.deepcopy(DEFAULTS)), Stats(base / "s.json"), PresetReader(base / "x.tle"),
                           PresetLibrary(base, extra_dirs=[]), live_state_path=base / "l.json",
                           updates=UpdateChecker("1.2.0", fetch=lambda: None))
-        self.ui = TrayUI(app)
+        self.ui = tray_ui(app)
         self.addCleanup(self.ui.root.destroy)
         self.ui.icon = mock.Mock(visible=False)
 
@@ -48,7 +51,7 @@ class NotificationTest(unittest.TestCase):
     def test_release_found_before_the_tray_existed(self):
         app = self.ui.app
         app.updates.available = Release("1.3.0", "https://exemplo")   # achada antes da bandeja
-        ui = TrayUI(app)
+        ui = tray_ui(app)
         self.addCleanup(ui.root.destroy)
         ui.icon = mock.Mock(visible=True)
         ui._drain()
@@ -62,6 +65,16 @@ class NotificationTest(unittest.TestCase):
         self.ui.icon.visible = True
         self.ui._drain()
         self.assertIn("1.3.0", self.ui.icon.notify.call_args.args[0])
+
+
+
+class IconRegistrationTest(unittest.TestCase):
+    """O pystray registra cada ícone com o endereço do objeto: guardados (tests/bandeja.py), não colidem."""
+
+    def test_many_icons_in_one_run(self):
+        image = Image.new("RGB", (16, 16))
+        for _ in range(30):   # sem o keep, o segundo nasce no endereço do primeiro e o Windows recusa
+            keep(pystray.Icon("gr7_presence", image, "GR7 Presence"))
 
 
 if __name__ == "__main__":
