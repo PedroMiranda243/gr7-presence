@@ -16,6 +16,14 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
   - conquistas: 7 e 30 dias seguidos, 10 e 100 horas, e meta batida 5 dias na mesma semana;
   - calendário dos dias tocados nas últimas 16 semanas;
   - presets, amplificadores e sessões recentes, com a sessão de agora marcada.
+- **Painel**, a primeira página da janela: o preset que está tocando, em destaque, com a cadeia do
+  rack; o cartão que o Discord está mostrando agora, com o tempo e quando troca para o próximo; a meta
+  do dia; e se o Discord, o Guitar Rig e a leitura da tela estão funcionando. Com o Guitar Rig fechado,
+  ele mostra a última sessão.
+- **Pausar por 1 hora**, além de pausar até você voltar, no botão Pausar do Painel.
+- **Aviso quando o Guitar Rig é minimizado.** Minimizado, ele não mostra a tela, e o perfil fica parado
+  no último preset lido; agora um aviso do Windows explica isso, uma vez por vez que você abre o
+  Guitar Rig. Dá para desligar nos Ajustes.
 - **Tela de Ajustes**, no lugar do `config.json` aberto no Bloco de Notas. **Abrir configurações**, na
   bandeja, abre a tela com tudo o que antes só dava para mudar no arquivo, com chaves, listas e campos.
   Do lado direito, a prévia mostra na hora como o seu perfil fica no Discord e como você aparece na

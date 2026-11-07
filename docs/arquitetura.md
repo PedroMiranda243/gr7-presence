@@ -81,7 +81,7 @@ thread mexe em widget do tkinter.
 ## A janela principal
 
 Uma janela só (`main_window.py`), com uma barra lateral e uma página para cada assunto. Por enquanto
-existem as páginas Estatísticas e Ajustes; o Painel chega na próxima etapa. Cada página tem
+existem as páginas Painel, Estatísticas e Ajustes. Cada página tem
 `render(largura, escala, t)` e devolve uma imagem do Pillow com as áreas clicáveis. O Tkinter só mostra
 essa imagem num `Canvas`, rola com a roda do mouse, repassa os cliques e redesenha a cada 10 segundos.
 
@@ -103,6 +103,11 @@ prévia), que não rola junto com o formulário.
 
 As opções mudadas na janela são gravadas com `Config.update`, que faz o loop recarregar o arquivo na
 volta seguinte (idioma, detecção de DAWs, reenvio do cartão), sem reiniciar.
+
+O Painel só lê o que o loop guardou na última volta, sem perguntar nada ao Guitar Rig nem ao Discord:
+`app.last_state` (preset, alvo, faixas, estado do rack), `app.showing` (a atividade que está no perfil,
+a posição no rodízio e quando foi enviada), `app.screen` (lendo, minimizada ou sem OCR) e
+`app.discord_connected`. Ele se redesenha a cada segundo, para o tempo do cartão andar.
 
 ## Arquivos de dados
 
