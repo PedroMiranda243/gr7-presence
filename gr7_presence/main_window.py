@@ -32,7 +32,6 @@ ITEM_H = 10 + 20 + 6 + 10.5 + 8
 REFRESH_MS = 10_000
 WHEEL_STEP = 60            # pixels lógicos por clique da roda do mouse
 RAIL_LABEL = K.Style(10.5, 600, K.ICON_OFF, line=1.0)
-TITLE_TEXT = "#B9BDC8"
 MENU_ITEM_H = 32
 TRANSPARENT = "#010203"    # cor que o Windows deixa transparente na lista de opções (cantos redondos)
 
@@ -51,7 +50,7 @@ def dark_title_bar(win: tk.Misc) -> None:
         for attr in (20, 19):   # DWMWA_USE_IMMERSIVE_DARK_MODE; o 19 é o das versões antigas do Windows 10
             if dwm.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(on), ctypes.sizeof(on)) == 0:
                 break
-        for attr, color in ((35, K.BG), (36, TITLE_TEXT)):   # DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR (só no 11)
+        for attr, color in ((35, K.BG), (36, K.TITLE_TEXT)):   # DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR (só no 11)
             value = _colorref(color)
             dwm.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(value), ctypes.sizeof(value))
     except (AttributeError, OSError, ValueError, tk.TclError) as exc:
@@ -71,7 +70,7 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
     for page in pages:
         on = page.key == selected
         if on or page.key == hover:
-            p.rrect(7, y, 64, ITEM_H, 12, K.RAIL_ON if on else "#151821")
+            p.rrect(7, y, 64, ITEM_H, 12, K.RAIL_ON if on else K.FIELD)
         color = K.TEXT if on else K.ICON_OFF
         p.icon(page.icon, 29, y + 10, 20, K.AMBER if on else K.ICON_OFF)
         p.text(39, y + 36, t(page.label_key), RAIL_LABEL, anchor="m", color=color)
@@ -80,7 +79,7 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
     if update_label:
         uy = height - 14 - ITEM_H
         if selected == "update" or hover == "update":
-            p.rrect(7, uy, 64, ITEM_H, 12, K.RAIL_ON if selected == "update" else "#151821")
+            p.rrect(7, uy, 64, ITEM_H, 12, K.RAIL_ON if selected == "update" else K.FIELD)
         p.icon("up", 29, uy + 10, 20, K.AMBER)
         p.text(39, uy + 36, update_label, RAIL_LABEL, anchor="m", color=K.AMBER)
         p.circle(7 + 64 - 16 - 3.5, uy + 8 + 3.5, 3.5, K.ORANGE)
@@ -119,7 +118,7 @@ class _Entry:
         check = (window.win.register(lambda text: self.showing_placeholder or len(text) <= spec.max_len), "%P")
         self.widget = tk.Entry(window.view, textvariable=self.var, font=window.entry_font, bg=K.FIELD, fg=K.TEXT,
                                insertbackground=K.TEXT, relief="flat", bd=0, highlightthickness=0,
-                               disabledbackground=K.FIELD, selectbackground="#4A3A22", selectforeground=K.TEXT,
+                               disabledbackground=K.FIELD, selectbackground=K.SELECTION, selectforeground=K.TEXT,
                                validate="key", validatecommand=check)
         self.item = window.view.create_window(0, 0, anchor="w", window=self.widget)
         self.widget.bind("<FocusIn>", self._focus_in)

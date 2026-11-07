@@ -269,9 +269,9 @@ class StatsPage:
             if a.got:
                 p.shadow(mx, y, 52, 52, 15, (255, 106, 61, 204), dy=10, blur=22, spread=-10)
                 p.rrect(mx, y, 52, 52, 15, K.gradient(p.px(52), p.px(52), K.AMBER, K.ORANGE))
-                p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, "#2A1206")
+                p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, K.BADGE_ICON)
             else:
-                p.rrect(mx, y, 52, 52, 15, "#1C1F29", outline="#262A37")
+                p.rrect(mx, y, 52, 52, 15, K.BADGE_OFF, outline=K.FIELD_LINE)
                 p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, K.DIM)
             ty = y + 52 + 7
             for line in p.wrap(title, BADGE_TITLE, col_w):

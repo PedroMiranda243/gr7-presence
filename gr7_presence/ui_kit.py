@@ -61,6 +61,22 @@ CARD = "#1E2027"           # o cartão do Discord na prévia
 CARD_LINE = "#2B2D34"
 CARD_MUTED = "#B5BAC1"
 CARD_BUTTON = "#3A3D46"
+TEXT_LEAD = "#D2CCC2"       # o parágrafo sob o título do palco
+ON_ACCENT = "#1A0E08"       # texto sobre o degradê do botão principal
+ON_ACCENT_OFF = "#3A2E26"   # o mesmo texto com o botão desabilitado
+WHITE = "#FFFFFF"           # texto da pílula do amplificador
+PILL = "#1F2128"            # pílula da cadeia: branco a 6 % sobre o palco
+PILL_LINE = "#26282F"       # e o contorno, a 9 %
+PILL_TEXT = "#E7E3DB"
+BTN_STAGE = "#24262C"       # botão secundário sobre o palco ou a página (Pausar, Mais tarde)
+BTN_STAGE_LINE = "#2C2E34"
+EMPTY_LINE = "#2E3342"      # contorno tracejado do cartão vazio
+BADGE_OFF = "#1C1F29"       # conquista ainda não ganha
+BADGE_ICON = "#2A1206"      # ícone sobre a conquista ganha
+OK_BG = "#122923"           # sinal de pronto na primeira abertura
+WARN_BG = "#2A2416"         # e o do que falta
+SELECTION = "#4A3A22"       # texto selecionado nos campos
+TITLE_TEXT = "#B9BDC8"      # título na barra de título escura (Windows 11)
 
 
 # ---- texto ---------------------------------------------------------------------------------------

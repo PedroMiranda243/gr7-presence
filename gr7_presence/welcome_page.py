@@ -28,15 +28,14 @@ DEFAULT_EXE = Path(GUITAR_RIG_EXE)
 DISCORD_PROCESSES = {"discord.exe", "discordptb.exe", "discordcanary.exe"}
 GOALS = [0, 20, 30, 60]
 TITLE = K.Style(38, 800, K.GLOW, display=True, width=125, line=1.0)
-LEAD = K.Style(14, 400, "#D2CCC2", line=1.5)
+LEAD = K.Style(14, 400, K.TEXT_LEAD, line=1.5)
 CHECK = K.Style(13.5, 600, K.TEXT, line=1.5)
 CHECK_HINT = K.Style(13, 400, K.MUTED, line=1.5)   # quebra onde o 12,5 do exemplo quebra; linhas como lá
 LABEL = K.Style(13.5, 600, K.TEXT, line=1.3)
-PREVIEW = K.Style(13, 400, "#D2CCC2", line=1.45)
+PREVIEW = K.Style(13, 400, K.TEXT_LEAD, line=1.45)
 FOOT = K.Style(13, 400, K.MUTED, line=1.3)
-PRIMARY = K.Style(13.5, 700, "#1A0E08", line=1.3)
+PRIMARY = K.Style(13.5, 700, K.ON_ACCENT, line=1.3)
 LIGHT = [(0.0, (255, 183, 77, 0.30)), (0.45, (255, 106, 61, 0.12)), (0.75, (11, 12, 16, 0.0)), (1.0, (11, 12, 16, 0.0))]
-OK_BG, WARN_BG = "#122923", "#2A2416"
 
 
 def discord_running() -> bool:
@@ -148,7 +147,7 @@ class WelcomePage:
             if i:
                 p.hline(x, x + left_w, ly, K.PANEL_LINE)
                 ly += 9
-            p.circle(x + 11, ly + 11, 11, OK_BG if ok else WARN_BG)
+            p.circle(x + 11, ly + 11, 11, K.OK_BG if ok else K.WARN_BG)
             if ok:
                 p.icon("check", x + 5, ly + 5, 12, K.GREEN, stroke=2.6)
             else:

@@ -16,10 +16,10 @@ from .i18n import Translator
 
 PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 20, 14
 TITLE = K.Style(46, 800, K.GLOW, display=True, width=125, line=0.98)
-META = K.Style(14, 400, "#D2CCC2", line=1.5)
-PRIMARY = K.Style(13.5, 700, "#1A0E08", line=1.3)
+META = K.Style(14, 400, K.TEXT_LEAD, line=1.5)
+PRIMARY = K.Style(13.5, 700, K.ON_ACCENT, line=1.3)
 LINK = K.Style(13, 400, K.TEXT_SOFT, line=1.3)
-PROGRESS = K.Style(13, 400, "#D2CCC2", line=1.3)
+PROGRESS = K.Style(13, 400, K.TEXT_LEAD, line=1.3)
 ERROR = K.Style(13, 400, K.BAD, line=1.45)
 H3 = K.Style(15, 700, K.TEXT, display=True, width=112, line=1.2)
 H4 = K.Style(13, 700, K.TEXT, line=1.3)
@@ -27,7 +27,6 @@ ITEM = K.Style(13.5, 400, K.TEXT_SOFT, line=1.55)
 NOTE = K.Style(13, 400, K.MUTED, line=1.45)
 LIGHT = [(0.0, (255, 183, 77, 0.34)), (0.42, (255, 106, 61, 0.14)), (0.74, (17, 19, 26, 0.0)), (1.0, (17, 19, 26, 0.0))]
 SKIP_SECTIONS = {"como atualizar", "how to update"}   # dentro do programa, a pessoa já está atualizando
-BTN, BTN_LINE = "#24262C", "#2C2E34"
 
 
 def note_sections(markdown: str) -> list[tuple[str, list[tuple[str, int]]]]:
@@ -144,13 +143,13 @@ class UpdatePage:
             fill = fill.point(lambda v: round(v * 0.45 + 17 * 0.55))   # apagado, como o :disabled do exemplo
         p.rrect(x, ty, bw, 38, 11, fill)
         p.text(x + 18, ty + (38 - 13.5 * 1.3) / 2, t("update_now"), PRIMARY,
-               color="#1A0E08" if not busy and release else "#3A2E26")
+               color=K.ON_ACCENT if not busy and release else K.ON_ACCENT_OFF)
         if not busy and release is not None:
             regions.append(K.Region(x, ty, x + bw, ty + 38, self._confirm, "update_now"))
         lx = x + bw + 10
         later = t("upd_later")
         lw = p.measure(later, K.BUTTON) + 28
-        p.rrect(lx, ty + 2, lw, 34, 10, BTN, outline=BTN_LINE)
+        p.rrect(lx, ty + 2, lw, 34, 10, K.BTN_STAGE, outline=K.BTN_STAGE_LINE)
         p.text(lx + 14, ty + 2 + (34 - 13 * 1.3) / 2, later, K.BUTTON, color=K.TEXT if not busy else K.FAINT)
         if not busy:
             regions.append(K.Region(lx, ty + 2, lx + lw, ty + 36, self.on_later, "later"))
