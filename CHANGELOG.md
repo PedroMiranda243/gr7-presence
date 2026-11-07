@@ -9,6 +9,11 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Correções
+- **Estatísticas sem espaço vazio em janela mais larga.** O calendário dos dias tocados mostra mais
+  semanas até preencher o painel, e as barras de presets e amplificadores crescem até o tempo, em vez
+  de sobrar espaço vazio.
+
 ## [1.4.1] - 2026-11-07
 
 ### Como atualizar

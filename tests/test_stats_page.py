@@ -2,10 +2,12 @@ import tempfile
 import unittest
 from datetime import date, datetime, timedelta
 from pathlib import Path
+from unittest import mock
 
 from gr7_presence.i18n import Translator
 from gr7_presence.stats import Stats
-from gr7_presence.stats_page import StatsPage, level, nice_ticks
+from gr7_presence import ui_kit as K
+from gr7_presence.stats_page import CAL_GAP, CAL_LEFT, CAL_WEEKS, StatsPage, calendar_grid, level, nice_ticks
 
 TODAY = date(2026, 11, 7)
 
@@ -31,6 +33,15 @@ class HelpersTest(unittest.TestCase):
         self.assertAlmostEqual(top, 99)
         ticks, _ = nice_ticks(360)
         self.assertEqual(ticks[1], 120)   # semanas: de 2 em 2 horas
+
+    def test_calendar_fills_the_panel(self):
+        # Larguras internas do painel: janela mínima, a do exemplo (960), ~1120 e tela cheia em 1920.
+        for width in (318, 368, 446, 838):
+            weeks, step = calendar_grid(width)
+            self.assertGreaterEqual(weeks, CAL_WEEKS)
+            self.assertAlmostEqual(CAL_LEFT + weeks * step - CAL_GAP, width)   # a última coluna encosta na borda
+            self.assertTrue(12 <= step - CAL_GAP <= 15, (width, step))          # quadradinho perto dos 13 do exemplo
+        self.assertGreater(calendar_grid(446)[0], calendar_grid(368)[0])      # janela mais larga: mais semanas
 
     def test_calendar_levels(self):
         self.assertEqual([level(m * 60) for m in (0, 10, 20, 21, 45, 75, 76)], [0, 1, 1, 2, 2, 3, 4])
@@ -62,6 +73,26 @@ class StatsPageTest(unittest.TestCase):
         stats = make_stats(self, preset="ABCD - Post Punk Lead 6 (Remastered Version With A Very Long Name)")
         _page, r = self.render(stats, width=782)
         self.assertEqual(r.image.width, 782)
+
+    def track_widths(self, width: float) -> list[float]:
+        """Largura dos trilhos das barras de presets e amplificadores, desenhados com o tom TRACK e 6 de altura."""
+        widths = []
+        original = K.Painter.rrect
+
+        def spy(painter, x, y, w, h, r, fill, *args, **kwargs):
+            if fill == K.TRACK and h == 6:
+                widths.append(round(w, 1))
+            return original(painter, x, y, w, h, r, fill, *args, **kwargs)
+
+        with mock.patch.object(K.Painter, "rrect", spy):
+            self.render(make_stats(self), width=width)
+        return widths
+
+    def test_list_bars_take_the_extra_width(self):
+        self.assertEqual(set(self.track_widths(882)), {92})       # na janela do exemplo, como no exemplo
+        wide = self.track_widths(1042)                            # janela de ~1120 px
+        self.assertEqual(len(set(wide)), 1)
+        self.assertAlmostEqual(wide[0], 92 + (1042 - 882) / 2, delta=0.1)   # o que a coluna cresceu vai para a barra
 
     def test_period_buttons(self):
         page, r = self.render(make_stats(self))

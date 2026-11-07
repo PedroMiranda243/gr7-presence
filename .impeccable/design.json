@@ -1056,7 +1056,7 @@
     "dos": [
       "Do pegar cor, estilo de texto e peça do `gr7_presence/ui_kit.py`; cor nova entra lá, com nome.",
       "Do começar uma tela nova com um palco (stage, raio 18, `radial_light`) e pôr o resto em painéis (panel, raio 16, título Title), com 24 px de margem e 14 px entre blocos.",
-      "Do desenhar em px lógicos pelo `Painter` e conferir em 1×, 1,25×, 1,5× e 2×.",
+      "Do desenhar em px lógicos pelo `Painter` e conferir em 1×, 1,25×, 1,5× e 2×, e em janelas de 860, 960, 1120 e 1920 px de largura.",
       "Do dar a todo controle clicável uma `Region` com o `radius` do desenho, para o Tab chegar nele e o contorno âmbar acompanhar o canto.",
       "Do escrever o erro em Brasa, em palavras simples, dizendo o que fazer.",
       "Do manter texto em faint ou mais claro (4,5:1 no mínimo); dim só para ícone e ponto.",

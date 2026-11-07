@@ -273,8 +273,8 @@ Escuros frios em camadas, uma luz quente e um vermelho de marca guardado para um
 ### Tertiary
 - **Brasa** (bad): texto de erro em palavras simples (link inválido, falha ao baixar). Não é vermelho
   de alarme; é um laranja claro que se lê sobre o painel (7,9:1).
-- **Rampa do calendário** (grid, cal-1, cal-2, cal-3, amber): os cinco tons do calendário de 16
-  semanas, de nada tocado até mais de 75 minutos (`CAL_RAMP`).
+- **Rampa do calendário** (grid, cal-1, cal-2, cal-3, amber): os cinco tons do calendário dos dias
+  tocados, de nada tocado até mais de 75 minutos (`CAL_RAMP`).
 
 ### Neutral
 - **Fundo do Palco** (bg): a janela, a barra de título (Windows 11) e o espaço entre painéis.
@@ -369,6 +369,12 @@ passo) e mostra uma barra de rolagem de 4 px só quando não cabe.
 
 Toda medida é lógica: desenhe com o `Painter`, nunca em pixels de tela.
 
+Os exemplos têm 960 px, mas a pessoa pode alargar a janela: o que tem tamanho fixo deixa um vazio.
+Painéis, campos e barras crescem com a largura. O calendário mantém o quadradinho perto de 13 px e
+mostra mais semanas (16 no mínimo) até encostar na borda (`calendar_grid`). Nas listas de presets e
+amplificadores, o nome fica com a coluna do exemplo (200 px, ou o que um nome comprido precisar) e a
+barra fica com o resto.
+
 ## Elevation & Depth
 
 A profundidade vem de camadas de tom (bg → rail → stage → panel → field → selected), não de sombra. Os
@@ -459,7 +465,8 @@ páginas, a cada 10 s; minimizada, nada é desenhado. Não há transição, fade
 - **Do** pegar cor, estilo de texto e peça do `gr7_presence/ui_kit.py`; cor nova entra lá, com nome.
 - **Do** começar uma tela nova com um palco (stage, raio 18, `radial_light`) e pôr o resto em painéis
   (panel, raio 16, título Title), com 24 px de margem e 14 px entre blocos.
-- **Do** desenhar em px lógicos pelo `Painter` e conferir em 1×, 1,25×, 1,5× e 2×.
+- **Do** desenhar em px lógicos pelo `Painter` e conferir em 1×, 1,25×, 1,5× e 2×, e em janelas de
+  860, 960, 1120 e 1920 px de largura.
 - **Do** dar a todo controle clicável uma `Region` com o `radius` do desenho, para o Tab chegar nele e o
   contorno âmbar acompanhar o canto.
 - **Do** escrever o erro em Brasa, em palavras simples, dizendo o que fazer.
