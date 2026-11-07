@@ -35,7 +35,7 @@ GOALS = [0, 15, 20, 30, 45, 60, 90, 120]
 TITLE = K.Style(30, 800, K.TEXT, display=True, width=125, line=1.0)
 H3 = K.Style(15, 700, K.TEXT, display=True, width=112, line=1.2)
 LABEL = K.Style(13.5, 600, K.TEXT, line=1.3)
-HINT = K.Style(13, 400, K.MUTED, line=1.4)   # 13 no Pillow ocupa o mesmo que 12,5 no navegador do exemplo
+HINT = K.Style(13, 400, K.MUTED, line=1.4)   # com 13, as linhas quebram onde quebram no exemplo (12,5 no navegador)
 NOTE = K.Style(13, 400, K.MUTED, line=1.45)
 SMALL = K.Style(12, 400, K.MUTED, line=1.3)
 COUNT = K.Style(11.5, 400, K.FAINT, line=1.3)
@@ -261,7 +261,7 @@ class SettingsPage:
 
         def draw(p, x, y, regions, _fields):
             K.switch(p, x, y, get())
-            regions.append(K.Region(x - 4, y - 6, x + 42, y + 28, toggle, key or label))
+            regions.append(K.Region(x - 4, y - 6, x + 42, y + 28, toggle, key or label, radius=17))
         return label, hint, 38, 22, draw
 
     def _select_row(self, key, label, hint, options, current=None):
@@ -417,7 +417,7 @@ class SettingsPage:
         px_ = x
         for i in range(len(activities)):
             p.rrect(px_, y + 5, 16, 4, 2, K.AMBER if i == self.card_index else K.SCROLL_THUMB)
-            regions.append(K.Region(px_ - 2, y - 2, px_ + 18, y + 16, lambda i=i: self._show_card(i), f"card{i}"))
+            regions.append(K.Region(px_ - 2, y - 2, px_ + 18, y + 16, lambda i=i: self._show_card(i), f"card{i}", radius=4))
             px_ += 22
         p.text(px_ + 2, y, t("preview_rotation", i=self.card_index + 1, n=len(activities), s=self._rotate_value()),
                ROTATION, max_w=w - (px_ - x) - 2)

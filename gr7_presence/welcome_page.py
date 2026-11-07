@@ -29,8 +29,8 @@ DISCORD_PROCESSES = {"discord.exe", "discordptb.exe", "discordcanary.exe"}
 GOALS = [0, 20, 30, 60]
 TITLE = K.Style(38, 800, K.GLOW, display=True, width=125, line=1.0)
 LEAD = K.Style(14, 400, "#D2CCC2", line=1.5)
-CHECK = K.Style(13.5, 600, K.TEXT, line=1.3)
-CHECK_HINT = K.Style(13, 400, K.MUTED, line=1.4)   # mesma largura do 12,5 do exemplo
+CHECK = K.Style(13.5, 600, K.TEXT, line=1.5)
+CHECK_HINT = K.Style(13, 400, K.MUTED, line=1.5)   # quebra onde o 12,5 do exemplo quebra; linhas como lá
 LABEL = K.Style(13.5, 600, K.TEXT, line=1.3)
 PREVIEW = K.Style(13, 400, "#D2CCC2", line=1.45)
 FOOT = K.Style(13, 400, K.MUTED, line=1.3)
@@ -155,7 +155,7 @@ class WelcomePage:
                 p.circle(x + 11, ly + 11, 3.5, K.AMBER)
             suffix = "ok" if ok else "no"
             p.text(x + 34, ly + 1, t(f"{key}_{suffix}"), CHECK, max_w=left_w - 34)
-            ly += 2 + 13.5 * 1.3
+            ly += 4 + 13.5 * 1.5   # o ritmo do exemplo: 62 px de uma verificação para a outra
             ly += p.paragraph(x + 34, ly, t(f"{key}_{suffix}_hint"), CHECK_HINT, left_w - 34) + 9
         p.hline(x, x + left_w, ly, K.PANEL_LINE)
         ly += 6 + 11
@@ -173,7 +173,7 @@ class WelcomePage:
         ly += 11
         p.text(x, ly + (22 - 13.5 * 1.3) / 2, t("set_autostart"), LABEL)
         K.switch(p, x + left_w - 38, ly, self._autostart_on())
-        regions.append(K.Region(x + left_w - 42, ly - 6, x + left_w + 4, ly + 28, self._toggle_autostart, "autostart"))
+        regions.append(K.Region(x + left_w - 42, ly - 6, x + left_w + 4, ly + 28, self._toggle_autostart, "autostart", radius=17))
 
         rx = x + left_w + 20
         ry = y + p.paragraph(rx, y, t("welcome_preview"), PREVIEW, 290) + 10
@@ -185,5 +185,5 @@ class WelcomePage:
         bx = x + w - bw
         p.rrect(bx, foot, bw, 38, 11, K.gradient(p.px(bw), p.px(38), K.AMBER, K.ORANGE, horizontal=True))
         p.text(bx + 18, foot + (38 - 13.5 * 1.3) / 2, t("welcome_start"), PRIMARY)
-        regions.append(K.Region(bx, foot, bx + bw, foot + 38, self.on_start, "start"))
+        regions.append(K.Region(bx, foot, bx + bw, foot + 38, self.on_start, "start", radius=11))
         return K.Rendered(p.img, height, regions)

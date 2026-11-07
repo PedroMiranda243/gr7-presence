@@ -76,7 +76,14 @@ class Style:
 
 
 @functools.lru_cache(maxsize=256)
-def _font(display: bool, px: int, weight: int, width: int, opsz: float) -> ImageFont.FreeTypeFont:
+def _font(display: bool, px: float, weight: int, width: int, opsz: float) -> ImageFont.FreeTypeFont:
+    try:
+        return _load_font(display, px, weight, width, opsz)
+    except TypeError:   # Pillow anterior à 10.1 só aceita tamanho inteiro
+        return _load_font(display, max(1, round(px)), weight, width, opsz)
+
+
+def _load_font(display: bool, px: float, weight: int, width: int, opsz: float) -> ImageFont.FreeTypeFont:
     if display:
         try:
             f = ImageFont.truetype(str(ARCHIVO), px)
@@ -95,20 +102,22 @@ def _font(display: bool, px: int, weight: int, width: int, opsz: float) -> Image
         return ImageFont.truetype(str(WIN_FONTS / static), px)     # Windows 10
     except OSError:
         try:
-            return ImageFont.load_default(px)
+            return ImageFont.load_default(round(px))
         except TypeError:   # Pillow anterior à 10.1
             return ImageFont.load_default()
 
 
 def font(style: Style, scale: float) -> ImageFont.FreeTypeFont:
+    # Tamanho inteiro: em tamanho pequeno a fonte arredonda a largura de cada letra (hinting), e um
+    # tamanho "quebrado" não fica entre os dois vizinhos; ele só muda as quebras de linha de lugar.
     return _font(style.display, max(1, round(style.size * scale)), style.weight, style.width,
                  min(36.0, max(5.0, style.size)))
 
 
 @functools.lru_cache(maxsize=32)
-def _emoji_font(px: int) -> ImageFont.FreeTypeFont | None:
+def _emoji_font(px: float) -> ImageFont.FreeTypeFont | None:
     try:
-        return ImageFont.truetype(str(EMOJI_FONT), px)
+        return ImageFont.truetype(str(EMOJI_FONT), max(1, round(px)))
     except OSError:
         return None
 
@@ -547,6 +556,7 @@ class Region:
     action: object          # função sem argumentos
     key: str = ""
     drag: object = None     # função(x, y) chamada ao clicar e arrastar (o controle deslizante)
+    radius: float = 10      # raio dos cantos do controle, para o contorno do teclado acompanhar
     step: object = None     # função(+1 ou -1) para as setas do teclado (o controle deslizante)
 
     def hit(self, x: float, y: float) -> bool:
@@ -570,7 +580,7 @@ def segmented(p: Painter, right: float, top: float, labels: list[str], selected:
             p.rrect(x, top + 4, iw, h - 8, 8, SELECTED)
         p.text(x + iw / 2, top + 4 + 6, label, style, anchor="m", color=TEXT if i == selected else MUTED)
         if actions:
-            regions.append(Region(x, top, x + iw, top + h, actions[i], (keys or labels)[i]))
+            regions.append(Region(x, top + 4, x + iw, top + h - 4, actions[i], (keys or labels)[i], radius=8))
         x += iw + 2
     return w, h, regions
 

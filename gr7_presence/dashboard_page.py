@@ -29,7 +29,7 @@ BIG_SUB = K.Style(14, 400, K.MUTED, line=1.0)
 NOTE = K.Style(13, 400, K.MUTED, line=1.45)
 CONN = K.Style(13.5, 400, K.TEXT, line=1.3)
 CONN_R = K.Style(13, 400, K.MUTED, line=1.3)
-CONN_HINT = K.Style(13, 400, K.MUTED, line=1.4)   # mesma largura do 12,5 do exemplo
+CONN_HINT = K.Style(13, 400, K.MUTED, line=1.4)   # quebra onde o 12,5 do exemplo quebra
 ROTATION = K.Style(12, 400, K.MUTED, line=1.3)
 EMPTY = K.Style(13, 400, K.MUTED, line=1.45)
 BUTTON = K.Style(13, 600, K.TEXT, line=1.3)

@@ -75,7 +75,7 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
         color = K.TEXT if on else K.ICON_OFF
         p.icon(page.icon, 29, y + 10, 20, K.AMBER if on else K.ICON_OFF)
         p.text(39, y + 36, t(page.label_key), RAIL_LABEL, anchor="m", color=color)
-        regions.append(K.Region(7, y, 71, y + ITEM_H, page.key, page.key))
+        regions.append(K.Region(7, y, 71, y + ITEM_H, page.key, page.key, radius=12))
         y += ITEM_H + 6
     if update_label:
         uy = height - 14 - ITEM_H
@@ -84,7 +84,7 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
         p.icon("up", 29, uy + 10, 20, K.AMBER)
         p.text(39, uy + 36, update_label, RAIL_LABEL, anchor="m", color=K.AMBER)
         p.circle(7 + 64 - 16 - 3.5, uy + 8 + 3.5, 3.5, K.ORANGE)
-        regions.append(K.Region(7, uy, 71, uy + ITEM_H, "update", "update"))
+        regions.append(K.Region(7, uy, 71, uy + ITEM_H, "update", "update", radius=12))
     return K.Rendered(p.img, height, regions)
 
 
@@ -637,8 +637,12 @@ class MainWindow:
             return
         canvas = {"rail": self.rail, "side": self.side}.get(self._kb[0], self.view)
         s = self.scale
-        canvas.create_rectangle((region.x0 - 3) * s, (region.y0 - 3) * s, (region.x1 + 3) * s, (region.y1 + 3) * s,
-                                outline=K.AMBER, width=max(2, round(2 * s)), tags="kbring")
+        x0, y0, x1, y1 = (region.x0 - 3) * s, (region.y0 - 3) * s, (region.x1 + 3) * s, (region.y1 + 3) * s
+        r = min((region.radius + 3) * s, (x1 - x0) / 2, (y1 - y0) / 2)
+        # Cantos redondos como os do controle: polígono suavizado (o Canvas não tem retângulo redondo).
+        points = [x0 + r, y0, x1 - r, y0, x1, y0, x1, y0 + r, x1, y1 - r, x1, y1, x1 - r, y1, x0 + r, y1,
+                  x0, y1, x0, y1 - r, x0, y0 + r, x0, y0]
+        canvas.create_polygon(points, smooth=True, outline=K.AMBER, fill="", width=max(2, round(2 * s)), tags="kbring")
 
     def _activate(self, _event=None) -> str:
         region = self._region_of(self._kb)
