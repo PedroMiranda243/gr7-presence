@@ -79,10 +79,11 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `stats_page.py` | A página Estatísticas, desenhada numa imagem | Calcular os números (`stats.py`) |
 | `settings_page.py` | A página Ajustes: as opções do `config.json` e a prévia do cartão | Montar o cartão (usa `presence.py`) |
 | `ui_kit.py` | Cores, fontes e peças da direção "Palco", desenhadas com o Pillow | Usar o Tkinter |
-| `tray.py` | Ícone, menu, notificações | Lógica de presença |
+| `tray.py` | Ícone, menu curto, notificações; abre a janela principal e a primeira abertura | Lógica de presença |
 | `app_icon.py` | O ícone do programa (o pedal de `tools/icone_pedal.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
 | `updates.py` | Consulta a última release, baixa o zip conferindo o sha256, entrega ao atualizador | Trocar arquivos ou atualizar sem a pessoa confirmar |
-| `update_window.py` | A janela "Atualizar o GR7 Presence" (notas e botão) | Baixar ou instalar |
+| `update_page.py` | A página Atualização: notas da release, botão e andamento do download | Baixar ou instalar |
+| `welcome_page.py` | A primeira abertura (uma vez): confere Discord, Guitar Rig e OCR, meta e início com o Windows | — |
 | `tools/atualizar.py` | Roda depois que o programa fecha: troca os arquivos, roda o instalador, volta se falhar | Importar o programa ou qualquer pacote fora da biblioteca padrão |
 | `config.py` / `migrate.py` | `dados\config.json` com recarga ao vivo; migração de versões antigas | — |
 | `tools/` | Instalador, empacotador, notas da release, ícones | Rodar junto com o programa |

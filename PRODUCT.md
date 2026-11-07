@@ -29,7 +29,8 @@ o nome contra a biblioteca de presets. Nenhum outro programa mostra o preset ao 
 
 ## Operating Context
 
-- Ícone na bandeja com menu; janelas pequenas abertas pelo menu (Estatísticas, Atualização).
+- Ícone na bandeja com um menu curto (abrir, pausar, atualizar, sair) e uma janela com Painel,
+  Estatísticas, Ajustes e Atualização. Na primeira abertura, uma janela de boas-vindas.
 - As configurações hoje são um `config.json` aberto no Bloco de Notas.
 - Notificações do Windows avisam versão nova e atualização concluída.
 - O Guitar Rig 7 e o Discord ficam abertos ao mesmo tempo, os dois com interface escura.

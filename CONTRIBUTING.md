@@ -7,7 +7,7 @@ já custaram tempo.
 ## Achou um problema ou tem uma ideia?
 
 Abra uma [issue](https://github.com/PedroMiranda243/gr7-presence/issues/new/choose) pelo modelo. Para
-problemas, a versão do GR7 Presence (aparece no menu da bandeja) e um trecho do
+problemas, a versão do GR7 Presence (aparece em Ajustes › Programa) e um trecho do
 `dados\gr7_presence.log` ajudam muito. Apague do log o que você não quiser mostrar, como nomes de
 presets ou de faixas.
 

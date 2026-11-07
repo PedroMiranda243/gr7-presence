@@ -49,6 +49,7 @@ class Release:
     zip_url: str | None = None
     sha256: str | None = None
     notes: str = ""
+    size: int | None = None      # bytes do zip, quando o GitHub informa
 
 
 class UpdateError(Exception):
@@ -87,11 +88,14 @@ def fetch_latest(opener=urllib.request.urlopen, timeout: float = 10) -> Release 
     return Release(".".join(map(str, version)), data.get("html_url") or RELEASES_URL,
                    zip_url=asset.get("browser_download_url"),
                    sha256=digest[7:].lower() if digest.startswith("sha256:") else None,
-                   notes=data.get("body") or "")
+                   notes=data.get("body") or "",
+                   size=asset.get("size") if isinstance(asset.get("size"), int) else None)
 
 
-def download(release: Release, folder: Path = WORK_DIR, opener=urllib.request.urlopen, timeout: float = 60) -> Path:
-    """Baixa o zip da release e confere o sha256. Arquivo que não confere é apagado, nunca usado."""
+def download(release: Release, folder: Path = WORK_DIR, opener=urllib.request.urlopen, timeout: float = 60,
+             progress: Callable[[int, int | None], None] | None = None) -> Path:
+    """Baixa o zip da release e confere o sha256. Arquivo que não confere é apagado, nunca usado.
+    `progress(baixado, total)` é chamado a cada pedaço, para a janela mostrar o andamento."""
     if not release.zip_url or not release.sha256:
         raise UpdateError("a versão nova não traz o zip com o código de conferência")
     if not release.zip_url.startswith(DOWNLOAD_PREFIX):
@@ -103,9 +107,18 @@ def download(release: Release, folder: Path = WORK_DIR, opener=urllib.request.ur
     request = urllib.request.Request(release.zip_url, headers={"User-Agent": f"GR7-Presence/{__version__}"})
     try:
         with opener(request, timeout=timeout) as response, partial.open("wb") as out:
+            total = release.size
+            try:
+                total = total or int(response.headers.get("Content-Length") or 0) or None
+            except (AttributeError, ValueError):
+                pass
+            done = 0
             while chunk := response.read(64 * 1024):
                 digest.update(chunk)
                 out.write(chunk)
+                done += len(chunk)
+                if progress:
+                    progress(done, total)
     except OSError as exc:
         partial.unlink(missing_ok=True)
         raise UpdateError(f"não consegui baixar ({exc})") from exc
