@@ -208,6 +208,11 @@ no endereço de um que foi jogado fora é recusado pelo Windows (WinError 1410);
 antes da 1.4.0. Nos testes, crie a bandeja com o `tray_ui` de `tests/bandeja.py`, que guarda os ícones
 até o fim da rodada. No programa há um ícone só.
 
+**Janela mais larga que o exemplo e sobra espaço vazio.** Os exemplos têm 960 px, mas a pessoa pode
+alargar a janela. Na 1.4.1, o calendário (16 semanas de quadradinhos de 13 px) e as barras de 92 px
+das listas tinham tamanho fixo e deixavam um vazio grande à direita numa janela de 1120 px. Faça a
+peça crescer com a largura e confira em 860, 960, 1120 e 1920 px (`tests/test_stats_page.py`).
+
 **A janela fica borrada ou com o texto pequeno em 125 % ou 150 %.** Tudo é desenhado em pixels de tela:
 as medidas do `ui_kit` são lógicas (as dos exemplos, numa janela de 960 × 640) e o `Painter` multiplica
 pela escala do Windows. Não desenhe com tamanhos fixos em pixels de tela, e confira em mais de uma

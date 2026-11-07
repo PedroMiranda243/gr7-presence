@@ -1,7 +1,8 @@
 """Página Estatísticas da janela principal, desenhada pelo Pillow como no exemplo aprovado (Palco).
 
 De cima para baixo: o gráfico com a luz na barra de hoje e os números ao lado; as conquistas; o
-calendário de 16 semanas e os presets mais tocados; os amplificadores e as sessões recentes.
+calendário dos dias tocados (16 semanas ou mais, conforme a largura) e os presets mais tocados; os
+amplificadores e as sessões recentes.
 """
 from __future__ import annotations
 
@@ -41,6 +42,19 @@ LIGHT = [(0.0, (255, 179, 71, 0.32)), (0.55, (255, 106, 61, 0.12)), (1.0, (17, 1
 ROW_H = 6 + 13 * 1.4 + 6
 REC_H = 7 + 13 * 1.4 + 7
 CAL_CELL, CAL_GAP, CAL_LEFT, CAL_TOP = 13, 4, 20, 18
+CAL_WEEKS = 16           # o mínimo; janela mais larga mostra mais semanas
+LIST_BAR, LIST_VALUE, LIST_NAME = 92, 56, 200   # medidas do exemplo; a barra fica com o que sobrar
+
+
+def calendar_grid(width: float) -> tuple[int, float]:
+    """Semanas e passo (quadradinho + espaço) para o calendário ocupar a largura toda do painel.
+
+    O quadradinho fica perto dos 13 px do exemplo e o que sobra vira mais semanas para trás: com
+    tamanho fixo, uma janela mais larga que a do exemplo deixava um vazio à direita.
+    """
+    span = width - CAL_LEFT + CAL_GAP
+    weeks = max(CAL_WEEKS, int(span // (CAL_CELL + CAL_GAP)))
+    return weeks, span / weeks
 
 
 def level(seconds: float) -> int:
@@ -131,7 +145,7 @@ class StatsPage:
         badge_w = (inner - 42 - 10 * (badge_cols - 1)) / badge_cols
         badge_h = max(self._badge_height(m, b, badge_w) for b in badges)
         ach_h = 2 + 36 + 15 * 1.2 + 12 + badge_h
-        cal_h = 2 + 36 + 18 + 12 + CAL_TOP + 7 * (CAL_CELL + CAL_GAP) - CAL_GAP + 10 + 14
+        cal_h = 2 + 36 + 18 + 12 + CAL_TOP + 7 * calendar_grid(col - 42)[1] - CAL_GAP + 10 + 14
         presets_h = 2 + 36 + 18 + 12 + self._list_height(m, d["presets"], col)
         amps_h = 2 + 36 + 18 + 12 + self._list_height(m, d["amps"], col)
         recent_n = len(d["summary"].recent)
@@ -158,7 +172,7 @@ class StatsPage:
         y += ach_h + GAP
 
         cx, cy, cw = self._panel(p, PAD_X, y, col, row1, t("cal_title"))
-        self._calendar(p, cx, cy, d, t)
+        self._calendar(p, cx, cy, cw, d, t)
         cx, cy, cw = self._panel(p, PAD_X + col + GAP, y, col, row1, t("stats_top_presets"))
         self._list(p, cx, cy, cw, d["presets"], t("list_presets_empty") if d["empty"] else t("list_period_empty"))
         y += row1 + GAP
@@ -287,14 +301,15 @@ class StatsPage:
                     p.rrect(cx - col_w / 2, ty, max(4, col_w * a.progress), 4, 2, K.ICON_OFF)
 
     # ---- calendário ----
-    def _calendar(self, p: K.Painter, x: float, y: float, d: dict, t: Translator) -> None:
+    def _calendar(self, p: K.Painter, x: float, y: float, w: float, d: dict, t: Translator) -> None:
         today: date = d["today"]
-        first = week_start(today) - timedelta(weeks=15)
-        step = CAL_CELL + CAL_GAP
+        weeks, step = calendar_grid(w)
+        cell = step - CAL_GAP
+        first = week_start(today) - timedelta(weeks=weeks - 1)
         months = t("months_short").split(",")
         initials = t("weekday_initials").split(",")
         last_col = -9
-        for i in range(112):
+        for i in range(weeks * 7):
             day = first + timedelta(days=i)
             col = i // 7
             if day > today:
@@ -303,16 +318,16 @@ class StatsPage:
                 p.text(x + CAL_LEFT + col * step, y + 1, months[day.month - 1], CAL)
                 last_col = col
         for r in (1, 3, 5):
-            p.label(x, y + CAL_TOP + r * step + CAL_CELL / 2, initials[r], CAL)
+            p.label(x, y + CAL_TOP + r * step + cell / 2, initials[r], CAL)
         days = d["days"]
-        for i in range(112):
+        for i in range(weeks * 7):
             day = first + timedelta(days=i)
             if day > today:
                 break
             cx = x + CAL_LEFT + (i // 7) * step
             cy = y + CAL_TOP + (i % 7) * step
             color = K.CAL_RAMP[0 if d["empty"] else level(days.get(day, 0.0))]
-            p.rrect(cx, cy, CAL_CELL, CAL_CELL, 3, color, outline=K.GLOW if day == today else None)
+            p.rrect(cx, cy, cell, cell, 3, color, outline=K.GLOW if day == today else None)
         ly = y + CAL_TOP + 7 * step - CAL_GAP + 10 + 7
         lx = x + p.label(x, ly, t("legend_less"), LEGEND) + 4
         for color in K.CAL_RAMP:
@@ -328,14 +343,17 @@ class StatsPage:
         if not items:
             p.paragraph(x, y, empty, EMPTY, w)
             return
-        name_w = w - 92 - 56 - 20
+        # O nome fica com a coluna do exemplo (ou o que um nome comprido precisar); a barra, com o resto.
+        longest = max(p.measure(name, ROW) for name, _ in items)
+        name_w = min(w - LIST_BAR - LIST_VALUE - 20, max(LIST_NAME, longest + 12))
+        bar_w = w - name_w - LIST_VALUE - 20
         top = items[0][1] or 1
         for i, (name, secs) in enumerate(items):
             ty = y + i * ROW_H + 6
             p.text(x, ty, name, ROW, max_w=name_w)
             bx, by = x + name_w + 10, ty + (13 * 1.4 - 6) / 2
-            p.rrect(bx, by, 92, 6, 3, K.TRACK)
-            fill_w = max(6, 92 * secs / top)
+            p.rrect(bx, by, bar_w, 6, 3, K.TRACK)
+            fill_w = max(6, bar_w * secs / top)
             fill = K.gradient(p.px(fill_w), p.px(6), K.AMBER, K.ORANGE, horizontal=True) if i == 0 else K.DIM
             p.rrect(bx, by, fill_w, 6, 3, fill)
             p.text(x + w, ty, format_time(secs), ROW_SOFT, anchor="r")
