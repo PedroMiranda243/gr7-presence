@@ -29,6 +29,15 @@ class MaskTest(unittest.TestCase):
         self.assertGreater(light.getpixel((100, 1))[3], light.getpixel((100, 60))[3])
         self.assertEqual(light.getpixel((199, 99))[3], 0)
 
+    def test_focus_ring_is_a_rounded_outline(self):
+        ring = K.ring_image(52, 34, 17, K.AMBER, 2)          # a chave: pílula inteira
+        self.assertEqual(ring.mode, "RGBA")
+        self.assertEqual(ring.getpixel((26, 0))[3], 255)     # borda de cima cheia
+        self.assertEqual(ring.getpixel((26, 33))[3], 255)    # e a de baixo, sem falha
+        self.assertEqual(ring.getpixel((26, 17))[3], 0)      # o meio fica transparente
+        self.assertEqual(ring.getpixel((0, 0))[3], 0)        # o canto é redondo
+        self.assertTrue(any(0 < ring.getpixel((x, y))[3] < 255 for x in range(8) for y in range(8)))   # suavizado
+
 
 class IconTest(unittest.TestCase):
     def test_every_icon_draws_something(self):

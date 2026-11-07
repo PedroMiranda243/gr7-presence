@@ -44,6 +44,8 @@ DEFAULTS: dict = {
     "notify_goal": True,
     # Notificação do Windows quando o Guitar Rig é minimizado (uma por vez que ele é aberto).
     "notify_minimized": True,
+    # A janela de primeira abertura já apareceu (ela aparece uma vez, depois de instalar).
+    "welcome_done": False,
     # Detecta o Guitar Rig 7 como plugin VST3 dentro de uma DAW (REAPER, FL Studio, Ableton...).
     "detect_plugin_hosts": True,
     # Uma vez por dia, confere no GitHub se saiu versão nova do GR7 Presence e avisa na bandeja.

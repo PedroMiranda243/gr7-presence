@@ -32,7 +32,6 @@ ITEM_H = 10 + 20 + 6 + 10.5 + 8
 REFRESH_MS = 10_000
 WHEEL_STEP = 60            # pixels lógicos por clique da roda do mouse
 RAIL_LABEL = K.Style(10.5, 600, K.ICON_OFF, line=1.0)
-TITLE_TEXT = "#B9BDC8"
 MENU_ITEM_H = 32
 TRANSPARENT = "#010203"    # cor que o Windows deixa transparente na lista de opções (cantos redondos)
 
@@ -51,7 +50,7 @@ def dark_title_bar(win: tk.Misc) -> None:
         for attr in (20, 19):   # DWMWA_USE_IMMERSIVE_DARK_MODE; o 19 é o das versões antigas do Windows 10
             if dwm.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(on), ctypes.sizeof(on)) == 0:
                 break
-        for attr, color in ((35, K.BG), (36, TITLE_TEXT)):   # DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR (só no 11)
+        for attr, color in ((35, K.BG), (36, K.TITLE_TEXT)):   # DWMWA_CAPTION_COLOR, DWMWA_TEXT_COLOR (só no 11)
             value = _colorref(color)
             dwm.DwmSetWindowAttribute(hwnd, attr, ctypes.byref(value), ctypes.sizeof(value))
     except (AttributeError, OSError, ValueError, tk.TclError) as exc:
@@ -60,7 +59,9 @@ def dark_title_bar(win: tk.Misc) -> None:
 
 def render_rail(height: float, scale: float, pages: list, selected: str, hover: str | None,
                 update_label: str | None, t: Translator) -> K.Rendered:
-    """A barra lateral: o ícone, uma entrada por página e, embaixo, a versão nova quando houver."""
+    """A barra lateral: o ícone, uma entrada por página e, embaixo, a versão nova quando houver.
+    Páginas com `rail = False` (a de atualização) não ganham entrada própria."""
+    pages = [page for page in pages if getattr(page, "rail", True)]
     p = K.Painter(RAIL_W, height, scale, K.RAIL)
     p.rect(RAIL_W - 1, 0, 1, height, K.RAIL_LINE)
     p.picture(LOGO, 22, 12, 34)
@@ -69,20 +70,20 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
     for page in pages:
         on = page.key == selected
         if on or page.key == hover:
-            p.rrect(7, y, 64, ITEM_H, 12, K.RAIL_ON if on else "#151821")
+            p.rrect(7, y, 64, ITEM_H, 12, K.RAIL_ON if on else K.FIELD)
         color = K.TEXT if on else K.ICON_OFF
         p.icon(page.icon, 29, y + 10, 20, K.AMBER if on else K.ICON_OFF)
         p.text(39, y + 36, t(page.label_key), RAIL_LABEL, anchor="m", color=color)
-        regions.append(K.Region(7, y, 71, y + ITEM_H, page.key, page.key))
+        regions.append(K.Region(7, y, 71, y + ITEM_H, page.key, page.key, radius=12))
         y += ITEM_H + 6
     if update_label:
         uy = height - 14 - ITEM_H
-        if hover == "update":
-            p.rrect(7, uy, 64, ITEM_H, 12, "#151821")
+        if selected == "update" or hover == "update":
+            p.rrect(7, uy, 64, ITEM_H, 12, K.RAIL_ON if selected == "update" else K.FIELD)
         p.icon("up", 29, uy + 10, 20, K.AMBER)
         p.text(39, uy + 36, update_label, RAIL_LABEL, anchor="m", color=K.AMBER)
         p.circle(7 + 64 - 16 - 3.5, uy + 8 + 3.5, 3.5, K.ORANGE)
-        regions.append(K.Region(7, uy, 71, uy + ITEM_H, "update", "update"))
+        regions.append(K.Region(7, uy, 71, uy + ITEM_H, "update", "update", radius=12))
     return K.Rendered(p.img, height, regions)
 
 
@@ -117,7 +118,7 @@ class _Entry:
         check = (window.win.register(lambda text: self.showing_placeholder or len(text) <= spec.max_len), "%P")
         self.widget = tk.Entry(window.view, textvariable=self.var, font=window.entry_font, bg=K.FIELD, fg=K.TEXT,
                                insertbackground=K.TEXT, relief="flat", bd=0, highlightthickness=0,
-                               disabledbackground=K.FIELD, selectbackground="#4A3A22", selectforeground=K.TEXT,
+                               disabledbackground=K.FIELD, selectbackground=K.SELECTION, selectforeground=K.TEXT,
                                validate="key", validatecommand=check)
         self.item = window.view.create_window(0, 0, anchor="w", window=self.widget)
         self.widget.bind("<FocusIn>", self._focus_in)
@@ -156,7 +157,10 @@ class _Entry:
 
 class MainWindow:
     def __init__(self, master: tk.Misc, pages: list, translator: Callable[[], Translator],
-                 update_version: Callable[[], str | None], on_update: Callable[[], None], page: str | None = None):
+                 update_version: Callable[[], str | None], on_update: Callable[[], None] | None = None,
+                 page: str | None = None, size: tuple[int, int] = SIZE, min_size: tuple[int, int] = MIN_SIZE,
+                 rail: bool = True, on_close: Callable[[], None] | None = None):
+        self.on_close = on_close
         self.pages = pages
         self.by_key = {p.key: p for p in pages}
         self.translator = translator
@@ -174,6 +178,7 @@ class MainWindow:
         self._menu: tk.Toplevel | None = None
         self._thumb_h = 0
         self._jobs: dict[str, str] = {}
+        self._kb: tuple[str, str] | None = None   # controle com o foco do teclado: (área, chave)
         for p in pages:
             p.on_change = self.request_render
             p.host = self
@@ -183,15 +188,16 @@ class MainWindow:
         self.win.configure(bg=K.BG)
         # O programa é DPI aware: o desenho é feito em pixels de tela, na escala do Windows.
         self.scale = s = max(1.0, self.win.winfo_fpixels("1i") / 96)
-        self.win.geometry(f"{round(SIZE[0] * s)}x{round(SIZE[1] * s)}")
-        self.win.minsize(round(MIN_SIZE[0] * s), round(MIN_SIZE[1] * s))
+        self.win.geometry(f"{round(size[0] * s)}x{round(size[1] * s)}")
+        self.win.minsize(round(min_size[0] * s), round(min_size[1] * s))
         self.win.protocol("WM_DELETE_WINDOW", self.close)   # o ícone vem do iconbitmap(default=) da bandeja
         families = set(tkfont.families(self.win))
         family = "Segoe UI Variable Text" if "Segoe UI Variable Text" in families else "Segoe UI"
         self.entry_font = tkfont.Font(self.win, family=family, size=-round(13.5 * s))
 
         self.rail = tk.Canvas(self.win, width=round(RAIL_W * s), bg=K.RAIL, highlightthickness=0, bd=0)
-        self.rail.pack(side="left", fill="y")
+        if rail:
+            self.rail.pack(side="left", fill="y")
         self.view = tk.Canvas(self.win, bg=K.BG, highlightthickness=0, bd=0, yscrollincrement=1, takefocus=1)
         self.view.pack(side="left", fill="both", expand=True)
         self.side = tk.Canvas(self.win, width=1, bg=K.BG, highlightthickness=0, bd=0)
@@ -213,6 +219,15 @@ class MainWindow:
         self.side.bind("<Motion>", self._side_motion)
         self.side.bind("<Button-1>", self._side_click)
         self.win.bind("<MouseWheel>", self._wheel)
+        # Teclado: Tab e Shift+Tab andam pelos controles, Enter ou espaço acionam, setas mexem no deslizante.
+        self.win.bind("<Tab>", lambda _e: self._tab(1))
+        self.win.bind("<Shift-Tab>", lambda _e: self._tab(-1))
+        for canvas in (self.rail, self.view, self.side):
+            canvas.configure(takefocus=1)
+            canvas.bind("<Return>", self._activate)
+            canvas.bind("<space>", self._activate)
+            canvas.bind("<Left>", lambda _e: self._arrow(-1))
+            canvas.bind("<Right>", lambda _e: self._arrow(1))
         self._jobs["title"] = self.win.after_idle(lambda: dark_title_bar(self.win))
         self._layout_side()
         self._jobs["refresh"] = self.win.after(self._refresh_ms(), self._refresh)
@@ -227,6 +242,7 @@ class MainWindow:
         if page in self.by_key and page != self.current:
             self.close_menu()
             self.view.focus_set()
+            self._kb = None
             self.current = page
             self.view.yview_moveto(0)
             self._layout_side()
@@ -248,6 +264,8 @@ class MainWindow:
             self.win.after_cancel(job)
         self._jobs.clear()
         self.win.destroy()
+        if self.on_close:
+            self.on_close()
 
     def later(self, ms: int, fn: Callable[[], None], key: str | None = None) -> None:
         """Agenda `fn` na thread da interface; com `key`, o pedido anterior igual é cancelado."""
@@ -291,6 +309,7 @@ class MainWindow:
         width = self.view.winfo_width()
         if width <= 1:
             return
+        self.page.view_height = self.view.winfo_height() / self.scale   # quem ocupa a altura toda usa
         try:
             rendered = self.page.render(width / self.scale, self.scale, self.translator())
         except Exception:   # uma página com defeito não pode derrubar a bandeja
@@ -302,6 +321,7 @@ class MainWindow:
         self.view.configure(scrollregion=(0, 0, rendered.image.width, rendered.image.height))
         self._sync_fields(rendered.fields)
         self._update_thumb()
+        self._draw_ring()
 
     def render_side(self) -> None:
         if not self.alive or not getattr(self.page, "side_width", 0):
@@ -316,6 +336,7 @@ class MainWindow:
             return
         self._photos["side"] = ImageTk.PhotoImage(self._side.image)
         self.side.itemconfigure(self._side_item, image=self._photos["side"])
+        self._draw_ring()
 
     def render_rail(self) -> None:
         if not self.alive:
@@ -331,6 +352,7 @@ class MainWindow:
             return
         self._photos["rail"] = ImageTk.PhotoImage(self._rail.image)
         self.rail.itemconfigure(self._rail_item, image=self._photos["rail"])
+        self._draw_ring()
 
     def _sync_fields(self, fields: list[K.Field]) -> None:
         """Põe, move e tira os tk.Entry conforme os campos que a página desenhou."""
@@ -369,8 +391,10 @@ class MainWindow:
 
     # ---- lista de opções -----------------------------------------------------------------------
     def open_menu(self, x: float, y: float, width: float, options: list[tuple[object, str]], current: object,
-                  on_pick: Callable[[object], None]) -> None:
-        """Abre a lista de opções logo abaixo de um campo. `x` e `y` em pixels lógicos da página."""
+                  on_pick: Callable[[object], None], above: float | None = None) -> None:
+        """Abre a lista de opções logo abaixo de um campo (`x`, `y` em pixels lógicos da página). Se ela
+        passar do pé da janela, abre acima, terminando em `above` (o topo do campo, menos a folga).
+        Setas para cima e para baixo escolhem, Enter confirma, Esc fecha."""
         self.close_menu()
         s = self.scale
         menu = tk.Toplevel(self.win)
@@ -407,14 +431,33 @@ class MainWindow:
             if r is not None:
                 on_pick(r.action)
 
+        def move(step):
+            values = [v for v, _ in options]
+            start = state["hover"] if state["hover"] is not None else (values.index(current) if current in values else -1)
+            state["hover"] = (start + step) % len(options)
+            draw()
+
+        def choose(_event=None):
+            hover = state["hover"]
+            self.close_menu()
+            if hover is not None:
+                on_pick(options[hover][0])
+
         draw()
         img = state["rendered"].image
         sx = self.view.winfo_rootx() + round(x * s - self.view.canvasx(0))
         sy = self.view.winfo_rooty() + round(y * s - self.view.canvasy(0))
+        bottom = self.win.winfo_rooty() + self.win.winfo_height()
+        if above is not None and sy + img.height > bottom:   # não cabe embaixo: abre para cima
+            sy = self.view.winfo_rooty() + round(above * s - self.view.canvasy(0)) - img.height
         menu.geometry(f"{img.width}x{img.height}+{sx}+{sy}")
         canvas.bind("<Motion>", motion)
         canvas.bind("<Button-1>", click)
         menu.bind("<Escape>", lambda _e: self.close_menu())
+        menu.bind("<Down>", lambda _e: move(1))
+        menu.bind("<Up>", lambda _e: move(-1))
+        menu.bind("<Return>", choose)
+        menu.bind("<space>", choose)
         menu.bind("<FocusOut>", lambda _e: self.close_menu())
         self._menu = menu
         menu.focus_force()
@@ -431,6 +474,8 @@ class MainWindow:
                 menu.destroy()
             except tk.TclError:
                 pass
+            if self.alive:
+                self.field_focus(None)   # o campo de escolha perde a borda âmbar quando a lista fecha
 
     # ---- eventos ------------------------------------------------------------------------------
     def _refresh(self) -> None:
@@ -464,6 +509,8 @@ class MainWindow:
 
     def _view_press(self, event) -> None:
         self.view.focus_set()   # clicar fora de um campo de texto tira o foco dele
+        self._kb = None         # com o mouse, o contorno do teclado some
+        self._draw_ring()
         region = self._page_region(event)
         if not region:
             return
@@ -493,6 +540,8 @@ class MainWindow:
         self.side.configure(cursor="hand2" if self._side_region(event) else "")
 
     def _side_click(self, event) -> None:
+        self._kb = None
+        self._draw_ring()
         region = self._side_region(event)
         if region:
             region.action()
@@ -513,10 +562,99 @@ class MainWindow:
         self._set_hover(region.key if region else None)
 
     def _rail_click(self, event) -> None:
+        self._kb = None
+        self._draw_ring()
         region = self._rail_region(event)
         if not region:
             return
-        if region.key == "update":
-            self.on_update()
+        self._rail_action(region)
+
+    def _rail_action(self, region: K.Region) -> None:
+        if region.key == "update" and "update" not in self.by_key:
+            if self.on_update:
+                self.on_update()
         else:
             self.show(region.key)
+
+    # ---- teclado ------------------------------------------------------------------------------
+    def _targets(self) -> list[tuple[str, str]]:
+        """Os controles na ordem do Tab: barra lateral, página (áreas e campos, de cima para baixo) e
+        o painel da direita."""
+        order: list[tuple[str, str]] = []
+        if self._rail and self.rail.winfo_ismapped():
+            order += [("rail", r.key) for r in sorted(self._rail.regions, key=lambda r: (r.y0, r.x0))]
+        if self._page:
+            items = [((r.y0, r.x0), ("page", r.key)) for r in self._page.regions]
+            items += [((f.y, f.x), ("entry", f.key)) for f in self._page.fields]
+            order += [target for _pos, target in sorted(items, key=lambda i: i[0])]
+        if self._side and getattr(self.page, "side_width", 0):
+            order += [("side", r.key) for r in sorted(self._side.regions, key=lambda r: (r.y0, r.x0))]
+        return order
+
+    def _tab(self, step: int) -> str:
+        targets = self._targets()
+        if not targets:
+            return "break"
+        focused = self.win.focus_get()
+        current = next((("entry", k) for k, e in self._entries.items() if e.widget is focused), None) or self._kb
+        if current in targets:
+            index = (targets.index(current) + step) % len(targets)
+        else:
+            index = 0 if step > 0 else len(targets) - 1
+        self._focus_target(targets[index])
+        return "break"
+
+    def _focus_target(self, target: tuple[str, str]) -> None:
+        area, key = target
+        if area == "entry":
+            self._kb = None
+            self._draw_ring()
+            self._entries[key].widget.focus_set()
+            return
+        self._kb = target
+        {"rail": self.rail, "side": self.side}.get(area, self.view).focus_set()
+        region = self._region_of(target)
+        if area == "page" and region and self._page:   # rola até o controle, se ele estiver fora da vista
+            top, view_h = self.view.canvasy(0), self.view.winfo_height()
+            if region.y0 * self.scale < top or region.y1 * self.scale > top + view_h:
+                self.view.yview_moveto(max(0.0, (region.y0 - 20) * self.scale / max(1, self._page.image.height)))
+                self._update_thumb()
+        self._draw_ring()
+
+    def _region_of(self, target: tuple[str, str] | None) -> K.Region | None:
+        if not target:
+            return None
+        rendered = {"rail": self._rail, "page": self._page, "side": self._side}.get(target[0])
+        return next((r for r in rendered.regions if r.key == target[1]), None) if rendered else None
+
+    def _draw_ring(self) -> None:
+        """O contorno âmbar no controle que tem o foco do teclado (o mesmo âmbar do campo com foco)."""
+        for canvas in (self.rail, self.view, self.side):
+            canvas.delete("kbring")
+        region = self._region_of(self._kb)
+        if not region:
+            return
+        canvas = {"rail": self.rail, "side": self.side}.get(self._kb[0], self.view)
+        s = self.scale
+        x0, y0 = round((region.x0 - 3) * s), round((region.y0 - 3) * s)
+        x1, y1 = round((region.x1 + 3) * s), round((region.y1 + 3) * s)
+        # Desenhado pelo Pillow, suave como o resto da janela, com os cantos do controle + 3.
+        ring = K.ring_image(x1 - x0, y1 - y0, round((region.radius + 3) * s), K.AMBER, max(2, round(2 * s)))
+        self._photos["ring"] = ImageTk.PhotoImage(ring)
+        canvas.create_image(x0, y0, anchor="nw", image=self._photos["ring"], tags="kbring")
+
+    def _activate(self, _event=None) -> str:
+        region = self._region_of(self._kb)
+        if region:
+            if self._kb[0] == "rail":
+                self._rail_action(region)
+            elif not region.drag:   # o controle deslizante usa as setas
+                region.action()
+        return "break"
+
+    def _arrow(self, step: int) -> str | None:
+        region = self._region_of(self._kb)
+        if region and region.step:
+            region.step(step)
+            return "break"
+        return None

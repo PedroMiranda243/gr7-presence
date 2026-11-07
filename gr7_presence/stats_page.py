@@ -113,7 +113,7 @@ class StatsPage:
                       else t("fact_no_streak_sub"))
         n = d["week_sessions"]
         week_sub = t("fact_week_sub", n=n) if n > 1 else t("fact_week_sub_one") if n == 1 else t("fact_week_sub_none")
-        return [streak, (format_time(s.week, long=True), week_sub), (format_time(s.total), t("fact_total_sub"))]
+        return [streak, (format_time(s.week, long=True), week_sub), (f"{int(s.total // 3600)} h" if s.total >= 3600 else format_time(s.total), t("fact_total_sub"))]
 
     # ---- desenho -----------------------------------------------------------------------------
     def render(self, width: float, scale: float, t: Translator) -> K.Rendered:
@@ -269,9 +269,9 @@ class StatsPage:
             if a.got:
                 p.shadow(mx, y, 52, 52, 15, (255, 106, 61, 204), dy=10, blur=22, spread=-10)
                 p.rrect(mx, y, 52, 52, 15, K.gradient(p.px(52), p.px(52), K.AMBER, K.ORANGE))
-                p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, "#2A1206")
+                p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, K.BADGE_ICON)
             else:
-                p.rrect(mx, y, 52, 52, 15, "#1C1F29", outline="#262A37")
+                p.rrect(mx, y, 52, 52, 15, K.BADGE_OFF, outline=K.FIELD_LINE)
                 p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, K.DIM)
             ty = y + 52 + 7
             for line in p.wrap(title, BADGE_TITLE, col_w):

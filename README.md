@@ -31,7 +31,7 @@ Precisa de Windows 10 ou 11, do Guitar Rig 7 e do Discord desktop (o Discord no 
 
 ## 🔔 Atualizações
 
-- **O programa avisa sozinho.** Uma vez por dia ele confere se saiu versão nova. Quando sai, aparece uma notificação e o item **⬆️ Atualizar para a versão X** no menu do ícone da bandeja.
+- **O programa avisa sozinho.** Uma vez por dia ele confere se saiu versão nova. Quando sai, aparece uma notificação, o item **Atualizar para a versão X** no menu do ícone da bandeja e a versão nova no pé da barra lateral da janela do programa.
 - **Para atualizar, um clique:** o item abre uma janela com o que muda. Em **Atualizar agora**, o programa baixa a versão nova, confere se o arquivo é o mesmo publicado aqui, fecha, instala e abre de novo sozinho, em 1 ou 2 minutos. Se algo der errado, a versão que você tinha volta, e o motivo fica em `dados\atualizacao.log`.
 - **Suas estatísticas e configurações ficam guardadas.** A pasta `dados` não é tocada.
 - **Atualizar à mão também funciona** (e é o caminho para quem está na 1.0.0, que ainda não tem o botão): botão direito na bandeja › **Sair**, extraia o zip novo **na mesma pasta**, substituindo os arquivos, e rode o `instalar.bat` de novo.
@@ -47,13 +47,13 @@ Precisa de Windows 10 ou 11, do Guitar Rig 7 e do Discord desktop (o Discord no 
 - **Modo plugin.** Com o Guitar Rig 7 aberto como VST3 numa DAW (REAPER, FL Studio, Ableton, Studio One, Cubase, Bitwig, Cakewalk…), mostra "🎛️ Guitar Rig 7 no REAPER".
 - **Estatísticas de prática.** Gráfico dos últimos 14 dias (ou por semana, ou por mês) com a meta do dia, sequência de dias seguidos 🔥 (vale a partir de 5 min por dia), recorde, conquistas, calendário dos dias tocados, presets e amps mais usados e as sessões recentes. Tudo fica no seu PC.
 - **Janela do programa.** Painel com o que está no seu perfil agora, Estatísticas e Ajustes, no visual escuro do programa.
-- **Bandeja do sistema.** Ponto verde quando está no Discord, cinza quando está esperando. Menu com pausar, estatísticas, configurações, iniciar com o Windows e a versão instalada.
+- **Bandeja do sistema.** Ponto verde quando está no Discord, cinza quando está esperando. Menu curto: abrir a janela, pausar por 1 hora ou até você voltar, e atualizar quando sai versão nova.
 - **Ícone próprio.** Um pedal vermelho na bandeja, na barra de tarefas e nos atalhos, diferente do ícone do Guitar Rig 7 para não confundir os dois abertos ao mesmo tempo.
 - **Robusto.** Se o Discord fechar, ele reconecta sozinho. Um arquivo corrompido não derruba nada, e só uma cópia do programa roda por vez.
 
 ## Configuração
 
-Clique com o botão direito no ícone da bandeja e escolha **Abrir configurações**: abre a tela de **Ajustes**, com a prévia de como o perfil fica no Discord. Tudo vale na hora, sem reiniciar. As opções ficam em `dados\config.json`; quem preferir pode editar o arquivo (botão **Abrir config.json** em Ajustes › Programa), que é recarregado sozinho quando você salva.
+Clique com o botão direito no ícone da bandeja, escolha **Abrir o GR7 Presence** e vá em **Ajustes**: é a tela, com a prévia de como o perfil fica no Discord. Tudo vale na hora, sem reiniciar. As opções ficam em `dados\config.json`; quem preferir pode editar o arquivo (botão **Abrir config.json** em Ajustes › Programa), que é recarregado sozinho quando você salva.
 
 | Opção | Padrão | O que faz |
 |---|---|---|
@@ -80,10 +80,10 @@ Dê dois cliques em `desinstalar.bat` e depois apague a pasta.
 
 ## Solução de problemas
 
-- **Não aparece nada.** Confira o ícone da bandeja. Cinza com "Discord não encontrado" quer dizer que o Discord desktop está fechado. Veja também o log em `dados\gr7_presence.log` (botão direito na bandeja › **Abrir pasta de dados**).
+- **Não aparece nada.** Confira o ícone da bandeja. Cinza com "Discord não encontrado" quer dizer que o Discord desktop está fechado. Veja também o log em `dados\gr7_presence.log` (Ajustes › Programa › **Registros**).
 - **O preset não mudou.** Confira se o Guitar Rig não está minimizado: minimizado, ele não desenha a janela, e o perfil fica no último preset lido.
 - **Imagens em branco ou ícone de dado no lugar do logo.** O Discord guarda as imagens em cache. Se uma imagem não for reconhecida, o programa passa a mandar o link direto dela sozinho. O ícone pequeno ao lado do seu nome só atualiza recarregando o Discord com **Ctrl+R**.
-- **Achou um defeito?** [Abra uma issue](https://github.com/PedroMiranda243/gr7-presence/issues/new/choose) com a versão (aparece no menu da bandeja) e um trecho do log.
+- **Achou um defeito?** [Abra uma issue](https://github.com/PedroMiranda243/gr7-presence/issues/new/choose) com a versão (aparece em Ajustes › Programa) e um trecho do log.
 
 ## Para quem desenvolve
 

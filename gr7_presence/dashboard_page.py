@@ -18,27 +18,24 @@ PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 20, 14
 CARD_W = 290
 NAME = K.Style(46, 800, K.GLOW, display=True, width=125, line=0.98)
 NAME_MD = K.Style(38, 800, K.GLOW, display=True, width=125, line=0.98)
-META = K.Style(14, 400, "#D2CCC2", line=1.5)
+META = K.Style(14, 400, K.TEXT_LEAD, line=1.5)
 META_MUTED = K.Style(14, 400, K.MUTED, line=1.5)
-PILL = K.Style(12.5, 500, "#E7E3DB", line=1.2)
-PILL_AMP = K.Style(12.5, 600, "#FFFFFF", line=1.2)
-LIVE = K.Style(13, 400, "#D2CCC2", line=1.3)
+PILL = K.Style(12.5, 500, K.PILL_TEXT, line=1.2)
+PILL_AMP = K.Style(12.5, 600, K.WHITE, line=1.2)
+LIVE = K.Style(13, 400, K.TEXT_LEAD, line=1.3)
 H3 = K.Style(15, 700, K.TEXT, display=True, width=112, line=1.2)
 BIG = K.Style(34, 800, K.TEXT, display=True, width=118, line=1.0)
 BIG_SUB = K.Style(14, 400, K.MUTED, line=1.0)
 NOTE = K.Style(13, 400, K.MUTED, line=1.45)
 CONN = K.Style(13.5, 400, K.TEXT, line=1.3)
 CONN_R = K.Style(13, 400, K.MUTED, line=1.3)
-CONN_HINT = K.Style(12.5, 400, K.MUTED, line=1.4)
+CONN_HINT = K.Style(13, 400, K.MUTED, line=1.4)   # quebra onde o 12,5 do exemplo quebra
 ROTATION = K.Style(12, 400, K.MUTED, line=1.3)
 EMPTY = K.Style(13, 400, K.MUTED, line=1.45)
 BUTTON = K.Style(13, 600, K.TEXT, line=1.3)
 
 LIGHT = [(0.0, (255, 183, 77, 0.36)), (0.40, (255, 106, 61, 0.15)), (0.72, (17, 19, 26, 0.0)), (1.0, (17, 19, 26, 0.0))]
 LIGHT_OFF = [(0.0, (160, 170, 200, 0.12)), (0.70, (17, 19, 26, 0.0)), (1.0, (17, 19, 26, 0.0))]
-PILL_BG, PILL_LINE = "#1F2128", "#26282F"       # branco a 6 % e 9 % sobre o palco
-STAGE_BTN, STAGE_BTN_LINE = "#24262C", "#2C2E34"
-DIM_DOT = "#5A6177"
 VERBS = {0: "playing", 2: "listening", 3: "watching", 5: "competing"}
 PILL_H = 6 + 12.5 * 1.2 + 6 + 2
 
@@ -190,7 +187,7 @@ class DashboardPage:
                     if amp:
                         p.rrect(px_, y, pw, PILL_H, PILL_H / 2, K.RED)
                     else:
-                        p.rrect(px_, y, pw, PILL_H, PILL_H / 2, PILL_BG, outline=PILL_LINE)
+                        p.rrect(px_, y, pw, PILL_H, PILL_H / 2, K.PILL, outline=K.PILL_LINE)
                     p.text(px_ + 12, y + 7, label, PILL_AMP if amp else PILL)
                     px_ += pw + 6
                 y += PILL_H + 6
@@ -217,7 +214,7 @@ class DashboardPage:
         bw = 14 + 13 + 8 + p.measure(label, BUTTON) + (8 + 13 if not app.paused else 0) + 14
         bx = x + w - bw
         p.text(x + 16, y + (34 - 13 * 1.3) / 2, text, LIVE, max_w=bx - x - 28)
-        p.rrect(bx, y, bw, 34, 10, STAGE_BTN, outline=STAGE_BTN_LINE)
+        p.rrect(bx, y, bw, 34, 10, K.BTN_STAGE, outline=K.BTN_STAGE_LINE)
         p.icon("play" if app.paused else "pause", bx + 14, y + 10.5, 13, K.TEXT, stroke=2.6)
         p.text(bx + 14 + 13 + 8, y + (34 - 13 * 1.3) / 2, label, BUTTON)
         if app.paused:
@@ -228,7 +225,7 @@ class DashboardPage:
 
         def open_menu():
             if self.host:
-                self.host.open_menu(bx + bw - 220, y + 34 + 4, 220, options, None, self._pause)
+                self.host.open_menu(bx + bw - 220, y + 34 + 4, 220, options, None, self._pause, above=y - 4)
         regions.append(K.Region(bx, y, bx + bw, y + 34, open_menu, "pause"))
 
     # ---- o cartão, à direita ----
@@ -251,7 +248,7 @@ class DashboardPage:
         empty = self._empty_text(t, state)
         if empty:
             h = 22 + K.paragraph_height(p, empty, EMPTY, CARD_W - 36) + 22
-            p.dashed_rrect(x, y, CARD_W, h, 8, "#2E3342")
+            p.dashed_rrect(x, y, CARD_W, h, 8, K.EMPTY_LINE)
             ty = y + 22
             for line in p.wrap(empty, EMPTY, CARD_W - 36):
                 p.text(x + CARD_W / 2, ty, line, EMPTY, anchor="m")
@@ -322,12 +319,12 @@ class DashboardPage:
         discord = ((K.GREEN, t("conn_discord"), t("conn_on"), None) if app.discord_connected else
                    (K.ORANGE, t("conn_discord"), t("conn_off"), t("conn_discord_hint")))
         if not state:
-            return [discord, (DIM_DOT, t("conn_gr"), t("conn_closed"), None),
-                    (DIM_DOT, t("conn_screen"), t("screen_waiting"), None)]
+            return [discord, (K.DIM, t("conn_gr"), t("conn_closed"), None),
+                    (K.DIM, t("conn_screen"), t("screen_waiting"), None)]
         target = state[1]
         if target.kind == "plugin":
             return [discord, (K.GREEN, t("conn_gr"), t("conn_daw", host=target.host or "DAW"), None),
-                    (DIM_DOT, t("conn_screen"), t("screen_plugin"), t("screen_plugin_hint"))]
+                    (K.DIM, t("conn_screen"), t("screen_plugin"), t("screen_plugin_hint"))]
         screen = {
             "minimized": (K.AMBER, t("screen_minimized"), t("screen_minimized_hint")),
             "no_ocr": (K.AMBER, t("screen_no_ocr"), t("screen_no_ocr_hint")),

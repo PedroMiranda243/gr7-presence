@@ -63,7 +63,8 @@ A cada 5 segundos, o `app.tick()`:
 
 ## Atualização com um clique
 
-1. A bandeja abre a `UpdateWindow` com as notas da release. Em "Atualizar agora", a thread `download`
+1. A página Atualização da janela principal mostra as notas da release. Ela abre pelo item da versão
+   nova, no pé da barra lateral, ou pelo menu da bandeja. Em "Atualizar agora", a thread `download`
    baixa o anexo `GR7-Presence.zip` (só de uma release deste repositório) e confere o sha256 informado
    pela API.
 2. `updates.start_updater` copia o `tools/atualizar.py` da versão instalada para a pasta temporária e o

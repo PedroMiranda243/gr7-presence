@@ -1,0 +1,1075 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-07T00:00:00Z",
+  "title": "Design System: GR7 Presence",
+  "extensions": {
+    "colorMeta": {
+      "bg": {
+        "role": "neutral",
+        "displayName": "Fundo do Palco",
+        "canonical": "#0B0C10",
+        "tonalRamp": [
+          "#0A0B0F",
+          "#242529",
+          "#404247",
+          "#5F6166",
+          "#808288",
+          "#A3A5AB",
+          "#C7C9CF",
+          "#ECEEF4"
+        ]
+      },
+      "rail": {
+        "role": "neutral",
+        "displayName": "Trilho",
+        "canonical": "#0F1117",
+        "tonalRamp": [
+          "#090B11",
+          "#23252B",
+          "#3F4249",
+          "#5E6169",
+          "#7F828A",
+          "#A2A5AD",
+          "#C6C9D2",
+          "#EBEEF7"
+        ]
+      },
+      "rail-line": {
+        "role": "neutral",
+        "displayName": "Linha do Trilho",
+        "canonical": "#1B1E29",
+        "tonalRamp": [
+          "#080A14",
+          "#212430",
+          "#3E414E",
+          "#5D616E",
+          "#7E8290",
+          "#A0A4B3",
+          "#C4C9D8",
+          "#E9EEFE"
+        ]
+      },
+      "rail-on": {
+        "role": "neutral",
+        "displayName": "Trilho Escolhido",
+        "canonical": "#1B1E2A",
+        "tonalRamp": [
+          "#080A15",
+          "#212431",
+          "#3E414F",
+          "#5D616F",
+          "#7E8291",
+          "#A0A4B4",
+          "#C4C8D9",
+          "#E9EEFF"
+        ]
+      },
+      "stage": {
+        "role": "neutral",
+        "displayName": "Palco",
+        "canonical": "#11131A",
+        "tonalRamp": [
+          "#090B11",
+          "#22252C",
+          "#3F424A",
+          "#5E616A",
+          "#7F828B",
+          "#A2A5AF",
+          "#C6C9D3",
+          "#EBEEF9"
+        ]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Painel",
+        "canonical": "#13151C",
+        "tonalRamp": [
+          "#090B11",
+          "#23252C",
+          "#3F424A",
+          "#5E616A",
+          "#7F828B",
+          "#A2A5AE",
+          "#C6C9D3",
+          "#EBEEF9"
+        ]
+      },
+      "panel-line": {
+        "role": "neutral",
+        "displayName": "Contorno do Painel",
+        "canonical": "#1E2130",
+        "tonalRamp": [
+          "#080A17",
+          "#212433",
+          "#3D4152",
+          "#5C6072",
+          "#7D8194",
+          "#A0A4B8",
+          "#C3C8DC",
+          "#E9EDFF"
+        ]
+      },
+      "field": {
+        "role": "neutral",
+        "displayName": "Campo",
+        "canonical": "#151821",
+        "tonalRamp": [
+          "#080B13",
+          "#21252E",
+          "#3E424C",
+          "#5D616C",
+          "#7E828E",
+          "#A0A5B1",
+          "#C4C9D6",
+          "#EAEEFB"
+        ]
+      },
+      "field-line": {
+        "role": "neutral",
+        "displayName": "Contorno do Campo",
+        "canonical": "#262A37",
+        "tonalRamp": [
+          "#080A16",
+          "#212431",
+          "#3D414F",
+          "#5C6170",
+          "#7D8292",
+          "#9FA5B5",
+          "#C3C9DA",
+          "#E8EEFF"
+        ]
+      },
+      "selected": {
+        "role": "neutral",
+        "displayName": "Selecionado",
+        "canonical": "#272B38",
+        "tonalRamp": [
+          "#080A15",
+          "#212431",
+          "#3D414F",
+          "#5C6170",
+          "#7D8292",
+          "#9FA5B5",
+          "#C3C9DA",
+          "#E8EEFF"
+        ]
+      },
+      "track": {
+        "role": "neutral",
+        "displayName": "Trilho de Progresso",
+        "canonical": "#232734",
+        "tonalRamp": [
+          "#080A16",
+          "#212431",
+          "#3D4150",
+          "#5C6170",
+          "#7D8292",
+          "#9FA5B5",
+          "#C3C9DA",
+          "#E8EEFF"
+        ]
+      },
+      "bar": {
+        "role": "neutral",
+        "displayName": "Barra Apagada",
+        "canonical": "#2B3040",
+        "tonalRamp": [
+          "#070A18",
+          "#202434",
+          "#3C4152",
+          "#5B6173",
+          "#7C8295",
+          "#9EA4B8",
+          "#C2C9DD",
+          "#E7EEFF"
+        ]
+      },
+      "grid": {
+        "role": "neutral",
+        "displayName": "Grade",
+        "canonical": "#1A1D27",
+        "tonalRamp": [
+          "#080B14",
+          "#21252F",
+          "#3E424D",
+          "#5D616D",
+          "#7E828F",
+          "#A0A5B2",
+          "#C4C9D7",
+          "#E9EEFC"
+        ]
+      },
+      "scroll-thumb": {
+        "role": "neutral",
+        "displayName": "Barra de Rolagem",
+        "canonical": "#2A2F3D",
+        "tonalRamp": [
+          "#070A16",
+          "#202532",
+          "#3C4250",
+          "#5B6171",
+          "#7C8293",
+          "#9EA5B6",
+          "#C2C9DB",
+          "#E7EEFF"
+        ]
+      },
+      "switch-off": {
+        "role": "neutral",
+        "displayName": "Chave Desligada",
+        "canonical": "#2A2F3D",
+        "tonalRamp": [
+          "#070A16",
+          "#202532",
+          "#3C4250",
+          "#5B6171",
+          "#7C8293",
+          "#9EA5B6",
+          "#C2C9DB",
+          "#E7EEFF"
+        ]
+      },
+      "btn": {
+        "role": "neutral",
+        "displayName": "Botão Secundário",
+        "canonical": "#26282E",
+        "tonalRamp": [
+          "#090B10",
+          "#23252B",
+          "#404248",
+          "#5F6168",
+          "#808289",
+          "#A2A5AC",
+          "#C6C9D1",
+          "#EBEEF6"
+        ]
+      },
+      "btn-line": {
+        "role": "neutral",
+        "displayName": "Contorno do Botão",
+        "canonical": "#2F3137",
+        "tonalRamp": [
+          "#090B10",
+          "#23252B",
+          "#404248",
+          "#5F6168",
+          "#808289",
+          "#A2A5AC",
+          "#C6C9D1",
+          "#ECEEF6"
+        ]
+      },
+      "text": {
+        "role": "neutral",
+        "displayName": "Texto",
+        "canonical": "#F3F1EC",
+        "tonalRamp": [
+          "#0C0B08",
+          "#262521",
+          "#43423E",
+          "#63615D",
+          "#84827E",
+          "#A7A5A0",
+          "#CBC9C4",
+          "#F0EEE9"
+        ]
+      },
+      "text-soft": {
+        "role": "neutral",
+        "displayName": "Texto Suave",
+        "canonical": "#C9C4BB",
+        "tonalRamp": [
+          "#0E0B05",
+          "#28251E",
+          "#46413A",
+          "#656159",
+          "#868279",
+          "#A9A49C",
+          "#CDC8BF",
+          "#F3EEE4"
+        ]
+      },
+      "text-lead": {
+        "role": "neutral",
+        "displayName": "Texto de Abertura",
+        "canonical": "#D2CCC2",
+        "tonalRamp": [
+          "#0E0A05",
+          "#29241D",
+          "#464139",
+          "#666058",
+          "#878278",
+          "#AAA49B",
+          "#CEC8BE",
+          "#F4EEE3"
+        ]
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Dica",
+        "canonical": "#9EA3B0",
+        "tonalRamp": [
+          "#080B14",
+          "#21252F",
+          "#3E424D",
+          "#5C616D",
+          "#7D828F",
+          "#A0A5B2",
+          "#C4C9D6",
+          "#E9EEFC"
+        ]
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Apagado",
+        "canonical": "#7A8094",
+        "tonalRamp": [
+          "#070A18",
+          "#202434",
+          "#3C4153",
+          "#5B6073",
+          "#7C8296",
+          "#9EA4B9",
+          "#C2C8DE",
+          "#E7EEFF"
+        ]
+      },
+      "icon-off": {
+        "role": "neutral",
+        "displayName": "Ícone Fora",
+        "canonical": "#8C92A4",
+        "tonalRamp": [
+          "#070A17",
+          "#202433",
+          "#3C4151",
+          "#5B6171",
+          "#7C8293",
+          "#9EA5B7",
+          "#C2C9DC",
+          "#E7EEFF"
+        ]
+      },
+      "dim": {
+        "role": "neutral",
+        "displayName": "Penumbra",
+        "canonical": "#5A6177",
+        "tonalRamp": [
+          "#060A1A",
+          "#1E2437",
+          "#3B4156",
+          "#596076",
+          "#7A8299",
+          "#9CA4BD",
+          "#C0C8E2",
+          "#E5EEFF"
+        ]
+      },
+      "glow": {
+        "role": "neutral",
+        "displayName": "Brilho",
+        "canonical": "#FFF5EA",
+        "tonalRamp": [
+          "#100A04",
+          "#2B241C",
+          "#484038",
+          "#686056",
+          "#8A8177",
+          "#ADA399",
+          "#D1C7BD",
+          "#F7EDE2"
+        ]
+      },
+      "on-accent": {
+        "role": "neutral",
+        "displayName": "Sobre o Aceso",
+        "canonical": "#1A0E08",
+        "tonalRamp": [
+          "#130804",
+          "#2F221B",
+          "#4D3E37",
+          "#6D5D56",
+          "#8F7E76",
+          "#B2A198",
+          "#D7C5BC",
+          "#FDEAE1"
+        ]
+      },
+      "on-accent-off": {
+        "role": "neutral",
+        "displayName": "Sobre o Aceso Desabilitado",
+        "canonical": "#3A2E26",
+        "tonalRamp": [
+          "#120903",
+          "#2E221B",
+          "#4C3F37",
+          "#6C5E55",
+          "#8D7F76",
+          "#B1A298",
+          "#D5C6BC",
+          "#FBEBE1"
+        ]
+      },
+      "pill": {
+        "role": "neutral",
+        "displayName": "Pílula",
+        "canonical": "#1F2128",
+        "tonalRamp": [
+          "#090B11",
+          "#23252C",
+          "#3F4249",
+          "#5E6169",
+          "#7F828B",
+          "#A2A5AE",
+          "#C6C9D2",
+          "#EBEEF8"
+        ]
+      },
+      "pill-line": {
+        "role": "neutral",
+        "displayName": "Contorno da Pílula",
+        "canonical": "#26282F",
+        "tonalRamp": [
+          "#090B11",
+          "#23252C",
+          "#3F4249",
+          "#5F6169",
+          "#7F828B",
+          "#A2A5AE",
+          "#C6C9D2",
+          "#EBEEF8"
+        ]
+      },
+      "pill-text": {
+        "role": "neutral",
+        "displayName": "Texto da Pílula",
+        "canonical": "#E7E3DB",
+        "tonalRamp": [
+          "#0D0B06",
+          "#28251F",
+          "#45423B",
+          "#64615A",
+          "#85827B",
+          "#A8A59D",
+          "#CDC9C1",
+          "#F2EEE6"
+        ]
+      },
+      "btn-stage": {
+        "role": "neutral",
+        "displayName": "Botão do Palco",
+        "canonical": "#24262C",
+        "tonalRamp": [
+          "#090B10",
+          "#23252B",
+          "#404248",
+          "#5F6168",
+          "#808289",
+          "#A2A5AC",
+          "#C6C9D1",
+          "#EBEEF6"
+        ]
+      },
+      "btn-stage-line": {
+        "role": "neutral",
+        "displayName": "Contorno do Botão do Palco",
+        "canonical": "#2C2E34",
+        "tonalRamp": [
+          "#090B10",
+          "#23252B",
+          "#404248",
+          "#5F6168",
+          "#808289",
+          "#A2A5AC",
+          "#C6C9D1",
+          "#EBEEF6"
+        ]
+      },
+      "empty-line": {
+        "role": "neutral",
+        "displayName": "Tracejado do Cartão Vazio",
+        "canonical": "#2E3342",
+        "tonalRamp": [
+          "#070A17",
+          "#202433",
+          "#3C4151",
+          "#5B6171",
+          "#7C8293",
+          "#9EA5B7",
+          "#C2C9DC",
+          "#E7EEFF"
+        ]
+      },
+      "badge-off": {
+        "role": "neutral",
+        "displayName": "Conquista Apagada",
+        "canonical": "#1C1F29",
+        "tonalRamp": [
+          "#080B14",
+          "#22252F",
+          "#3E424D",
+          "#5D616D",
+          "#7E828F",
+          "#A0A5B2",
+          "#C4C9D6",
+          "#EAEEFC"
+        ]
+      },
+      "badge-icon": {
+        "role": "neutral",
+        "displayName": "Ícone da Conquista Ganha",
+        "canonical": "#2A1206",
+        "tonalRamp": [
+          "#1A0400",
+          "#371E11",
+          "#563B2D",
+          "#775A4B",
+          "#9A7A6C",
+          "#BE9D8D",
+          "#E3C1B1",
+          "#FFE6D5"
+        ]
+      },
+      "ok-bg": {
+        "role": "secondary",
+        "displayName": "Fundo de Pronto",
+        "canonical": "#122923",
+        "tonalRamp": [
+          "#000F0A",
+          "#132A24",
+          "#304841",
+          "#4F6760",
+          "#6F8981",
+          "#91ACA4",
+          "#B5D0C8",
+          "#DAF6ED"
+        ]
+      },
+      "warn-bg": {
+        "role": "tertiary",
+        "displayName": "Fundo do que Falta",
+        "canonical": "#2A2416",
+        "tonalRamp": [
+          "#100A01",
+          "#2A2416",
+          "#484132",
+          "#676151",
+          "#898271",
+          "#ACA493",
+          "#D0C8B7",
+          "#F6EEDB"
+        ]
+      },
+      "selection": {
+        "role": "primary",
+        "displayName": "Seleção de Texto",
+        "canonical": "#4A3A22",
+        "tonalRamp": [
+          "#150800",
+          "#31220A",
+          "#4F3F27",
+          "#6F5E45",
+          "#917F65",
+          "#B5A287",
+          "#DAC6AA",
+          "#FFEBCF"
+        ]
+      },
+      "title-text": {
+        "role": "neutral",
+        "displayName": "Texto da Barra de Título",
+        "canonical": "#B9BDC8",
+        "tonalRamp": [
+          "#080B12",
+          "#22252D",
+          "#3E424B",
+          "#5D616B",
+          "#7E828C",
+          "#A1A5AF",
+          "#C5C9D4",
+          "#EAEEFA"
+        ]
+      },
+      "amber": {
+        "role": "primary",
+        "displayName": "Âmbar de Palco",
+        "canonical": "#FFB347",
+        "tonalRamp": [
+          "#1B0400",
+          "#411800",
+          "#6C2F00",
+          "#934E00",
+          "#B77000",
+          "#DD9319",
+          "#FFB84D",
+          "#FFE08A"
+        ]
+      },
+      "orange": {
+        "role": "primary",
+        "displayName": "Laranja de Ribalta",
+        "canonical": "#FF5A36",
+        "tonalRamp": [
+          "#200000",
+          "#4B0600",
+          "#7A1700",
+          "#AD2A09",
+          "#E33E17",
+          "#FF6B49",
+          "#FF9E80",
+          "#FFCFB6"
+        ]
+      },
+      "red": {
+        "role": "secondary",
+        "displayName": "Vermelho do Pedal",
+        "canonical": "#E0141C",
+        "tonalRamp": [
+          "#200000",
+          "#4B0405",
+          "#7B1513",
+          "#AE2723",
+          "#E43A34",
+          "#FF685C",
+          "#FF9C8D",
+          "#FFCDBF"
+        ]
+      },
+      "green": {
+        "role": "secondary",
+        "displayName": "Verde Conectado",
+        "canonical": "#3DDC97",
+        "tonalRamp": [
+          "#001203",
+          "#003212",
+          "#005626",
+          "#007B3E",
+          "#009E5E",
+          "#03C380",
+          "#50E9A3",
+          "#9DFFD0"
+        ]
+      },
+      "bad": {
+        "role": "tertiary",
+        "displayName": "Brasa",
+        "canonical": "#FF8A6A",
+        "tonalRamp": [
+          "#200000",
+          "#4B0700",
+          "#7A1900",
+          "#A43818",
+          "#CB5C3D",
+          "#F37F60",
+          "#FFA483",
+          "#FFD0B2"
+        ]
+      },
+      "focus-ring": {
+        "role": "primary",
+        "displayName": "Halo do Foco",
+        "canonical": "#3E3124",
+        "tonalRamp": [
+          "#130801",
+          "#2F2216",
+          "#4D3F32",
+          "#6D5E50",
+          "#8F7F70",
+          "#B2A292",
+          "#D7C6B6",
+          "#FCEBDB"
+        ]
+      },
+      "cal-1": {
+        "role": "tertiary",
+        "displayName": "Calendário 1",
+        "canonical": "#4A2620",
+        "tonalRamp": [
+          "#1D0100",
+          "#3C1914",
+          "#5C3630",
+          "#7E554E",
+          "#A1766E",
+          "#C69990",
+          "#EBBCB4",
+          "#FFE1D8"
+        ],
+        "projectScale": [
+          "#1A1D27",
+          "#4A2620",
+          "#8F3A22",
+          "#E0602B",
+          "#FFB347"
+        ]
+      },
+      "cal-2": {
+        "role": "tertiary",
+        "displayName": "Calendário 2",
+        "canonical": "#8F3A22",
+        "tonalRamp": [
+          "#200000",
+          "#4B0700",
+          "#752106",
+          "#99432B",
+          "#BF654C",
+          "#E6886E",
+          "#FFAC91",
+          "#FFD1B5"
+        ],
+        "projectScale": [
+          "#1A1D27",
+          "#4A2620",
+          "#8F3A22",
+          "#E0602B",
+          "#FFB347"
+        ]
+      },
+      "cal-3": {
+        "role": "tertiary",
+        "displayName": "Calendário 3",
+        "canonical": "#E0602B",
+        "tonalRamp": [
+          "#200000",
+          "#4A0900",
+          "#791B00",
+          "#AC2F00",
+          "#D4551D",
+          "#FC7946",
+          "#FFA172",
+          "#FFD1AC"
+        ],
+        "projectScale": [
+          "#1A1D27",
+          "#4A2620",
+          "#8F3A22",
+          "#E0602B",
+          "#FFB347"
+        ]
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Cartão do Discord",
+        "canonical": "#1E2027",
+        "tonalRamp": [
+          "#090B11",
+          "#23252C",
+          "#3F4249",
+          "#5E6169",
+          "#7F828B",
+          "#A2A5AE",
+          "#C6C9D2",
+          "#EBEEF8"
+        ]
+      },
+      "card-line": {
+        "role": "neutral",
+        "displayName": "Contorno do Cartão do Discord",
+        "canonical": "#2B2D34",
+        "tonalRamp": [
+          "#090B11",
+          "#23252C",
+          "#404249",
+          "#5F6169",
+          "#80828A",
+          "#A2A5AD",
+          "#C6C9D2",
+          "#EBEEF7"
+        ]
+      },
+      "card-muted": {
+        "role": "neutral",
+        "displayName": "Texto do Cartão do Discord",
+        "canonical": "#B5BAC1",
+        "tonalRamp": [
+          "#080B10",
+          "#22252B",
+          "#3E4248",
+          "#5D6268",
+          "#7E8389",
+          "#A1A5AC",
+          "#C4CAD1",
+          "#EAEFF6"
+        ]
+      },
+      "card-button": {
+        "role": "neutral",
+        "displayName": "Botão do Cartão do Discord",
+        "canonical": "#3A3D46",
+        "tonalRamp": [
+          "#090B12",
+          "#22252D",
+          "#3F424B",
+          "#5E616B",
+          "#7F828C",
+          "#A1A5AF",
+          "#C5C9D4",
+          "#EAEEFA"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display-xl": {
+        "displayName": "Display XL",
+        "purpose": "Nome do preset no palco do Painel; versão na Atualização. Cor glow."
+      },
+      "display-lg": {
+        "displayName": "Display LG",
+        "purpose": "Palco sem Guitar Rig aberto; título da primeira abertura."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Título das páginas Estatísticas e Ajustes."
+      },
+      "stat": {
+        "displayName": "Stat",
+        "purpose": "Minutos de hoje na meta."
+      },
+      "stat-sm": {
+        "displayName": "Stat SM",
+        "purpose": "Números ao lado do gráfico. Cor glow."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Título de cada painel."
+      },
+      "body-lead": {
+        "displayName": "Body Lead",
+        "purpose": "Parágrafo sob o título do palco (text-lead)."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Valores de campo, linhas de conexão."
+      },
+      "body-sm": {
+        "displayName": "Body SM",
+        "purpose": "Dicas, notas e explicações (muted)."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Nome de cada opção dos Ajustes."
+      },
+      "button": {
+        "displayName": "Button",
+        "purpose": "Botão secundário."
+      },
+      "button-primary": {
+        "displayName": "Button Primary",
+        "purpose": "Botão principal, cor on-accent."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Linhas pequenas: rodízio, legendas, subtítulos de conquista."
+      },
+      "micro": {
+        "displayName": "Micro",
+        "purpose": "Eixos do gráfico, contadores (faint)."
+      },
+      "rail-label": {
+        "displayName": "Rail Label",
+        "purpose": "Rótulo das entradas do trilho."
+      }
+    },
+    "shadows": [
+      {
+        "name": "cartao-flutuante",
+        "value": "0 22px 44px -14px rgba(0,0,0,0.75)",
+        "purpose": "Só o cartão do Discord sobre o palco."
+      },
+      {
+        "name": "brilho-conquista",
+        "value": "0 10px 22px -10px rgba(255,106,61,0.80)",
+        "purpose": "Só a conquista ganha."
+      },
+      {
+        "name": "botao-deslizante",
+        "value": "0 1px 4px rgba(0,0,0,0.50)",
+        "purpose": "O círculo branco do deslizante."
+      },
+      {
+        "name": "foco-teclado",
+        "value": "0 0 0 2px #FFB347",
+        "purpose": "Controle com o foco do teclado: 3 px para fora, cantos do controle + 3 (ring_image)."
+      },
+      {
+        "name": "halo-campo",
+        "value": "0 0 0 3px #3E3124",
+        "purpose": "Campo com foco, junto do contorno âmbar."
+      },
+      {
+        "name": "luz-palco",
+        "value": "radial-gradient(58% 125% at 26% -22%, rgba(255,183,77,0.36), rgba(255,106,61,0.15) 40%, transparent 72%)",
+        "purpose": "Uma por página, no palco (radial_light). Apagada: rgba(160,170,200,0.12) até 70 %."
+      }
+    ],
+    "motion": [
+      {
+        "name": "troca-de-imagem",
+        "value": "0ms",
+        "purpose": "Toda mudança redesenha e troca a imagem inteira; sem transição."
+      },
+      {
+        "name": "juntar-pedidos",
+        "value": "15ms",
+        "purpose": "Pedidos seguidos de desenho (digitar, arrastar) viram um só."
+      },
+      {
+        "name": "atualizar-painel",
+        "value": "1000ms",
+        "purpose": "O Painel conta os segundos do cartão e do rodízio."
+      },
+      {
+        "name": "atualizar-paginas",
+        "value": "10000ms",
+        "purpose": "As outras páginas; nada é desenhado com a janela minimizada."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "janela-minima",
+        "value": "860px"
+      },
+      {
+        "name": "janela",
+        "value": "960px"
+      },
+      {
+        "name": "primeira-abertura",
+        "value": "720px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Botão principal",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "A ação principal da tela, no degradê aceso. Um por tela.",
+      "html": "<button class=\"ds-btn-primary\">Atualizar agora</button>",
+      "css": ".ds-btn-primary { height: 38px; padding: 0 18px; border: none; border-radius: 11px; background: linear-gradient(90deg, #FFB347, #FF5A36); color: #1A0E08; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 13.5px; font-weight: 700; cursor: pointer; } .ds-btn-primary:disabled { opacity: 0.45; } .ds-btn-primary:focus-visible { outline: 2px solid #FFB347; outline-offset: 3px; }"
+    },
+    {
+      "name": "Botão secundário",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Ações de apoio ao lado da principal.",
+      "html": "<button class=\"ds-btn-secondary\">Mais tarde</button>",
+      "css": ".ds-btn-secondary { height: 34px; padding: 0 14px; border: 1px solid #2F3137; border-radius: 10px; background: #26282E; color: #F3F1EC; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; } .ds-btn-secondary:focus-visible { outline: 2px solid #FFB347; outline-offset: 3px; }"
+    },
+    {
+      "name": "Campo de texto",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Campo dos Ajustes; com foco, contorno âmbar e halo; inválido, contorno laranja e mensagem em Brasa.",
+      "html": "<div class=\"ds-field-wrap\"><input class=\"ds-input\" placeholder=\"https://\" pattern=\"https?://.+\\..+\"><p class=\"ds-error\">O link precisa começar com https:// para o Discord aceitar.</p></div>",
+      "css": ".ds-field-wrap { background: #13151C; padding: 12px; } .ds-input { width: 260px; height: 34px; box-sizing: border-box; padding: 0 12px; background: #151821; border: 1px solid #262A37; border-radius: 10px; color: #F3F1EC; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 13.5px; outline: none; } .ds-input::placeholder { color: #7A8094; } .ds-input:focus { border-color: #FFB347; box-shadow: 0 0 0 3px #3E3124; } .ds-input:invalid { border-color: #FF5A36; } .ds-error { margin: 6px 0 0; color: #FF8A6A; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 12.5px; line-height: 1.4; }"
+    },
+    {
+      "name": "Chave liga/desliga",
+      "kind": "custom",
+      "refersTo": "switch-off",
+      "description": "38 × 22; ligada acende no degradê do palco.",
+      "html": "<button class=\"ds-switch\" aria-pressed=\"true\"></button> <button class=\"ds-switch\" aria-pressed=\"false\"></button>",
+      "css": ".ds-switch { position: relative; width: 38px; height: 22px; border: none; border-radius: 11px; background: #2A2F3D; cursor: pointer; } .ds-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #C9CDD8; } .ds-switch[aria-pressed=true] { background: linear-gradient(90deg, #FFB347, #FF5A36); } .ds-switch[aria-pressed=true]::after { left: 19px; background: #FFFFFF; } .ds-switch:focus-visible { outline: 2px solid #FFB347; outline-offset: 3px; }"
+    },
+    {
+      "name": "Segmentado",
+      "kind": "chip",
+      "refersTo": "segmented-item-selected",
+      "description": "Abas pequenas (período do gráfico, idioma).",
+      "html": "<div class=\"ds-seg\"><button class=\"ds-seg-item is-on\">14 dias</button><button class=\"ds-seg-item\">16 semanas</button><button class=\"ds-seg-item\">Tudo</button></div>",
+      "css": ".ds-seg { display: inline-flex; gap: 2px; padding: 4px; background: #151821; border: 1px solid #1E2130; border-radius: 11px; } .ds-seg-item { padding: 6px 12px; border: none; border-radius: 8px; background: transparent; color: #9EA3B0; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; } .ds-seg-item.is-on { background: #272B38; color: #F3F1EC; } .ds-seg-item:focus-visible { outline: 2px solid #FFB347; outline-offset: 3px; }"
+    },
+    {
+      "name": "Trilho",
+      "kind": "nav",
+      "refersTo": "rail-item-active",
+      "description": "Barra lateral de 78 px: página atual com ícone âmbar, hover em field.",
+      "html": "<nav class=\"ds-rail\"><a class=\"ds-rail-item is-on\" tabindex=\"0\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><rect x=\"3\" y=\"3\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"14\" y=\"3\" width=\"7\" height=\"5\" rx=\"1.5\"/><rect x=\"14\" y=\"12\" width=\"7\" height=\"9\" rx=\"1.5\"/><rect x=\"3\" y=\"16\" width=\"7\" height=\"5\" rx=\"1.5\"/></svg><span>Painel</span></a><a class=\"ds-rail-item\" tabindex=\"0\"><svg viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\"><path d=\"M4 20V11M10 20V5M16 20v-6M21 20H3\"/></svg><span>Estatísticas</span></a></nav>",
+      "css": ".ds-rail { width: 78px; padding: 12px 0; background: #0F1117; border-right: 1px solid #1B1E29; display: flex; flex-direction: column; align-items: center; gap: 6px; } .ds-rail-item { width: 64px; padding: 10px 0 8px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; gap: 6px; color: #8C92A4; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 10.5px; font-weight: 600; cursor: pointer; } .ds-rail-item:hover { background: #151821; } .ds-rail-item.is-on { background: #1B1E2A; color: #F3F1EC; } .ds-rail-item.is-on svg { color: #FFB347; } .ds-rail-item:focus-visible { outline: 2px solid #FFB347; outline-offset: 3px; }"
+    },
+    {
+      "name": "Pílulas da cadeia",
+      "kind": "chip",
+      "refersTo": "chain-pill",
+      "description": "A cadeia do rack no palco; só o amplificador é vermelho.",
+      "html": "<div class=\"ds-pills\"><span class=\"ds-pill\">Noise Gate</span><span class=\"ds-pill\">Distortion</span><span class=\"ds-pill ds-pill-amp\">Amplificador</span><span class=\"ds-pill\">Reverb</span></div>",
+      "css": ".ds-pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 16px; background: #11131A; } .ds-pill { padding: 6px 12px; border-radius: 9999px; background: #1F2128; border: 1px solid #26282F; color: #E7E3DB; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 12.5px; font-weight: 500; } .ds-pill-amp { background: #E0141C; border-color: #E0141C; color: #FFFFFF; font-weight: 600; }"
+    },
+    {
+      "name": "Palco",
+      "kind": "card",
+      "refersTo": "stage",
+      "description": "O bloco iluminado do topo de cada página, com o nome enorme em Archivo.",
+      "html": "<section class=\"ds-stage\"><h1 class=\"ds-stage-title\">Nome do Preset</h1><p class=\"ds-stage-lead\">Preset próprio · Rock, Metal</p></section>",
+      "css": ".ds-stage { padding: 28px; border-radius: 18px; background: radial-gradient(58% 125% at 26% -22%, rgba(255,183,77,0.36), rgba(255,106,61,0.15) 40%, rgba(17,19,26,0) 72%), #11131A; } .ds-stage-title { margin: 0 0 12px; font-family: Archivo, 'Segoe UI Variable', 'Segoe UI', sans-serif; font-size: 46px; font-weight: 800; font-stretch: 125%; line-height: 0.98; color: #FFF5EA; } .ds-stage-lead { margin: 0; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.5; color: #D2CCC2; }"
+    },
+    {
+      "name": "Painel",
+      "kind": "card",
+      "refersTo": "panel",
+      "description": "Bloco de conteúdo apagado, título em Archivo 700 e linhas separadas por panel-line.",
+      "html": "<section class=\"ds-panel\"><h3 class=\"ds-panel-title\">Conexões</h3><div class=\"ds-row\"><i class=\"ds-dot\"></i><span>Discord</span><span class=\"ds-row-state\">conectado</span></div><div class=\"ds-row\"><i class=\"ds-dot ds-dot-warn\"></i><span>Leitura da tela</span><span class=\"ds-row-state\">pausada</span></div></section>",
+      "css": ".ds-panel { padding: 19px 21px; border-radius: 16px; background: #13151C; border: 1px solid #1E2130; font-family: 'Segoe UI Variable Text', 'Segoe UI', sans-serif; } .ds-panel-title { margin: 0 0 12px; font-family: Archivo, 'Segoe UI Variable', 'Segoe UI', sans-serif; font-size: 15px; font-weight: 700; font-stretch: 112%; line-height: 1.2; color: #F3F1EC; } .ds-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; font-size: 13.5px; color: #F3F1EC; } .ds-row + .ds-row { border-top: 1px solid #1E2130; } .ds-dot { width: 8px; height: 8px; border-radius: 50%; background: #3DDC97; } .ds-dot-warn { background: #FFB347; } .ds-row-state { margin-left: auto; font-size: 13px; color: #9EA3B0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Palco",
+    "overview": "O que está ao vivo recebe a luz; o resto fica na penumbra. A janela é um palco azul-quase-preto em camadas, com uma luz quente que desce de cima (âmbar para laranja) só sobre o que importa agora: o preset que está no perfil, a barra de hoje no gráfico, a ação principal. Fica ao lado do Guitar Rig e do Discord, os dois escuros, e precisa conviver com eles sem se confundir com nenhum.\n\nA densidade é de ferramenta, não de site: uma janela de 960 × 640 (mínimo 860 × 560) com trilho de 78 px à esquerda e páginas que rolam. Os títulos e os números grandes são da Archivo larga e pesada; o resto é Segoe UI, discreto, no tamanho de leitura do Windows. Não há painéis iguais lado a lado competindo: um palco iluminado no topo e painéis apagados embaixo.\n\nTudo é desenhado pelo Pillow em pixels lógicos e multiplicado pela escala do Windows (`Painter`); o Tkinter só mostra a imagem num Canvas. Os tokens moram num lugar só: `gr7_presence/ui_kit.py`.",
+    "keyCharacteristics": [
+      "Palco escuro em camadas (fundo, trilho, palco, painel, campo), sem bordas fortes.",
+      "Luz radial quente só no palco de cada página; degradê âmbar → laranja só no que está \"aceso\".",
+      "Archivo 800 larga nos títulos e números; Segoe UI nos textos e controles.",
+      "Vermelho da marca só no amplificador da cadeia e no ícone do pedal.",
+      "Quase sem movimento: a imagem é trocada inteira; o Painel se redesenha a cada 1 s."
+    ],
+    "rules": [
+      {
+        "name": "The One Light Rule",
+        "body": "Uma luz por página, sempre sobre o palco, sempre de cima. Painéis comuns não recebem luz nem degradê no fundo.",
+        "section": "colors"
+      },
+      {
+        "name": "The Red Pedal Rule",
+        "body": "O vermelho (#E0141C) é o pedal e o amplificador. Erro usa Brasa; ação usa o degradê âmbar → laranja.",
+        "section": "colors"
+      },
+      {
+        "name": "The Lit Means Live Rule",
+        "body": "O degradê âmbar → laranja marca o que está aceso agora (ligado, hoje, progresso, ação principal). Se não está ao vivo nem é a ação principal, é cinza.",
+        "section": "colors"
+      },
+      {
+        "name": "The Integer Pixel Rule",
+        "body": "O tamanho da fonte é arredondado para um inteiro depois de multiplicado pela escala (`font()`): em tamanho pequeno o hinting arredonda cada letra, e um tamanho quebrado só muda as quebras de linha. Atenção: o Python arredonda o ,5 para o par, então em 100 % 10,5 vira 10, 12,5 vira 12 e 13,5 vira 14. Confira a quebra em 1×, 1,25×, 1,5× e 2×.",
+        "section": "typography"
+      },
+      {
+        "name": "The Two Voices Rule",
+        "body": "Archivo só em títulos e números grandes; nenhum texto corrido, botão ou rótulo em Archivo. Sem caixa-alta, sem espaçamento entre letras, sem rótulo pequeno acima do título.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Panel Rule",
+        "body": "Painel não tem sombra. Sombra só onde algo flutua (o cartão do Discord) ou acende (a conquista ganha).",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do pegar cor, estilo de texto e peça do `gr7_presence/ui_kit.py`; cor nova entra lá, com nome.",
+      "Do começar uma tela nova com um palco (stage, raio 18, `radial_light`) e pôr o resto em painéis (panel, raio 16, título Title), com 24 px de margem e 14 px entre blocos.",
+      "Do desenhar em px lógicos pelo `Painter` e conferir em 1×, 1,25×, 1,5× e 2×.",
+      "Do dar a todo controle clicável uma `Region` com o `radius` do desenho, para o Tab chegar nele e o contorno âmbar acompanhar o canto.",
+      "Do escrever o erro em Brasa, em palavras simples, dizendo o que fazer.",
+      "Do manter texto em faint ou mais claro (4,5:1 no mínimo); dim só para ícone e ponto.",
+      "Do mostrar a tela nova ao dono do projeto (exemplo ou captura) antes de virar código."
+    ],
+    "donts": [
+      "Don't usar o vermelho #E0141C fora do amplificador e do pedal.",
+      "Don't pôr luz ou degradê em mais de um palco por página, nem em painel comum.",
+      "Don't usar Archivo em texto corrido, botão ou rótulo; nem caixa-alta ou rótulo pequeno acima de título.",
+      "Don't fazer uma fileira de painéis iguais do mesmo peso como primeira vista.",
+      "Don't usar arte, logo ou marca da Native Instruments; o ícone é o pedal de `tools/icone_pedal.py`.",
+      "Don't usar as cores do cartão do Discord (card, card-muted, card-button) fora da prévia.",
+      "Don't desenhar com tamanho fixo em pixels de tela nem criar animação."
+    ]
+  }
+}

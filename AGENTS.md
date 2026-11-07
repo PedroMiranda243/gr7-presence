@@ -79,10 +79,11 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `stats_page.py` | A página Estatísticas, desenhada numa imagem | Calcular os números (`stats.py`) |
 | `settings_page.py` | A página Ajustes: as opções do `config.json` e a prévia do cartão | Montar o cartão (usa `presence.py`) |
 | `ui_kit.py` | Cores, fontes e peças da direção "Palco", desenhadas com o Pillow | Usar o Tkinter |
-| `tray.py` | Ícone, menu, notificações | Lógica de presença |
+| `tray.py` | Ícone, menu curto, notificações; abre a janela principal e a primeira abertura | Lógica de presença |
 | `app_icon.py` | O ícone do programa (o pedal de `tools/icone_pedal.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
 | `updates.py` | Consulta a última release, baixa o zip conferindo o sha256, entrega ao atualizador | Trocar arquivos ou atualizar sem a pessoa confirmar |
-| `update_window.py` | A janela "Atualizar o GR7 Presence" (notas e botão) | Baixar ou instalar |
+| `update_page.py` | A página Atualização: notas da release, botão e andamento do download | Baixar ou instalar |
+| `welcome_page.py` | A primeira abertura (uma vez): confere Discord, Guitar Rig e OCR, meta e início com o Windows | — |
 | `tools/atualizar.py` | Roda depois que o programa fecha: troca os arquivos, roda o instalador, volta se falhar | Importar o programa ou qualquer pacote fora da biblioteca padrão |
 | `config.py` / `migrate.py` | `dados\config.json` com recarga ao vivo; migração de versões antigas | — |
 | `tools/` | Instalador, empacotador, notas da release, ícones | Rodar junto com o programa |
@@ -129,9 +130,9 @@ Lançar uma versão: `docs/lancar-versao.md`. Nunca crie a tag à mão sem segui
   `inspect_gr7.py`). Várias suposições razoáveis deste projeto estavam erradas (seção 7).
 - Leia o diff inteiro antes do commit: quem assina é o dono do repositório.
 - **O visual tem dono.** A direção "Palco" foi escolhida pelo dono do projeto a partir de exemplos, com o
-  pedido de ficar exatamente como neles. Antes de mexer numa tela, leia `PRODUCT.md` e o contrato em
-  `.impeccable/surfaces/`. Tela nova ou mudança de visual se mostra antes (exemplo ou captura) e só
-  depois vira código.
+  pedido de ficar exatamente como neles. Antes de mexer numa tela, leia `PRODUCT.md`, o `DESIGN.md` e
+  o contrato em `.impeccable/surfaces/`. Cor nova entra no `ui_kit.py`, com nome. Tela nova ou mudança
+  de visual se mostra antes (exemplo ou captura) e só depois vira código.
 
 ## 7. Armadilhas conhecidas
 
@@ -230,7 +231,7 @@ fixa `utf-8-bom` para `.ps1`.
 | Publicar uma versão | `docs/lancar-versao.md` |
 | Refazer o app no Discord Developer Portal | `docs/app-do-discord.md` |
 | Montar o ambiente, abrir PR | `CONTRIBUTING.md` |
-| O visual: para quem é, cores, fontes, telas aprovadas | `PRODUCT.md` e `.impeccable/surfaces/` |
+| O visual: para quem é, cores, fontes, peças, telas aprovadas | `PRODUCT.md`, `DESIGN.md` e `.impeccable/surfaces/` |
 
 > **Este arquivo é vivo.** Convenção nova ou armadilha nova entra aqui no mesmo Pull Request que a
 > introduz. Se o código diverge deste documento, um dos dois está errado: descubra qual antes de seguir.

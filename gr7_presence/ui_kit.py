@@ -41,7 +41,7 @@ GRID = "#1A1D27"
 TEXT = "#F3F1EC"
 TEXT_SOFT = "#C9C4BB"
 MUTED = "#9EA3B0"
-FAINT = "#6F7587"
+FAINT = "#7A8094"         # 4,6:1 sobre os painéis (o mínimo é 4,5:1)
 ICON_OFF = "#8C92A4"
 DIM = "#5A6177"
 GLOW = "#FFF5EA"
@@ -61,6 +61,22 @@ CARD = "#1E2027"           # o cartão do Discord na prévia
 CARD_LINE = "#2B2D34"
 CARD_MUTED = "#B5BAC1"
 CARD_BUTTON = "#3A3D46"
+TEXT_LEAD = "#D2CCC2"       # o parágrafo sob o título do palco
+ON_ACCENT = "#1A0E08"       # texto sobre o degradê do botão principal
+ON_ACCENT_OFF = "#3A2E26"   # o mesmo texto com o botão desabilitado
+WHITE = "#FFFFFF"           # texto da pílula do amplificador
+PILL = "#1F2128"            # pílula da cadeia: branco a 6 % sobre o palco
+PILL_LINE = "#26282F"       # e o contorno, a 9 %
+PILL_TEXT = "#E7E3DB"
+BTN_STAGE = "#24262C"       # botão secundário sobre o palco ou a página (Pausar, Mais tarde)
+BTN_STAGE_LINE = "#2C2E34"
+EMPTY_LINE = "#2E3342"      # contorno tracejado do cartão vazio
+BADGE_OFF = "#1C1F29"       # conquista ainda não ganha
+BADGE_ICON = "#2A1206"      # ícone sobre a conquista ganha
+OK_BG = "#122923"           # sinal de pronto na primeira abertura
+WARN_BG = "#2A2416"         # e o do que falta
+SELECTION = "#4A3A22"       # texto selecionado nos campos
+TITLE_TEXT = "#B9BDC8"      # título na barra de título escura (Windows 11)
 
 
 # ---- texto ---------------------------------------------------------------------------------------
@@ -76,7 +92,14 @@ class Style:
 
 
 @functools.lru_cache(maxsize=256)
-def _font(display: bool, px: int, weight: int, width: int, opsz: float) -> ImageFont.FreeTypeFont:
+def _font(display: bool, px: float, weight: int, width: int, opsz: float) -> ImageFont.FreeTypeFont:
+    try:
+        return _load_font(display, px, weight, width, opsz)
+    except TypeError:   # Pillow anterior à 10.1 só aceita tamanho inteiro
+        return _load_font(display, max(1, round(px)), weight, width, opsz)
+
+
+def _load_font(display: bool, px: float, weight: int, width: int, opsz: float) -> ImageFont.FreeTypeFont:
     if display:
         try:
             f = ImageFont.truetype(str(ARCHIVO), px)
@@ -95,20 +118,22 @@ def _font(display: bool, px: int, weight: int, width: int, opsz: float) -> Image
         return ImageFont.truetype(str(WIN_FONTS / static), px)     # Windows 10
     except OSError:
         try:
-            return ImageFont.load_default(px)
+            return ImageFont.load_default(round(px))
         except TypeError:   # Pillow anterior à 10.1
             return ImageFont.load_default()
 
 
 def font(style: Style, scale: float) -> ImageFont.FreeTypeFont:
+    # Tamanho inteiro: em tamanho pequeno a fonte arredonda a largura de cada letra (hinting), e um
+    # tamanho "quebrado" não fica entre os dois vizinhos; ele só muda as quebras de linha de lugar.
     return _font(style.display, max(1, round(style.size * scale)), style.weight, style.width,
                  min(36.0, max(5.0, style.size)))
 
 
 @functools.lru_cache(maxsize=32)
-def _emoji_font(px: int) -> ImageFont.FreeTypeFont | None:
+def _emoji_font(px: float) -> ImageFont.FreeTypeFont | None:
     try:
-        return ImageFont.truetype(str(EMOJI_FONT), px)
+        return ImageFont.truetype(str(EMOJI_FONT), max(1, round(px)))
     except OSError:
         return None
 
@@ -156,6 +181,18 @@ def rounded_mask(w: int, h: int, r: int) -> Image.Image:
     m.paste(c.transpose(Image.FLIP_TOP_BOTTOM), (0, h - r))
     m.paste(c.transpose(Image.ROTATE_180), (w - r, h - r))
     return m
+
+
+def ring_image(w: int, h: int, r: int, color: str, width: int) -> Image.Image:
+    """Contorno de cantos redondos, suavizado, sobre fundo transparente (RGBA): o foco do teclado."""
+    w, h = max(2, w), max(2, h)
+    r = int(min(r, w // 2, h // 2))
+    outer = rounded_mask(w, h, r)
+    inner = Image.new("L", (w, h), 0)
+    inner.paste(rounded_mask(max(1, w - 2 * width), max(1, h - 2 * width), max(0, r - width)), (width, width))
+    out = Image.new("RGBA", (w, h), color)
+    out.putalpha(ImageChops.subtract(outer, inner))
+    return out
 
 
 def _rgb(color: str) -> tuple[int, int, int]:
@@ -547,6 +584,8 @@ class Region:
     action: object          # função sem argumentos
     key: str = ""
     drag: object = None     # função(x, y) chamada ao clicar e arrastar (o controle deslizante)
+    radius: float = 10      # raio dos cantos do controle, para o contorno do teclado acompanhar
+    step: object = None     # função(+1 ou -1) para as setas do teclado (o controle deslizante)
 
     def hit(self, x: float, y: float) -> bool:
         return self.x0 <= x < self.x1 and self.y0 <= y < self.y1
@@ -569,7 +608,7 @@ def segmented(p: Painter, right: float, top: float, labels: list[str], selected:
             p.rrect(x, top + 4, iw, h - 8, 8, SELECTED)
         p.text(x + iw / 2, top + 4 + 6, label, style, anchor="m", color=TEXT if i == selected else MUTED)
         if actions:
-            regions.append(Region(x, top, x + iw, top + h, actions[i], (keys or labels)[i]))
+            regions.append(Region(x, top + 4, x + iw, top + h - 4, actions[i], (keys or labels)[i], radius=8))
         x += iw + 2
     return w, h, regions
 

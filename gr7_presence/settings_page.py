@@ -13,6 +13,7 @@ import threading
 import time
 from typing import Callable
 
+from . import __version__
 from . import autostart as autostart_mod
 from . import ui_kit as K
 from .app import MIN_ROTATE_SECONDS
@@ -25,7 +26,7 @@ from .presence import build_activity, build_cards
 log = logging.getLogger(__name__)
 
 PAD_LEFT, PAD_RIGHT, PAD_TOP, PAD_BOTTOM, GAP = 24, 8, 20, 24, 14
-SIDE_W = 344                 # 20 de espaço + 300 da prévia + 24 de margem
+SIDE_W = 320                 # 20 de espaço + 276 da prévia + 24 de margem, como no exemplo
 ROTATE_MAX = 60
 SLIDER_W = 150
 MIN_ROTATE = int(MIN_ROTATE_SECONDS)   # limite do Discord (AGENTS.md, regra 7)
@@ -34,7 +35,7 @@ GOALS = [0, 15, 20, 30, 45, 60, 90, 120]
 TITLE = K.Style(30, 800, K.TEXT, display=True, width=125, line=1.0)
 H3 = K.Style(15, 700, K.TEXT, display=True, width=112, line=1.2)
 LABEL = K.Style(13.5, 600, K.TEXT, line=1.3)
-HINT = K.Style(12.5, 400, K.MUTED, line=1.4)
+HINT = K.Style(13, 400, K.MUTED, line=1.4)   # com 13, as linhas quebram onde quebram no exemplo (12,5 no navegador)
 NOTE = K.Style(13, 400, K.MUTED, line=1.45)
 SMALL = K.Style(12, 400, K.MUTED, line=1.3)
 COUNT = K.Style(11.5, 400, K.FAINT, line=1.3)
@@ -151,6 +152,10 @@ class SettingsPage:
             self._rotate = int(value)
             self.on_change()
 
+    def _step_rotate(self, step: int) -> None:
+        """Setas do teclado no controle deslizante: 5 segundos por vez."""
+        self._set("rotate_seconds", max(MIN_ROTATE, min(ROTATE_MAX, self._rotate_value() + 5 * step)))
+
     def end_drag(self) -> None:
         if self._rotate is not None:
             value, self._rotate = self._rotate, None
@@ -256,7 +261,7 @@ class SettingsPage:
 
         def draw(p, x, y, regions, _fields):
             K.switch(p, x, y, get())
-            regions.append(K.Region(x - 4, y - 6, x + 42, y + 28, toggle, key or label))
+            regions.append(K.Region(x - 4, y - 6, x + 42, y + 28, toggle, key or label, radius=17))
         return label, hint, 38, 22, draw
 
     def _select_row(self, key, label, hint, options, current=None):
@@ -273,7 +278,7 @@ class SettingsPage:
                 if self.host:
                     self.focused = key
                     self.on_change()
-                    self.host.open_menu(x, y + 34 + 4, width, options, value, pick)
+                    self.host.open_menu(x, y + 34 + 4, width, options, value, pick, above=y - 4)
             regions.append(K.Region(x, y, x + width, y + 34, open_menu, key))
         return label, hint, ("select", [lbl for _v, lbl in options]), 34, draw
 
@@ -283,7 +288,7 @@ class SettingsPage:
             K.slider(p, x, y + 6, SLIDER_W, (value - MIN_ROTATE) / (ROTATE_MAX - MIN_ROTATE))
             p.text(x + SLIDER_W + 10 + 40, y + (34 - 13 * 1.3) / 2, t("seconds_short", n=value), VALUE, anchor="r")
             regions.append(K.Region(x - 4, y, x + SLIDER_W + 4, y + 34, lambda: None, "rotate_seconds",
-                                    drag=lambda px, _py: self._drag_rotate(x, px)))
+                                    drag=lambda px, _py: self._drag_rotate(x, px), step=self._step_rotate))
         return t("set_rotate"), t("set_rotate_hint"), SLIDER_W + 10 + 40, 34, draw
 
     def _language_row(self, t):
@@ -310,7 +315,7 @@ class SettingsPage:
                 K.button(p, bx, y, label)
                 regions.append(K.Region(bx, y, bx + bw, y + 34, action, label))
                 bx += bw + 8
-        return t("set_advanced"), t("set_advanced_hint"), width, 34, draw
+        return t("set_advanced"), t("set_advanced_hint", version=__version__), width, 34, draw
 
     def _control_width(self, m: K.Painter, row) -> float:
         width = row[2]
@@ -412,7 +417,7 @@ class SettingsPage:
         px_ = x
         for i in range(len(activities)):
             p.rrect(px_, y + 5, 16, 4, 2, K.AMBER if i == self.card_index else K.SCROLL_THUMB)
-            regions.append(K.Region(px_ - 2, y - 2, px_ + 18, y + 16, lambda i=i: self._show_card(i), f"card{i}"))
+            regions.append(K.Region(px_ - 2, y - 2, px_ + 18, y + 16, lambda i=i: self._show_card(i), f"card{i}", radius=4))
             px_ += 22
         p.text(px_ + 2, y, t("preview_rotation", i=self.card_index + 1, n=len(activities), s=self._rotate_value()),
                ROTATION, max_w=w - (px_ - x) - 2)

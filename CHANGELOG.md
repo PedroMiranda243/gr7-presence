@@ -10,27 +10,36 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 ## [Não lançado]
 
 ### Mudanças
-- **Estatísticas com visual novo**, numa janela nova do GR7 Presence:
+- **Interface nova, numa janela só.** O GR7 Presence ganhou uma janela escura, com uma barra lateral e
+  quatro páginas: Painel, Estatísticas, Ajustes e Atualização. **Abrir o GR7 Presence**, no menu da
+  bandeja (ou um clique no ícone), abre a janela.
+- **Painel:** o preset que está tocando, em destaque, com a cadeia do rack; o cartão que o Discord está
+  mostrando agora, com o tempo e quando troca para o próximo; a meta do dia; e se o Discord, o Guitar
+  Rig e a leitura da tela estão funcionando. Com o Guitar Rig fechado, ele mostra a última sessão.
+- **Estatísticas com visual novo:**
   - gráfico dos últimos 14 dias, com a luz na barra de hoje e a linha da meta, e também por semana
     (16 semanas) ou por mês;
   - conquistas: 7 e 30 dias seguidos, 10 e 100 horas, e meta batida 5 dias na mesma semana;
   - calendário dos dias tocados nas últimas 16 semanas;
   - presets, amplificadores e sessões recentes, com a sessão de agora marcada.
-- **Painel**, a primeira página da janela: o preset que está tocando, em destaque, com a cadeia do
-  rack; o cartão que o Discord está mostrando agora, com o tempo e quando troca para o próximo; a meta
-  do dia; e se o Discord, o Guitar Rig e a leitura da tela estão funcionando. Com o Guitar Rig fechado,
-  ele mostra a última sessão.
-- **Pausar por 1 hora**, além de pausar até você voltar, no botão Pausar do Painel.
+- **Ajustes, no lugar do `config.json` no Bloco de Notas.** Tudo o que antes só dava para mudar no
+  arquivo, com chaves, listas e campos. Do lado direito, a prévia mostra na hora como o seu perfil fica
+  no Discord e como você aparece na lista de membros. As mudanças valem na hora, sem reiniciar. O
+  `config.json` continua lá para quem preferir (Ajustes › Programa › Abrir config.json).
+- **Meta diária de prática**, de 30 minutos no começo, e um **aviso do Windows quando você bate a
+  meta** do dia.
 - **Aviso quando o Guitar Rig é minimizado.** Minimizado, ele não mostra a tela, e o perfil fica parado
-  no último preset lido; agora um aviso do Windows explica isso, uma vez por vez que você abre o
-  Guitar Rig. Dá para desligar nos Ajustes.
-- **Tela de Ajustes**, no lugar do `config.json` aberto no Bloco de Notas. **Abrir configurações**, na
-  bandeja, abre a tela com tudo o que antes só dava para mudar no arquivo, com chaves, listas e campos.
-  Do lado direito, a prévia mostra na hora como o seu perfil fica no Discord e como você aparece na
-  lista de membros. As mudanças valem na hora, sem reiniciar. O `config.json` continua lá para quem
-  preferir (Ajustes › Programa › Abrir config.json).
-- **Meta diária de prática**, de 30 minutos no começo, e um **aviso do Windows quando você bate a meta**
-  do dia. Dá para mudar a meta e desligar o aviso nos Ajustes.
+  no último preset lido; o aviso explica isso, uma vez por vez que você abre o Guitar Rig. Os dois
+  avisos podem ser desligados nos Ajustes.
+- **Pausar por 1 hora**, além de pausar até você voltar, no menu da bandeja e no Painel.
+- **Menu da bandeja mais curto:** abrir a janela, pausar, atualizar quando sai versão nova e sair. A
+  versão instalada, os registros e "Iniciar com o Windows" agora ficam em Ajustes › Programa.
+- **Atualização dentro da janela**, com o que muda, o andamento do download e como funciona.
+- **Primeira abertura:** na primeira vez, uma janela confere se o Discord, o Guitar Rig e a leitura da
+  tela estão prontos, mostra como o perfil vai ficar e pergunta a meta diária e se o programa inicia
+  com o Windows. Quem atualiza também vê essa janela, uma vez.
+- **A janela funciona pelo teclado:** Tab e Shift+Tab andam pelos botões e chaves, Enter ou espaço
+  acionam e as setas mexem no tempo de troca do cartão. Um contorno âmbar mostra onde você está.
 
 ## [1.3.1] - 2026-11-03
 

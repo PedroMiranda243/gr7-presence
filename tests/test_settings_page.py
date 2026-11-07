@@ -94,6 +94,14 @@ class SettingsPageTest(unittest.TestCase):
         self.page.end_drag()
         self.assertEqual(self.saved()["rotate_seconds"], 15)  # nunca abaixo do limite do Discord
 
+    def test_slider_with_the_keyboard(self):
+        r = self.region("rotate_seconds")
+        r.step(1)
+        self.assertEqual(self.saved()["rotate_seconds"], 25)
+        for _ in range(20):
+            self.region("rotate_seconds").step(-1)
+        self.assertEqual(self.saved()["rotate_seconds"], 15)
+
     def test_buttons_are_saved_when_typing_stops(self):
         host = mock.Mock()
         self.page.host = host
