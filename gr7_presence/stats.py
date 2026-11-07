@@ -139,6 +139,15 @@ class Stats:
         with self._lock:
             return list(self.sessions) + ([dict(self.current)] if self.current else [])
 
+    def seconds_on(self, day: date) -> float:
+        """Segundos tocados num dia, com a sessão de agora."""
+        key = day.isoformat()
+        total = 0.0
+        for s in self.snapshot():
+            days = s.get("days")
+            total += days.get(key, 0.0) if days else (s.get("seconds", 0.0) if _day(s.get("start", 0)) == key else 0.0)
+        return total
+
     def summary(self, top: int = 5, recent: int = 8, today: date | None = None) -> Summary:
         today = today or date.today()
         with self._lock:

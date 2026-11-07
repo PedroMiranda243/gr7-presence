@@ -52,7 +52,7 @@ Precisa de Windows 10 ou 11, do Guitar Rig 7 e do Discord desktop (o Discord no 
 
 ## Configuração
 
-Clique com o botão direito no ícone da bandeja e escolha **Abrir configurações**. O arquivo `dados\config.json` é recarregado sozinho quando você salva.
+Clique com o botão direito no ícone da bandeja e escolha **Abrir configurações**: abre a tela de **Ajustes**, com a prévia de como o perfil fica no Discord. Tudo vale na hora, sem reiniciar. As opções ficam em `dados\config.json`; quem preferir pode editar o arquivo (botão **Abrir config.json** em Ajustes › Programa), que é recarregado sozinho quando você salva.
 
 | Opção | Padrão | O que faz |
 |---|---|---|
@@ -65,6 +65,7 @@ Clique com o botão direito no ícone da bandeja e escolha **Abrir configuraçõ
 | `show_backing_track` | `true` | Faixa aberta no Tape Deck |
 | `show_stats` / `show_streak` | `true` | Cartão de prática, sequência de dias |
 | `daily_goal_minutes` | `30` | Meta diária de prática, em minutos (`0` = sem meta) |
+| `notify_goal` | `true` | Notificação do Windows quando a meta do dia é batida |
 | `detect_plugin_hosts` | `true` | Procura o Guitar Rig 7 como VST3 dentro de DAWs |
 | `check_updates` | `true` | Confere uma vez por dia se saiu versão nova |
 | `buttons` | site do GR7 + vazio | Até 2 botões `{ "label", "url" }`. Só os outros veem os botões, você não. |
