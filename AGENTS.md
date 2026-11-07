@@ -73,7 +73,10 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `presence.py` | Monta os cartões e o payload, com os limites do Discord | Rede, estado |
 | `discord_ipc.py` | Pipe local do Discord (handshake, `SET_ACTIVITY`) | Montar texto |
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
-| `stats.py` / `stats_window.py` | Sessões de prática e a janela de estatísticas | — |
+| `stats.py` | Sessões de prática e os números das estatísticas (barras, conquistas) | Desenhar |
+| `main_window.py` | A janela principal: barra lateral, rolagem, cliques, barra de título escura | Desenhar o conteúdo das páginas |
+| `stats_page.py` | A página Estatísticas, desenhada numa imagem | Calcular os números (`stats.py`) |
+| `ui_kit.py` | Cores, fontes e peças da direção "Palco", desenhadas com o Pillow | Usar o Tkinter |
 | `tray.py` | Ícone, menu, notificações | Lógica de presença |
 | `app_icon.py` | O ícone do programa (o pedal de `tools/icone_pedal.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
 | `updates.py` | Consulta a última release, baixa o zip conferindo o sha256, entrega ao atualizador | Trocar arquivos ou atualizar sem a pessoa confirmar |
@@ -82,8 +85,10 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `config.py` / `migrate.py` | `dados\config.json` com recarga ao vivo; migração de versões antigas | — |
 | `tools/` | Instalador, empacotador, notas da release, ícones | Rodar junto com o programa |
 
-Stack: Python puro com `psutil`, `pystray`, `Pillow` e, opcional, os pacotes `winrt` do OCR. Não troque
-nem acrescente peças por conta própria: "o assistente sugeriu" não é justificativa. Abra uma issue.
+Stack: Python puro com `psutil`, `pystray`, `Pillow` e, opcional, os pacotes `winrt` do OCR. A interface
+é desenhada pelo Pillow (sem biblioteca de interface), com a fonte Archivo (licença OFL, em
+`assets/fonts`). Não troque nem acrescente peças por conta própria: "o assistente sugeriu" não é
+justificativa. Abra uma issue.
 
 ## 4. Como rodar e testar
 
@@ -121,6 +126,10 @@ Lançar uma versão: `docs/lancar-versao.md`. Nunca crie a tag à mão sem segui
 - Antes de afirmar como o Guitar Rig se comporta, meça (capture, leia o arquivo, rode o
   `inspect_gr7.py`). Várias suposições razoáveis deste projeto estavam erradas (seção 7).
 - Leia o diff inteiro antes do commit: quem assina é o dono do repositório.
+- **O visual tem dono.** A direção "Palco" foi escolhida pelo dono do projeto a partir de exemplos, com o
+  pedido de ficar exatamente como neles. Antes de mexer numa tela, leia `PRODUCT.md` e o contrato em
+  `.impeccable/surfaces/`. Tela nova ou mudança de visual se mostra antes (exemplo ou captura) e só
+  depois vira código.
 
 ## 7. Armadilhas conhecidas
 
@@ -190,6 +199,14 @@ novo pela data da pasta, e o `PresetReader` pela data do arquivo. Numa máquina 
 duas gravações seguidas caem no mesmo instante e a data não muda: o teste passou quatro vezes e falhou
 na release 1.0.0. Nos testes, avance a data com `os.utime` em vez de contar com o relógio.
 
+**A janela fica borrada ou com o texto pequeno em 125 % ou 150 %.** Tudo é desenhado em pixels de tela:
+as medidas do `ui_kit` são lógicas (as dos exemplos, numa janela de 960 × 640) e o `Painter` multiplica
+pela escala do Windows. Não desenhe com tamanhos fixos em pixels de tela, e confira em mais de uma
+escala (`tests/test_stats_page.py` desenha em 1×, 1,25×, 1,5× e 2×).
+
+**Fonte diferente no Windows 10.** A Segoe UI Variable só existe no Windows 11; no 10, o `ui_kit` usa a
+Segoe UI comum. A Archivo é variável, e o Pillow recebe os eixos na ordem [peso, largura].
+
 **`.ps1` sem BOM estraga os acentos.** O PowerShell 5.1 lê UTF-8 sem BOM como ANSI. O `.editorconfig`
 fixa `utf-8-bom` para `.ps1`.
 
@@ -202,6 +219,7 @@ fixa `utf-8-bom` para `.ps1`.
 | Publicar uma versão | `docs/lancar-versao.md` |
 | Refazer o app no Discord Developer Portal | `docs/app-do-discord.md` |
 | Montar o ambiente, abrir PR | `CONTRIBUTING.md` |
+| O visual: para quem é, cores, fontes, telas aprovadas | `PRODUCT.md` e `.impeccable/surfaces/` |
 
 > **Este arquivo é vivo.** Convenção nova ou armadilha nova entra aqui no mesmo Pull Request que a
 > introduz. Se o código diverge deste documento, um dos dois está errado: descubra qual antes de seguir.

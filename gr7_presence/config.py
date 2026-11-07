@@ -38,6 +38,8 @@ DEFAULTS: dict = {
     "show_backing_track": True,
     "show_stats": True,
     "show_streak": True,
+    # Meta diária de prática, em minutos (0 = sem meta). Aparece nas Estatísticas.
+    "daily_goal_minutes": 30,
     # Detecta o Guitar Rig 7 como plugin VST3 dentro de uma DAW (REAPER, FL Studio, Ableton...).
     "detect_plugin_hosts": True,
     # Uma vez por dia, confere no GitHub se saiu versão nova do GR7 Presence e avisa na bandeja.

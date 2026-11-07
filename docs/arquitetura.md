@@ -55,7 +55,7 @@ A cada 5 segundos, o `app.tick()`:
 
 | Thread | O que roda | Por quê |
 |---|---|---|
-| Principal | `tkinter` oculto, janela de estatísticas | O tkinter exige a thread principal |
+| Principal | `tkinter` oculto, janela principal | O tkinter exige a thread principal |
 | pystray | Ícone e menu da bandeja (`run_detached`) | Tem o próprio laço de mensagens do Windows |
 | `presence` | O loop do `app` | Captura, OCR e Discord não podem travar a interface |
 | `updates` | Uma consulta ao GitHub, e termina | Rede lenta não pode atrasar o loop |
@@ -77,6 +77,24 @@ A cada 5 segundos, o `app.tick()`:
 
 As threads conversam pela fila do `TrayUI`, lida com `root.after` a cada 250 ms. Nenhuma outra
 thread mexe em widget do tkinter.
+
+## A janela principal
+
+Uma janela só (`main_window.py`), com uma barra lateral e uma página para cada assunto. Por enquanto
+existe a página Estatísticas; Painel e Ajustes chegam nas próximas etapas. Cada página tem
+`render(largura, escala, t)` e devolve uma imagem do Pillow com as áreas clicáveis. O Tkinter só mostra
+essa imagem num `Canvas`, rola com a roda do mouse, repassa os cliques e redesenha a cada 10 segundos.
+
+```mermaid
+flowchart LR
+    ST[stats<br/>números] --> PAGE[stats_page<br/>desenha a página]
+    KIT[ui_kit<br/>cores, fontes, peças] --> PAGE
+    PAGE -- imagem + áreas clicáveis --> WIN[main_window<br/>Canvas, rolagem, cliques]
+    TRAY[tray] -- abre --> WIN
+```
+
+As medidas são as dos exemplos aprovados, em pixels lógicos. O `Painter` multiplica pela escala de DPI
+do Windows, e por isso o desenho fica nítido em qualquer escala.
 
 ## Arquivos de dados
 
