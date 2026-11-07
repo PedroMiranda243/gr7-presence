@@ -204,12 +204,14 @@ class LivePresetReader:
         self.ocr = ocr or Ocr()
         self._last_pick: str | None = None
         self._anchor: tuple[int, int] | None = None   # onde o nome do preset apareceu da última vez
+        self.minimized = False                         # a janela estava minimizada na última leitura
 
     def read(self, pid: int) -> LiveReading | None:
         """O que aparece agora no Guitar Rig, ou None se não deu para ler (ex.: minimizado)."""
+        hwnd = main_window(pid)
+        self.minimized = bool(hwnd and user32.IsIconic(hwnd))
         if not self.ocr.available:
             return None
-        hwnd = main_window(pid)
         image = capture(hwnd) if hwnd else None
         if image is None:
             return None

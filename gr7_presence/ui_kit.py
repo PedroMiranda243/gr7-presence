@@ -123,6 +123,8 @@ def _runs(text: str) -> list[tuple[str, bool]]:
     """Separa o texto em trechos de letras e de emoji: o emoji sai colorido, da Segoe UI Emoji."""
     runs: list[tuple[str, bool]] = []
     for ch in text:
+        if ch == "\uFE0F":   # seletor de variação: sem o Raqm, o Pillow desenha um espaço vazio no lugar
+            continue
         emoji = _is_emoji(ch)
         if runs and runs[-1][1] == emoji:
             runs[-1] = (runs[-1][0] + ch, emoji)
@@ -207,6 +209,7 @@ ICONS: dict[str, list[tuple]] = {
     "target": [("circle", 12, 12, 9), ("circle", 12, 12, 5), ("circle", 12, 12, 1.2)],
     "check": [("path", "M5 12.5 9.8 17.3 19 7.5")],
     "pause": [("path", "M8 5v14M16 5v14")],
+    "play": [("path", "M8 5v14l11-7Z")],
     # o amplificador da prévia do cartão (o desenho do exemplo, de 40 para 24)
     "amp": [("path", "M9.6 5.4V3.9h4.8v1.5"), ("rect", 3, 5.4, 18, 13.8, 1.8), ("path", "M3 9h18"),
             ("circle", 6, 7.2, 0.25), ("circle", 8.4, 7.2, 0.25), ("circle", 10.8, 7.2, 0.25)],
@@ -419,6 +422,50 @@ class Painter:
             cx += (ef or f).getlength(run)
         return width
 
+    def baseline_text(self, x: float, baseline: float, text: str, style: Style, color: str | None = None) -> float:
+        """Texto apoiado numa linha de base (números grandes ao lado de texto pequeno)."""
+        f = font(style, self.s)
+        self.draw.text((round(x * self.s), round(baseline * self.s)), text, font=f, fill=color or style.color, anchor="ls")
+        return self.measure(text, style)
+
+    def ascent(self, style: Style) -> float:
+        return font(style, self.s).getmetrics()[0] / self.s
+
+    def balanced(self, text: str, style: Style, max_w: float) -> list[str]:
+        """Quebra em linhas de tamanho parecido (como o text-wrap: balance do CSS) para títulos."""
+        lines = self.wrap(text, style, max_w)
+        if len(lines) != 2:
+            return lines
+        words = text.split()
+        best = lines
+        best_w = max(self.measure(line, style) for line in lines)
+        for i in range(1, len(words)):
+            a, b = " ".join(words[:i]), " ".join(words[i:])
+            wa, wb = self.measure(a, style), self.measure(b, style)
+            if max(wa, wb) <= max_w and max(wa, wb) < best_w:
+                best, best_w = [a, b], max(wa, wb)
+        return best
+
+    def dashed_rrect(self, x: float, y: float, w: float, h: float, r: float, color: str, width: float = 1.5,
+                     dash: float = 6, gap: float = 4) -> None:
+        """Contorno tracejado de cantos redondos (o cartão vazio do Painel)."""
+        X, Y, W, H, R = self.px(x), self.px(y), self.px(x + w) - self.px(x), self.px(y + h) - self.px(y), self.px(r)
+        b = max(1, self.px(width))
+        outer = rounded_mask(W, H, R)
+        inner = Image.new("L", (W, H), 0)
+        inner.paste(rounded_mask(W - 2 * b, H - 2 * b, max(0, R - b)), (b, b))
+        ring = ImageChops.subtract(outer, inner)
+        dashes = Image.new("L", (W, H), 0)
+        d = ImageDraw.Draw(dashes)
+        on, period = self.px(dash), self.px(dash + gap)
+        for k in range(R, W - R, period):
+            d.rectangle((k, 0, min(k + on, W - R) - 1, H), fill=255)
+        for k in range(R, H - R, period):
+            d.rectangle((0, k, W, min(k + on, H - R) - 1), fill=255)
+        for cx, cy in ((0, 0), (W - R, 0), (0, H - R), (W - R, H - R)):
+            d.rectangle((cx, cy, cx + R - 1, cy + R - 1), fill=255)
+        self.img.paste(color, (X, Y), ImageChops.multiply(ring, dashes))
+
     def label(self, x: float, cy: float, text: str, style: Style, anchor: str = "l", color: str | None = None) -> float:
         """Uma linha curta centrada na altura `cy` (rótulos de gráfico)."""
         f = font(style, self.s)
@@ -434,17 +481,19 @@ class Painter:
         return text.rstrip() + "…"
 
     def wrap(self, text: str, style: Style, max_w: float) -> list[str]:
+        """Quebra em linhas que cabem em `max_w`; um \n no texto força a quebra."""
         lines: list[str] = []
-        line = ""
-        for word in text.split():
-            trial = f"{line} {word}".strip()
-            if line and self.measure(trial, style) > max_w:
+        for part in text.split("\n"):
+            line = ""
+            for word in part.split():
+                trial = f"{line} {word}".strip()
+                if line and self.measure(trial, style) > max_w:
+                    lines.append(line)
+                    line = word
+                else:
+                    line = trial
+            if line:
                 lines.append(line)
-                line = word
-            else:
-                line = trial
-        if line:
-            lines.append(line)
         return lines
 
     def paragraph(self, x: float, top: float, text: str, style: Style, max_w: float) -> float:

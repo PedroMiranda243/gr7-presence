@@ -215,7 +215,7 @@ class MainWindow:
         self.win.bind("<MouseWheel>", self._wheel)
         self._jobs["title"] = self.win.after_idle(lambda: dark_title_bar(self.win))
         self._layout_side()
-        self._jobs["refresh"] = self.win.after(REFRESH_MS, self._refresh)
+        self._jobs["refresh"] = self.win.after(self._refresh_ms(), self._refresh)
         self.focus()
 
     # ---- abrir, trocar de página, fechar ----------------------------------------------------
@@ -440,7 +440,11 @@ class MainWindow:
             self.render_page()
             self.render_side()
             self.render_rail()
-        self._jobs["refresh"] = self.win.after(REFRESH_MS, self._refresh)
+        self._jobs["refresh"] = self.win.after(self._refresh_ms(), self._refresh)
+
+    def _refresh_ms(self) -> int:
+        """O Painel conta os segundos do cartão; as outras páginas mudam devagar."""
+        return getattr(self.page, "refresh_ms", REFRESH_MS)
 
     def _wheel(self, event) -> None:
         self.view.yview_scroll(int(-event.delta / 120 * WHEEL_STEP * self.scale), "units")

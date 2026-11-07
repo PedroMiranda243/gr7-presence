@@ -1,12 +1,13 @@
 import copy
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 from gr7_presence.app import PresenceApp
 from gr7_presence.config import DEFAULTS
 from gr7_presence.detector import Target
-from gr7_presence.gr7_state import PresetReader
+from gr7_presence.gr7_state import PresetInfo, PresetReader
 from gr7_presence.live import LiveReading
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
@@ -15,6 +16,9 @@ from gr7_presence.stats import Stats
 class FakeConfig(dict):
     def __getitem__(self, key):
         return self.get(key, DEFAULTS.get(key))
+
+    def reload_if_changed(self):
+        return False
 
 
 class LiveStateTest(unittest.TestCase):
@@ -146,6 +150,80 @@ class GoalNoteTest(unittest.TestCase):
         self.play(800)
         self.app._check_goal(self.today)
         self.assertEqual(self.notes, [])
+
+class FakeIpc:
+    connected = True
+
+    def __init__(self):
+        self.sent = []
+
+    def poll(self):
+        pass
+
+    def set_activity(self, activity):
+        self.sent.append(activity)
+        return {"data": {"assets": activity.get("assets")}}
+
+    def clear_activity(self):
+        self.sent.append(None)
+
+
+class DashboardStateTest(unittest.TestCase):
+    """O que o loop guarda para o Painel: o cartão no perfil, a tela minimizada e a pausa de 1 hora."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        self.app = PresenceApp(FakeConfig(copy.deepcopy(DEFAULTS)), Stats(base / "stats.json"),
+                               PresetReader(base / "nao-existe.tle"), PresetLibrary(base, extra_dirs=[]),
+                               live_state_path=base / "live_state.json")
+        self.notes = []
+        self.app.on_note = lambda title, body: self.notes.append((title, body))
+        self.target = Target("standalone", 999_999_999, 1_792_985_871.2)
+
+    def test_showing_follows_what_was_sent(self):
+        self.app.ipc = FakeIpc()
+        preset = PresetInfo(name="Clean Cristalino", amp="Jump", chain=["Jump"])
+        self.app._update_discord(self.target, preset, [], None)
+        self.assertEqual(self.app.showing["activity"]["details"], "🎸 Clean Cristalino")
+        self.assertEqual(self.app.showing["index"], 0)
+        self.assertGreaterEqual(self.app.showing["count"], 1)
+        self.app._clear()
+        self.assertIsNone(self.app.showing)
+
+    def test_minimized_notice_once_per_guitar_rig_run(self):
+        preset = PresetInfo(name="Clean Cristalino")
+        self.app.live.minimized = True
+        self.app._check_minimized(self.target, preset)
+        self.app._check_minimized(self.target, preset)
+        self.assertEqual(self.app.screen, "minimized")
+        self.assertEqual(len(self.notes), 1)
+        self.assertEqual(self.notes[0][0], "Guitar Rig minimizado")
+        self.assertIn("Clean Cristalino", self.notes[0][1])
+        self.app.live.minimized = False
+        self.app._check_minimized(self.target, preset)
+        self.assertIn(self.app.screen, ("reading", "no_ocr"))
+        other = Target("standalone", 123, 1_792_999_999.0)       # o Guitar Rig foi aberto de novo
+        self.app.live.minimized = True
+        self.app._check_minimized(other, preset)
+        self.assertEqual(len(self.notes), 2)
+
+    def test_minimized_notice_can_be_turned_off(self):
+        self.app.config["notify_minimized"] = False
+        self.app.live.minimized = True
+        self.app._check_minimized(self.target, None)
+        self.assertEqual(self.notes, [])
+        self.assertEqual(self.app.screen, "minimized")
+
+    def test_pause_for_an_hour_ends_by_itself(self):
+        self.app.set_paused(True, 3600)
+        self.assertTrue(self.app.paused)
+        self.app.pause_until = 1.0                    # a hora já passou
+        with mock.patch.object(self.app.detector, "find", return_value=None):
+            self.app.tick()
+        self.assertFalse(self.app.paused)
+        self.assertIsNone(self.app.pause_until)
 
 if __name__ == "__main__":
     unittest.main()

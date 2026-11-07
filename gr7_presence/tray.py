@@ -17,6 +17,7 @@ import pystray
 from . import __version__, app_icon, autostart, updates
 from .config import DATA_DIR
 from .i18n import Translator
+from .dashboard_page import DashboardPage
 from .main_window import MainWindow
 from .settings_page import SettingsPage
 from .stats_page import StatsPage
@@ -136,7 +137,8 @@ class TrayUI:
         if self._main_window and self._main_window.alive:
             self._main_window.show(page)
             return
-        pages = [StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"]),
+        pages = [DashboardPage(self.app),
+                 StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"]),
                  SettingsPage(self.app.config, self.app.stats, self.app.library, lambda: self.app.last_state)]
         available = lambda: self.app.updates.available.version if self.app.updates.available else None
         # O idioma vem direto do config: mudar nos Ajustes troca a janela na hora, sem esperar o loop.

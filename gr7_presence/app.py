@@ -57,6 +57,12 @@ class PresenceApp:
         self.last_state: tuple | None = None
         self._goal_day: date | None = None
         self._goal_before = 0.0
+        # Para o Painel: o cartão que está no perfil agora (atividade, posição, total, quando foi) e o
+        # estado da leitura da tela: "reading", "minimized", "no_ocr" ou None (sem Guitar Rig ou plugin).
+        self.showing: dict | None = None
+        self.screen: str | None = None
+        self.pause_until: float | None = None
+        self._minimized_noted: tuple | None = None
 
         self._stop = threading.Event()
         self._target: Target | None = None
@@ -93,13 +99,21 @@ class PresenceApp:
             self.ipc.close()
         log.info("GR7 Presence encerrado")
 
-    def set_paused(self, paused: bool) -> None:
+    def set_paused(self, paused: bool, seconds: float | None = None) -> None:
+        """Pausa (até a pessoa voltar, ou por `seconds`) ou retoma a presença."""
         self.paused = paused
+        self.pause_until = time.time() + seconds if paused and seconds else None
         self._last_activity = None
-        log.info("Presença %s", "pausada" if paused else "retomada")
+        log.info("Presença %s%s", "pausada" if paused else "retomada", f" por {seconds:.0f} s" if paused and seconds else "")
+
+    @property
+    def discord_connected(self) -> bool:
+        return bool(self.ipc and self.ipc.connected)
 
     # ---- um passo do loop ----------------------------------------------------------------
     def tick(self) -> None:
+        if self.paused and self.pause_until and time.time() >= self.pause_until:
+            self.set_paused(False)   # acabou a pausa de 1 hora
         if self.config.reload_if_changed():
             self.t = Translator(self.config["language"])
             self.detector.detect_plugins = bool(self.config["detect_plugin_hosts"])
@@ -126,6 +140,7 @@ class PresenceApp:
 
         if not target:
             self.last_state = None
+            self.screen = None
             self._set_status(self.t("tray_waiting"), False)
             self._keepalive()
             return
@@ -138,6 +153,7 @@ class PresenceApp:
         self.stats.save_if_due()
         self.last_state = (preset, target, tracks, rack_state)
         self._check_goal()
+        self._check_minimized(target, preset)
 
         if self.paused:
             self._clear()
@@ -147,6 +163,7 @@ class PresenceApp:
             self._set_status(self.t("tray_no_client"), False)
             return
         if not self._ensure_connected():
+            self.showing = None   # o Discord está fechado: nada no perfil
             return
 
         self._update_discord(target, preset, tracks, rack_state)
@@ -177,6 +194,29 @@ class PresenceApp:
             self.on_note(self.t("goal_note_title"), body)
         except Exception:
             log.exception("Falha ao avisar da meta")
+
+    def _check_minimized(self, target: Target, preset: PresetInfo | None) -> None:
+        """Estado da leitura da tela para o Painel e, uma vez por abertura do Guitar Rig, o aviso de
+        que ele foi minimizado: minimizado, ele não desenha a janela e o perfil para no último preset."""
+        if target.kind != "standalone":
+            self.screen = None
+            return
+        if self.live.minimized:
+            self.screen = "minimized"
+        else:
+            self.screen = "reading" if self.live.ocr.available else "no_ocr"
+        run = (target.pid, target.started_at)
+        if self.screen != "minimized" or self._minimized_noted == run:
+            return
+        self._minimized_noted = run
+        if not (self.config["notify_minimized"] and self.on_note):
+            return
+        name = preset.name if preset and preset.name else None
+        body = self.t("min_note_body", name=name) if name else self.t("min_note_body_noname")
+        try:
+            self.on_note(self.t("min_note_title"), body)
+        except Exception:
+            log.exception("Falha ao avisar que o Guitar Rig foi minimizado")
 
     def _update_found(self, release: Release) -> None:
         if self.on_update:
@@ -290,8 +330,11 @@ class PresenceApp:
         version = self._version(target.exe or DEFAULT_EXE)
         activity = build_activity(card, target, self.config, self.t, edition, version, self.assets.resolve)
 
+        showing = {"activity": activity, "index": self._card_index % len(cards), "count": len(cards), "sent_at": now,
+                   "rotate": rotate}
         if activity == self._last_activity:
             self._last_sent = now
+            self.showing = showing
             return
         try:
             response = self.ipc.set_activity(activity)
@@ -302,10 +345,12 @@ class PresenceApp:
         except DiscordError as exc:
             log.warning("Falha ao atualizar o Discord: %s", exc)
             self._set_status(self.t("tray_no_discord"), False)
+            self.showing = None
             return
         log.debug("Cartão %s: %s | %s", card.key, activity.get("details"), activity.get("state"))
         self._last_activity = activity
         self._last_sent = now
+        self.showing = showing | {"activity": activity}
         if rack_state:
             shown = self.t("rack_empty" if rack_state == "empty" else "scratch")
         else:
@@ -316,6 +361,7 @@ class PresenceApp:
         if self._last_activity is not None and self.ipc:
             self.ipc.clear_activity()
         self._last_activity = None
+        self.showing = None
 
     def _keepalive(self) -> None:
         """Sem GR7 aberto, só responde PINGs; a conexão fica pronta para a próxima sessão."""
