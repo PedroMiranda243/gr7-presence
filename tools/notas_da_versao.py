@@ -24,14 +24,17 @@ def package_version() -> str:
     return m[1]
 
 
-def release_notes(version: str) -> str:
-    changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+def release_notes(version: str, changelog: str | None = None) -> str:
+    if changelog is None:
+        changelog = (ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
     m = re.search(rf"^## \[{re.escape(version)}\][^\n]*\n(.*?)(?=^## \[|^\[[^\]]+\]: |\Z)", changelog, re.M | re.S)
     if not m or not m[1].strip():
         sys.exit(f"O CHANGELOG.md não tem a seção '## [{version}]' com o que mudou.")
     # Na página da release, cada quebra de linha vira quebra de verdade: junta as linhas de
-    # continuação dos itens (recuadas), que no CHANGELOG só existem para caber em 100 colunas.
-    return re.sub(r"\n[ ]{2,}(?=\S)", " ", m[1].strip()) + "\n"
+    # continuação dos itens (recuadas), que no CHANGELOG só existem para caber em 100 colunas. Uma
+    # linha recuada que começa com "- " é um subitem, não continuação: fica na linha dela, com o
+    # recuo, para virar sublista (antes saía emendada no item de cima, com tracinhos no meio).
+    return re.sub(r"\n[ ]{2,}(?![-*+] |\d+\. )(?=\S)", " ", m[1].strip()) + "\n"
 
 
 def main() -> None:
