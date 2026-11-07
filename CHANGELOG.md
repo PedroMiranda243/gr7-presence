@@ -9,6 +9,10 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Correções
+- **Os títulos e os números grandes voltam à fonte Archivo**, a dos exemplos aprovados. O zip da 1.4.0
+  saiu sem a fonte, e a janela usava a Segoe UI no lugar.
+
 ## [1.4.0] - 2026-11-07
 
 ### Como atualizar

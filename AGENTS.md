@@ -219,6 +219,12 @@ quando o `config.json` muda no disco. A janela grava com `Config.update`, que fo
 **Fonte diferente no Windows 10.** A Segoe UI Variable só existe no Windows 11; no 10, o `ui_kit` usa a
 Segoe UI comum. A Archivo é variável, e o Pillow recebe os eixos na ordem [peso, largura].
 
+**Arquivo novo em `assets/` que não chega a quem atualiza.** O zip só leva o que está na `INCLUDE` do
+`tools/empacotar.py`. A 1.4.0 saiu sem a fonte Archivo: no repositório e nos testes ela existia, e a
+janela de quem atualizou usava a Segoe UI. O `tests/test_empacotar.py` confere que todo arquivo
+versionado em `assets/` vai para o zip; arquivo novo fora de `assets/` que o programa lê também precisa
+entrar na lista.
+
 **`.ps1` sem BOM estraga os acentos.** O PowerShell 5.1 lê UTF-8 sem BOM como ANSI. O `.editorconfig`
 fixa `utf-8-bom` para `.ps1`.
 
