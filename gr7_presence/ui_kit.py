@@ -167,6 +167,18 @@ def rounded_mask(w: int, h: int, r: int) -> Image.Image:
     return m
 
 
+def ring_image(w: int, h: int, r: int, color: str, width: int) -> Image.Image:
+    """Contorno de cantos redondos, suavizado, sobre fundo transparente (RGBA): o foco do teclado."""
+    w, h = max(2, w), max(2, h)
+    r = int(min(r, w // 2, h // 2))
+    outer = rounded_mask(w, h, r)
+    inner = Image.new("L", (w, h), 0)
+    inner.paste(rounded_mask(max(1, w - 2 * width), max(1, h - 2 * width), max(0, r - width)), (width, width))
+    out = Image.new("RGBA", (w, h), color)
+    out.putalpha(ImageChops.subtract(outer, inner))
+    return out
+
+
 def _rgb(color: str) -> tuple[int, int, int]:
     color = color.lstrip("#")
     return int(color[0:2], 16), int(color[2:4], 16), int(color[4:6], 16)

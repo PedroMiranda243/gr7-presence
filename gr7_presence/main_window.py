@@ -637,12 +637,12 @@ class MainWindow:
             return
         canvas = {"rail": self.rail, "side": self.side}.get(self._kb[0], self.view)
         s = self.scale
-        x0, y0, x1, y1 = (region.x0 - 3) * s, (region.y0 - 3) * s, (region.x1 + 3) * s, (region.y1 + 3) * s
-        r = min((region.radius + 3) * s, (x1 - x0) / 2, (y1 - y0) / 2)
-        # Cantos redondos como os do controle: polígono suavizado (o Canvas não tem retângulo redondo).
-        points = [x0 + r, y0, x1 - r, y0, x1, y0, x1, y0 + r, x1, y1 - r, x1, y1, x1 - r, y1, x0 + r, y1,
-                  x0, y1, x0, y1 - r, x0, y0 + r, x0, y0]
-        canvas.create_polygon(points, smooth=True, outline=K.AMBER, fill="", width=max(2, round(2 * s)), tags="kbring")
+        x0, y0 = round((region.x0 - 3) * s), round((region.y0 - 3) * s)
+        x1, y1 = round((region.x1 + 3) * s), round((region.y1 + 3) * s)
+        # Desenhado pelo Pillow, suave como o resto da janela, com os cantos do controle + 3.
+        ring = K.ring_image(x1 - x0, y1 - y0, round((region.radius + 3) * s), K.AMBER, max(2, round(2 * s)))
+        self._photos["ring"] = ImageTk.PhotoImage(ring)
+        canvas.create_image(x0, y0, anchor="nw", image=self._photos["ring"], tags="kbring")
 
     def _activate(self, _event=None) -> str:
         region = self._region_of(self._kb)
