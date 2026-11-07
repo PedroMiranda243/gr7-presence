@@ -113,7 +113,7 @@ class StatsPage:
                       else t("fact_no_streak_sub"))
         n = d["week_sessions"]
         week_sub = t("fact_week_sub", n=n) if n > 1 else t("fact_week_sub_one") if n == 1 else t("fact_week_sub_none")
-        return [streak, (format_time(s.week, long=True), week_sub), (format_time(s.total), t("fact_total_sub"))]
+        return [streak, (format_time(s.week, long=True), week_sub), (f"{int(s.total // 3600)} h" if s.total >= 3600 else format_time(s.total), t("fact_total_sub"))]
 
     # ---- desenho -----------------------------------------------------------------------------
     def render(self, width: float, scale: float, t: Translator) -> K.Rendered:

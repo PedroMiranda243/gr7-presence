@@ -29,7 +29,7 @@ BIG_SUB = K.Style(14, 400, K.MUTED, line=1.0)
 NOTE = K.Style(13, 400, K.MUTED, line=1.45)
 CONN = K.Style(13.5, 400, K.TEXT, line=1.3)
 CONN_R = K.Style(13, 400, K.MUTED, line=1.3)
-CONN_HINT = K.Style(12.5, 400, K.MUTED, line=1.4)
+CONN_HINT = K.Style(13, 400, K.MUTED, line=1.4)   # mesma largura do 12,5 do exemplo
 ROTATION = K.Style(12, 400, K.MUTED, line=1.3)
 EMPTY = K.Style(13, 400, K.MUTED, line=1.45)
 BUTTON = K.Style(13, 600, K.TEXT, line=1.3)
@@ -228,7 +228,7 @@ class DashboardPage:
 
         def open_menu():
             if self.host:
-                self.host.open_menu(bx + bw - 220, y + 34 + 4, 220, options, None, self._pause)
+                self.host.open_menu(bx + bw - 220, y + 34 + 4, 220, options, None, self._pause, above=y - 4)
         regions.append(K.Region(bx, y, bx + bw, y + 34, open_menu, "pause"))
 
     # ---- o cartão, à direita ----

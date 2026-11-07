@@ -28,6 +28,6 @@ FIRST VIEWPORT: trilho à esquerda (Painel, Estatísticas, Ajustes; atualizaçã
 nome do preset enorme à esquerda, pílulas da cadeia, status ao vivo e pausar; prévia do cartão do
 Discord à direita com o rodízio. Abaixo, Meta de hoje e Conexões.
 
-FORM: candidata 1 da lista própria (palco), fixada pelo dono do projeto. seed: 2fff3fc64ee1dba6
+FORM: candidata 1 da lista própria (palco), fixada pelo dono do projeto. seed:2fff3fc64ee1dba6
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance

@@ -41,7 +41,7 @@ GRID = "#1A1D27"
 TEXT = "#F3F1EC"
 TEXT_SOFT = "#C9C4BB"
 MUTED = "#9EA3B0"
-FAINT = "#6F7587"
+FAINT = "#7A8094"         # 4,6:1 sobre os painéis (o mínimo é 4,5:1)
 ICON_OFF = "#8C92A4"
 DIM = "#5A6177"
 GLOW = "#FFF5EA"
@@ -547,6 +547,7 @@ class Region:
     action: object          # função sem argumentos
     key: str = ""
     drag: object = None     # função(x, y) chamada ao clicar e arrastar (o controle deslizante)
+    step: object = None     # função(+1 ou -1) para as setas do teclado (o controle deslizante)
 
     def hit(self, x: float, y: float) -> bool:
         return self.x0 <= x < self.x1 and self.y0 <= y < self.y1

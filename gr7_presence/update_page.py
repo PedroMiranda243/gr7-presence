@@ -116,6 +116,11 @@ class UpdatePage:
         notes_h = 2 + 36 + 18 + 12 + self._notes_height(m, sections, col - 42, t)
         how = [t("upd_how_1"), t("upd_how_2"), t("upd_how_3", current=self.current)]
         how_h = 2 + 36 + 18 + 12 + sum(K.paragraph_height(m, s, NOTE, col - 42) + 10 for s in how) - 10
+        # Os dois cartões têm a mesma altura quando cabem juntos, como no exemplo. Com notas compridas,
+        # "Como funciona" fica do tamanho dele, em vez de um painel vazio comprido.
+        stretch = max(notes_h, how_h) <= 2 * min(notes_h, how_h)
+        notes_box = max(notes_h, how_h) if stretch else notes_h
+        how_box = max(notes_h, how_h) if stretch else how_h
         row_h = max(notes_h, how_h)
         total = PAD_TOP + stage_h + GAP + row_h + PAD_BOTTOM
 
@@ -176,9 +181,9 @@ class UpdatePage:
                 p.rrect(x, ty, fw, 10, 5, K.gradient(p.px(fw), p.px(10), K.AMBER, K.ORANGE, horizontal=True))
         y += stage_h + GAP
 
-        cx, cy, cw = self._panel(p, PAD_X, y, col, row_h, t("upd_notes_title"))
+        cx, cy, cw = self._panel(p, PAD_X, y, col, notes_box, t("upd_notes_title"))
         self._draw_notes(p, cx, cy, cw, sections, t)
-        cx, cy, cw = self._panel(p, PAD_X + col + GAP, y, col, row_h, t("upd_how_title"))
+        cx, cy, cw = self._panel(p, PAD_X + col + GAP, y, col, how_box, t("upd_how_title"))
         for s in how:
             cy += p.paragraph(cx, cy, s, NOTE, cw) + 10
         return K.Rendered(p.img, total, regions)

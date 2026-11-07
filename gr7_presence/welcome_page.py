@@ -23,14 +23,14 @@ from .presence import build_activity, build_cards
 
 log = logging.getLogger(__name__)
 
-SIZE = (720, 600)
+SIZE = (720, 568)   # área de dentro; com a barra de título, os 720 × 600 do exemplo
 DEFAULT_EXE = Path(GUITAR_RIG_EXE)
 DISCORD_PROCESSES = {"discord.exe", "discordptb.exe", "discordcanary.exe"}
 GOALS = [0, 20, 30, 60]
 TITLE = K.Style(38, 800, K.GLOW, display=True, width=125, line=1.0)
 LEAD = K.Style(14, 400, "#D2CCC2", line=1.5)
 CHECK = K.Style(13.5, 600, K.TEXT, line=1.3)
-CHECK_HINT = K.Style(12.5, 400, K.MUTED, line=1.4)
+CHECK_HINT = K.Style(13, 400, K.MUTED, line=1.4)   # mesma largura do 12,5 do exemplo
 LABEL = K.Style(13.5, 600, K.TEXT, line=1.3)
 PREVIEW = K.Style(13, 400, "#D2CCC2", line=1.45)
 FOOT = K.Style(13, 400, K.MUTED, line=1.3)
@@ -59,7 +59,9 @@ class WelcomePage:
     label_key = "nav_dashboard"
 
     def __init__(self, config, stats, on_start: Callable[[], None], autostart=autostart_mod,
-                 checks: Callable[[], tuple[bool, bool, bool]] | None = None):
+                 checks: Callable[[], tuple[bool, bool, bool]] | None = None, library=None):
+        self.library = library
+        self._loaded: dict = {}
         self.config = config
         self.stats = stats
         self.on_start = on_start
@@ -67,7 +69,7 @@ class WelcomePage:
         self.checks = checks or (lambda: (discord_running(), DEFAULT_EXE.exists(), ocr_installed()))
         self.on_change: Callable[[], None] = lambda: None
         self.host = None
-        self.view_height = SIZE[1] - 32
+        self.view_height = SIZE[1]
         self._autostart_wanted: bool | None = None
         self._checked = None
 
@@ -108,13 +110,22 @@ class WelcomePage:
         recent = self.stats.summary(top=1, recent=1).recent
         last = recent[0] if recent else {}
         name, amp = last.get("last_preset"), last.get("last_amp")
-        preset = (PresetInfo(name=name, amp=amp, chain=[amp] if amp else []) if name else
+        if name and self.library is not None and name not in self._loaded:
+            self._loaded[name] = None   # lê o preset (amp e cadeia) numa thread; a janela redesenha sozinha
+
+            def load():
+                try:
+                    self._loaded[name] = self.library.load(name)
+                except Exception:
+                    log.debug("Sem o preset %s para a prévia", name, exc_info=True)
+            threading.Thread(target=load, name="previa", daemon=True).start()
+        preset = (self._loaded.get(name) or PresetInfo(name=name, amp=amp, chain=[amp] if amp else []) if name else
                   PresetInfo(name=t("sample_preset"), amp="Jump", chain=["Noise Gate", "Jump", "Matched Cabinet Pro"],
                              genres=["Rock"]))
         target = Target("standalone", 0, time.time() - 1)
         card = build_cards(preset, target, None, self.config, t)[0]
         activity = build_activity(card, target, self.config, t, None, None)
-        return ["Guitar Rig 7", activity.get("details", ""), activity.get("state", ""), t("elapsed", t="00:01")]
+        return ["Guitar Rig 7", activity.get("details", ""), activity.get("state", ""), t("elapsed_one", t="00:01")]
 
     def render(self, width: float, scale: float, t: Translator) -> K.Rendered:
         if self._checked is None:   # uma vez por abertura da janela: procurar processos custa um pouco

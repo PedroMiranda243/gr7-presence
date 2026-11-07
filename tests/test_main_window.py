@@ -82,5 +82,35 @@ class TrayOpensMainWindowTest(unittest.TestCase):
         first.close()
 
 
+class KeyboardTest(unittest.TestCase):
+    """Tab anda pelos controles desenhados, Enter aciona, e o contorno âmbar mostra onde está o foco."""
+
+    def test_tab_enter_and_ring(self):
+        root = tk.Tk()
+        root.withdraw()
+        self.addCleanup(root.destroy)
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        page = StatsPage(Stats(Path(tmp.name) / "s.json"), lambda: 30)
+        win = MainWindow(root, [page], lambda: Translator("pt"), lambda: None)
+        self.addCleanup(lambda: win.alive and win.close())
+        root.update()
+        win.render_page()
+        win.render_rail()
+        targets = win._targets()
+        self.assertEqual(targets, [("rail", "stats"), ("page", "days"), ("page", "weeks"), ("page", "all")])
+        win._tab(1)
+        win._tab(1)
+        win._tab(1)
+        self.assertEqual(win._kb, ("page", "weeks"))
+        self.assertTrue(win.view.find_withtag("kbring"))
+        win._activate()
+        self.assertEqual(page.period, "weeks")
+        win._tab(-1)
+        self.assertEqual(win._kb, ("page", "days"))
+        win._view_press(mock.Mock(x=-100, y=-100))   # o mouse tira o contorno
+        self.assertFalse(win.view.find_withtag("kbring"))
+
+
 if __name__ == "__main__":
     unittest.main()

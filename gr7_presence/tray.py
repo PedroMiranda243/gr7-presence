@@ -165,7 +165,7 @@ class TrayUI:
                 self._welcome.on_close = None
                 self._welcome.close()
 
-        page = WelcomePage(self.app.config, self.app.stats, on_start=done)
+        page = WelcomePage(self.app.config, self.app.stats, on_start=done, library=self.app.library)
         self._welcome = MainWindow(self.root, [page], lambda: Translator(self.app.config["language"]), lambda: None,
                                    size=WELCOME_SIZE, min_size=WELCOME_SIZE, rail=False, on_close=done)
         self._welcome.win.resizable(False, False)
