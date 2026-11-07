@@ -38,6 +38,9 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 - **Primeira abertura:** na primeira vez, uma janela confere se o Discord, o Guitar Rig e a leitura da
   tela estão prontos, mostra como o perfil vai ficar e pergunta a meta diária e se o programa inicia
   com o Windows. Quem atualiza também vê essa janela, uma vez.
+- **A janela funciona pelo teclado:** Tab e Shift+Tab andam pelos botões e chaves, Enter ou espaço
+  acionam e as setas mexem no tempo de troca do cartão. Um contorno âmbar mostra onde você está.
+
 ## [1.3.1] - 2026-11-03
 
 ### Como atualizar

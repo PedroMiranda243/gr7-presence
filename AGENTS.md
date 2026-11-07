@@ -130,9 +130,9 @@ Lançar uma versão: `docs/lancar-versao.md`. Nunca crie a tag à mão sem segui
   `inspect_gr7.py`). Várias suposições razoáveis deste projeto estavam erradas (seção 7).
 - Leia o diff inteiro antes do commit: quem assina é o dono do repositório.
 - **O visual tem dono.** A direção "Palco" foi escolhida pelo dono do projeto a partir de exemplos, com o
-  pedido de ficar exatamente como neles. Antes de mexer numa tela, leia `PRODUCT.md` e o contrato em
-  `.impeccable/surfaces/`. Tela nova ou mudança de visual se mostra antes (exemplo ou captura) e só
-  depois vira código.
+  pedido de ficar exatamente como neles. Antes de mexer numa tela, leia `PRODUCT.md`, o `DESIGN.md` e
+  o contrato em `.impeccable/surfaces/`. Cor nova entra no `ui_kit.py`, com nome. Tela nova ou mudança
+  de visual se mostra antes (exemplo ou captura) e só depois vira código.
 
 ## 7. Armadilhas conhecidas
 
@@ -231,7 +231,7 @@ fixa `utf-8-bom` para `.ps1`.
 | Publicar uma versão | `docs/lancar-versao.md` |
 | Refazer o app no Discord Developer Portal | `docs/app-do-discord.md` |
 | Montar o ambiente, abrir PR | `CONTRIBUTING.md` |
-| O visual: para quem é, cores, fontes, telas aprovadas | `PRODUCT.md` e `.impeccable/surfaces/` |
+| O visual: para quem é, cores, fontes, peças, telas aprovadas | `PRODUCT.md`, `DESIGN.md` e `.impeccable/surfaces/` |
 
 > **Este arquivo é vivo.** Convenção nova ou armadilha nova entra aqui no mesmo Pull Request que a
 > introduz. Se o código diverge deste documento, um dos dois está errado: descubra qual antes de seguir.
