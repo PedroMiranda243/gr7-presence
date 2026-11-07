@@ -40,6 +40,8 @@ DEFAULTS: dict = {
     "show_streak": True,
     # Meta diária de prática, em minutos (0 = sem meta). Aparece nas Estatísticas.
     "daily_goal_minutes": 30,
+    # Notificação do Windows quando a meta do dia é batida.
+    "notify_goal": True,
     # Detecta o Guitar Rig 7 como plugin VST3 dentro de uma DAW (REAPER, FL Studio, Ableton...).
     "detect_plugin_hosts": True,
     # Uma vez por dia, confere no GitHub se saiu versão nova do GR7 Presence e avisa na bandeja.
@@ -113,6 +115,14 @@ class Config:
     def set(self, key: str, value) -> None:
         self.data[key] = value
         self.save()
+
+    def update(self, key: str, value) -> None:
+        """Muda uma opção pela janela de Ajustes. Grava e faz o loop recarregar o arquivo na próxima
+        volta, como se a pessoa tivesse editado o config.json: assim ele reaplica o idioma, a detecção
+        de DAWs e reenvia o cartão."""
+        self.data[key] = value
+        self.save()
+        self._mtime = None
 
     def reload_if_changed(self) -> bool:
         mtime = self._stat()

@@ -90,5 +90,62 @@ class RackStateTest(unittest.TestCase):
         self.assertEqual(self.app._recall_live(self.target), ("RTM2 Power", True))
 
 
+class GoalNoteTest(unittest.TestCase):
+    """O aviso de meta batida sai uma vez, na virada, e só com o programa aberto."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        base = Path(self.tmp.name)
+        cfg = FakeConfig(copy.deepcopy(DEFAULTS))
+        cfg["daily_goal_minutes"] = 10
+        self.stats = Stats(base / "stats.json")
+        self.app = PresenceApp(cfg, self.stats, PresetReader(base / "nao-existe.tle"), PresetLibrary(base, extra_dirs=[]),
+                               live_state_path=base / "live_state.json")
+        self.notes = []
+        self.app.on_note = lambda title, body: self.notes.append((title, body))
+        self.today = __import__("datetime").date.today()
+
+    def play(self, seconds):
+        start = __import__("time").time()
+        self.stats.start(start, "standalone")
+        self.stats._tick_at = start
+        self.stats.tick("P", "A", now=start + 1)
+        self.stats.current["days"][self.today.isoformat()] = seconds
+
+    def test_notifies_once_when_crossing(self):
+        self.play(500)
+        self.app._check_goal(self.today)       # primeira volta: só marca o ponto de partida
+        self.play(590)
+        self.app._check_goal(self.today)
+        self.assertEqual(self.notes, [])
+        self.play(601)
+        self.app._check_goal(self.today)
+        self.assertEqual(len(self.notes), 1)
+        self.assertEqual(self.notes[0][0], "Meta de hoje batida")
+        self.assertIn("10 min", self.notes[0][1])
+        self.play(900)
+        self.app._check_goal(self.today)
+        self.assertEqual(len(self.notes), 1)   # uma vez por dia
+
+    def test_opening_above_the_goal_does_not_notify(self):
+        self.play(1200)
+        self.app._check_goal(self.today)
+        self.play(1300)
+        self.app._check_goal(self.today)
+        self.assertEqual(self.notes, [])
+
+    def test_switch_off_and_no_goal(self):
+        self.app.config["notify_goal"] = False
+        self.play(500)
+        self.app._check_goal(self.today)
+        self.play(700)
+        self.app._check_goal(self.today)
+        self.app.config["notify_goal"] = True
+        self.app.config["daily_goal_minutes"] = 0
+        self.play(800)
+        self.app._check_goal(self.today)
+        self.assertEqual(self.notes, [])
+
 if __name__ == "__main__":
     unittest.main()

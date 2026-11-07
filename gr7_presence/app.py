@@ -7,6 +7,7 @@ import os
 import threading
 import time
 from dataclasses import replace
+from datetime import date
 from pathlib import Path
 from typing import Callable
 
@@ -15,7 +16,7 @@ from .assets import AssetResolver
 from .detector import Detector, Target, file_version
 from .discord_ipc import DiscordError, DiscordIPC
 from .gr7_state import PresetInfo, PresetReader
-from .i18n import Translator
+from .i18n import Translator, format_time
 from .live import LivePresetReader, loaded_tracks
 from .preset_library import PresetLibrary
 from .presence import build_activity, build_cards
@@ -50,6 +51,12 @@ class PresenceApp:
         self.status_text = self.t("tray_waiting")
         self.active = False
         self.on_status: Callable[[str, bool], None] | None = None
+        self.on_note: Callable[[str, str], None] | None = None    # notificação do Windows (título, texto)
+        # O que o loop viu na última volta (preset, alvo, faixas, estado do rack), para a prévia dos
+        # Ajustes mostrar o cartão de verdade. None com o Guitar Rig fechado.
+        self.last_state: tuple | None = None
+        self._goal_day: date | None = None
+        self._goal_before = 0.0
 
         self._stop = threading.Event()
         self._target: Target | None = None
@@ -118,6 +125,7 @@ class PresenceApp:
             self._rack_empty = self._cleared
 
         if not target:
+            self.last_state = None
             self._set_status(self.t("tray_waiting"), False)
             self._keepalive()
             return
@@ -128,6 +136,8 @@ class PresenceApp:
         else:
             self.stats.tick(preset.name if preset else None, preset.amp if preset else None)
         self.stats.save_if_due()
+        self.last_state = (preset, target, tracks, rack_state)
+        self._check_goal()
 
         if self.paused:
             self._clear()
@@ -145,6 +155,28 @@ class PresenceApp:
     def _check_updates(self) -> None:
         if self.config["check_updates"] and self.updates.due():
             self.updates.check_in_background(self._update_found)
+
+    def _check_goal(self, today: date | None = None) -> None:
+        """Avisa uma vez quando o tempo de hoje passa da meta. Só conta a virada que acontece com o
+        programa aberto: abrir o programa já acima da meta não avisa de novo."""
+        try:
+            goal = int(self.config["daily_goal_minutes"] or 0) * 60
+        except (TypeError, ValueError):
+            goal = 0
+        today = today or date.today()
+        seconds = self.stats.seconds_on(today)
+        crossed = self._goal_day == today and self._goal_before < goal <= seconds
+        self._goal_day, self._goal_before = today, seconds
+        if not (crossed and goal and self.config["notify_goal"] and self.on_note):
+            return
+        body = self.t("goal_note_body", t=format_time(goal))
+        streak = self.stats.summary(today=today).streak
+        if streak >= 1:
+            body += " " + self.t("goal_note_streak", n=streak + 1)
+        try:
+            self.on_note(self.t("goal_note_title"), body)
+        except Exception:
+            log.exception("Falha ao avisar da meta")
 
     def _update_found(self, release: Release) -> None:
         if self.on_update:

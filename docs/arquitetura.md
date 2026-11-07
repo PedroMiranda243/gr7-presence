@@ -81,7 +81,7 @@ thread mexe em widget do tkinter.
 ## A janela principal
 
 Uma janela só (`main_window.py`), com uma barra lateral e uma página para cada assunto. Por enquanto
-existe a página Estatísticas; Painel e Ajustes chegam nas próximas etapas. Cada página tem
+existem as páginas Estatísticas e Ajustes; o Painel chega na próxima etapa. Cada página tem
 `render(largura, escala, t)` e devolve uma imagem do Pillow com as áreas clicáveis. O Tkinter só mostra
 essa imagem num `Canvas`, rola com a roda do mouse, repassa os cliques e redesenha a cada 10 segundos.
 
@@ -95,6 +95,14 @@ flowchart LR
 
 As medidas são as dos exemplos aprovados, em pixels lógicos. O `Painter` multiplica pela escala de DPI
 do Windows, e por isso o desenho fica nítido em qualquer escala.
+
+O que não dá para desenhar fica com o Tkinter: os campos de texto são `tk.Entry` postos por cima do
+desenho do campo (a página devolve onde ficam), a lista de opções é uma janelinha sem borda, e o
+controle deslizante usa o arrastar do mouse. A página de Ajustes tem ainda um painel fixo à direita (a
+prévia), que não rola junto com o formulário.
+
+As opções mudadas na janela são gravadas com `Config.update`, que faz o loop recarregar o arquivo na
+volta seguinte (idioma, detecção de DAWs, reenvio do cartão), sem reiniciar.
 
 ## Arquivos de dados
 

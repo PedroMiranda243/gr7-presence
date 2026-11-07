@@ -63,6 +63,14 @@ class StatsTest(unittest.TestCase):
         self.assertEqual(summary.top_presets[0], ("P0", 1800))
         self.assertEqual(summary.top_amps[0][0], "Van 51")
 
+    def test_seconds_on_a_day(self):
+        s = Stats(self.path)
+        today = date.today()
+        self.play(s, ts(today), 600)
+        self.play(s, ts(today - timedelta(days=1)), 300)
+        s.sessions.append({"start": ts(today), "seconds": 120})   # sessão antiga, sem o "days"
+        self.assertAlmostEqual(s.seconds_on(today), 720)
+
     def test_current_session_counts_live(self):
         s = Stats(self.path)
         start = ts(date.today())

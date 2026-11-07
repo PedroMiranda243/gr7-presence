@@ -76,6 +76,7 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `stats.py` | Sessões de prática e os números das estatísticas (barras, conquistas) | Desenhar |
 | `main_window.py` | A janela principal: barra lateral, rolagem, cliques, barra de título escura | Desenhar o conteúdo das páginas |
 | `stats_page.py` | A página Estatísticas, desenhada numa imagem | Calcular os números (`stats.py`) |
+| `settings_page.py` | A página Ajustes: as opções do `config.json` e a prévia do cartão | Montar o cartão (usa `presence.py`) |
 | `ui_kit.py` | Cores, fontes e peças da direção "Palco", desenhadas com o Pillow | Usar o Tkinter |
 | `tray.py` | Ícone, menu, notificações | Lógica de presença |
 | `app_icon.py` | O ícone do programa (o pedal de `tools/icone_pedal.py`) e o AppUserModelID da barra de tarefas | Usar arte da Native Instruments |
@@ -203,6 +204,15 @@ na release 1.0.0. Nos testes, avance a data com `os.utime` em vez de contar com 
 as medidas do `ui_kit` são lógicas (as dos exemplos, numa janela de 960 × 640) e o `Painter` multiplica
 pela escala do Windows. Não desenhe com tamanhos fixos em pixels de tela, e confira em mais de uma
 escala (`tests/test_stats_page.py` desenha em 1×, 1,25×, 1,5× e 2×).
+
+**A prévia dos Ajustes mostra uma coisa e o Discord outra.** A prévia monta os cartões com as mesmas
+funções que mandam a atividade (`build_cards` e `build_activity`); não escreva uma segunda versão das
+regras só para a tela. Um botão com link inválido, por exemplo, some da prévia porque o
+`build_activity` o descarta.
+
+**Opção mudada na janela e o loop não percebe.** O loop só reaplica idioma, DAWs e o reenvio do cartão
+quando o `config.json` muda no disco. A janela grava com `Config.update`, que força essa recarga; o
+`Config.set` não força.
 
 **Fonte diferente no Windows 10.** A Segoe UI Variable só existe no Windows 11; no 10, o `ui_kit` usa a
 Segoe UI comum. A Archivo é variável, e o Pillow recebe os eixos na ordem [peso, largura].

@@ -13,7 +13,7 @@ import functools
 import logging
 import os
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 ASSETS = Path(__file__).resolve().parent.parent / "assets"
 ARCHIVO = ASSETS / "fonts" / "Archivo.ttf"
 WIN_FONTS = Path(os.environ.get("WINDIR", r"C:\Windows")) / "Fonts"
+EMOJI_FONT = WIN_FONTS / "seguiemj.ttf"
 
 # ---- cores ---------------------------------------------------------------------------------------
 BG = "#0B0C10"            # o palco
@@ -50,6 +51,16 @@ RED = "#E0141C"
 GREEN = "#3DDC97"
 CAL_RAMP = ("#1A1D27", "#4A2620", "#8F3A22", "#E0602B", "#FFB347")
 SCROLL_THUMB = "#2A2F3D"
+FIELD_LINE = "#262A37"
+FOCUS_RING = "#3E3124"     # âmbar a 18 % sobre o painel
+BAD = "#FF8A6A"
+BTN = "#26282E"           # branco a 8 % sobre o painel
+BTN_LINE = "#2F3137"
+SWITCH_OFF = "#2A2F3D"
+CARD = "#1E2027"           # o cartão do Discord na prévia
+CARD_LINE = "#2B2D34"
+CARD_MUTED = "#B5BAC1"
+CARD_BUTTON = "#3A3D46"
 
 
 # ---- texto ---------------------------------------------------------------------------------------
@@ -92,6 +103,32 @@ def _font(display: bool, px: int, weight: int, width: int, opsz: float) -> Image
 def font(style: Style, scale: float) -> ImageFont.FreeTypeFont:
     return _font(style.display, max(1, round(style.size * scale)), style.weight, style.width,
                  min(36.0, max(5.0, style.size)))
+
+
+@functools.lru_cache(maxsize=32)
+def _emoji_font(px: int) -> ImageFont.FreeTypeFont | None:
+    try:
+        return ImageFont.truetype(str(EMOJI_FONT), px)
+    except OSError:
+        return None
+
+
+def _is_emoji(ch: str) -> bool:
+    o = ord(ch)
+    return (o >= 0x1F000 or 0x2600 <= o <= 0x27BF or 0x2300 <= o <= 0x23FF or 0x2B00 <= o <= 0x2BFF
+            or o in (0xFE0F, 0x200D))
+
+
+def _runs(text: str) -> list[tuple[str, bool]]:
+    """Separa o texto em trechos de letras e de emoji: o emoji sai colorido, da Segoe UI Emoji."""
+    runs: list[tuple[str, bool]] = []
+    for ch in text:
+        emoji = _is_emoji(ch)
+        if runs and runs[-1][1] == emoji:
+            runs[-1] = (runs[-1][0] + ch, emoji)
+        else:
+            runs.append((ch, emoji))
+    return runs
 
 
 # ---- máscaras e degradês --------------------------------------------------------------------------
@@ -169,6 +206,11 @@ ICONS: dict[str, list[tuple]] = {
     "clock": [("circle", 12, 12, 9), ("path", "M12 7v5l3 2")],
     "target": [("circle", 12, 12, 9), ("circle", 12, 12, 5), ("circle", 12, 12, 1.2)],
     "check": [("path", "M5 12.5 9.8 17.3 19 7.5")],
+    "pause": [("path", "M8 5v14M16 5v14")],
+    # o amplificador da prévia do cartão (o desenho do exemplo, de 40 para 24)
+    "amp": [("path", "M9.6 5.4V3.9h4.8v1.5"), ("rect", 3, 5.4, 18, 13.8, 1.8), ("path", "M3 9h18"),
+            ("circle", 6, 7.2, 0.25), ("circle", 8.4, 7.2, 0.25), ("circle", 10.8, 7.2, 0.25)],
+    "amp_grille": [("path", "M6 12.3h12M6 14.7h12M6 17.1h12")],
 }
 _NUM = re.compile(r"[-+]?(?:\d*\.\d+|\d+)")
 
@@ -334,9 +376,11 @@ class Painter:
         alpha = mask.point(lambda v: v * color[3] // 255)
         self.img.paste(color[:3], (self.px(x - spread) - pad, self.px(y - spread + dy) - pad), alpha)
 
-    def icon(self, name: str, x: float, y: float, size: float, color: str, stroke: float = 1.8) -> None:
+    def icon(self, name: str, x: float, y: float, size: float, color: str, stroke: float = 1.8,
+             alpha: float = 1.0) -> None:
         img = icon_image(name, self.px(size), color, stroke)
-        self.img.paste(img, (self.px(x), self.px(y)), img)
+        mask = img.getchannel("A") if alpha >= 1 else img.getchannel("A").point(lambda v: round(v * alpha))
+        self.img.paste(img, (self.px(x), self.px(y)), mask)
 
     def picture(self, path: Path, x: float, y: float, size: float) -> None:
         try:
@@ -347,7 +391,12 @@ class Painter:
 
     # ---- texto ----
     def measure(self, text: str, style: Style) -> float:
-        return font(style, self.s).getlength(text) / self.s
+        f = font(style, self.s)
+        total = 0.0
+        for run, emoji in _runs(text):
+            ef = _emoji_font(f.size) if emoji else None
+            total += (ef or f).getlength(run)
+        return total / self.s
 
     def text(self, x: float, top: float, text: str, style: Style, anchor: str = "l",
              max_w: float | None = None, color: str | None = None) -> float:
@@ -358,9 +407,17 @@ class Painter:
         f = font(style, self.s)
         ascent, descent = f.getmetrics()
         line_h = style.size * style.line * self.s
-        baseline = self.px(top) + (line_h - (ascent + descent)) / 2 + ascent
-        self.draw.text((round(x * self.s), round(baseline)), text, font=f, fill=color or style.color, anchor=anchor + "s")
-        return f.getlength(text) / self.s
+        baseline = round(self.px(top) + (line_h - (ascent + descent)) / 2 + ascent)
+        width = self.measure(text, style)
+        cx = x * self.s - (width * self.s if anchor == "r" else width * self.s / 2 if anchor == "m" else 0)
+        for run, emoji in _runs(text):
+            ef = _emoji_font(f.size) if emoji else None
+            if ef:
+                self.draw.text((round(cx), baseline), run, font=ef, embedded_color=True, anchor="ls")
+            else:
+                self.draw.text((round(cx), baseline), run, font=f, fill=color or style.color, anchor="ls")
+            cx += (ef or f).getlength(run)
+        return width
 
     def label(self, x: float, cy: float, text: str, style: Style, anchor: str = "l", color: str | None = None) -> float:
         """Uma linha curta centrada na altura `cy` (rótulos de gráfico)."""
@@ -408,11 +465,27 @@ def paragraph_height(painter: Painter, text: str, style: Style, max_w: float) ->
 
 
 @dataclass
+class Field:
+    """Um campo de texto de verdade (tk.Entry), posto pela janela por cima do desenho do campo."""
+    key: str
+    x: float
+    y: float
+    w: float
+    h: float
+    value: str
+    placeholder: str = ""
+    max_len: int = 512
+    on_change: object = None   # função(texto)
+
+
+@dataclass
 class Rendered:
-    """Uma página ou barra desenhada: a imagem, a altura em pixels lógicos e as áreas clicáveis."""
+    """Uma página ou barra desenhada: a imagem, a altura em pixels lógicos, as áreas clicáveis e os
+    campos de texto."""
     image: Image.Image
     height: float
     regions: list
+    fields: list = field(default_factory=list)
 
 
 @dataclass
@@ -424,6 +497,7 @@ class Region:
     y1: float
     action: object          # função sem argumentos
     key: str = ""
+    drag: object = None     # função(x, y) chamada ao clicar e arrastar (o controle deslizante)
 
     def hit(self, x: float, y: float) -> bool:
         return self.x0 <= x < self.x1 and self.y0 <= y < self.y1
@@ -449,3 +523,111 @@ def segmented(p: Painter, right: float, top: float, labels: list[str], selected:
             regions.append(Region(x, top, x + iw, top + h, actions[i], (keys or labels)[i]))
         x += iw + 2
     return w, h, regions
+
+
+# ---- controles dos Ajustes ------------------------------------------------------------------------
+CONTROL = Style(13.5, 400, TEXT, line=1.3)
+BUTTON = Style(13, 600, TEXT, line=1.3)
+
+
+def switch(p: Painter, x: float, y: float, on: bool) -> None:
+    """Chave liga/desliga de 38 × 22, acesa no degradê do palco."""
+    if on:
+        p.rrect(x, y, 38, 22, 11, gradient(p.px(38), p.px(22), AMBER, ORANGE, horizontal=True))
+        p.circle(x + 38 - 3 - 8, y + 11, 8, "#FFFFFF")
+    else:
+        p.rrect(x, y, 38, 22, 11, SWITCH_OFF)
+        p.circle(x + 3 + 8, y + 11, 8, "#C9CDD8")
+
+
+def text_box(p: Painter, x: float, y: float, w: float, h: float = 34, focused: bool = False, bad: bool = False) -> None:
+    """O fundo de um campo; o texto vem de um tk.Entry posto por cima, ou de `select_box`."""
+    if focused:
+        p.rrect(x - 3, y - 3, w + 6, h + 6, 13, FOCUS_RING)
+    p.rrect(x, y, w, h, 10, FIELD, outline=AMBER if focused else ORANGE if bad else FIELD_LINE)
+
+
+def select_box(p: Painter, x: float, y: float, w: float, text: str, focused: bool = False) -> None:
+    text_box(p, x, y, w, 34, focused)
+    p.text(x + 12, y + (34 - CONTROL.size * CONTROL.line) / 2, text, CONTROL, max_w=w - 44)
+    p.icon("down", x + w - 12 - 14, y + 10, 14, MUTED, stroke=2.2)
+
+
+def select_width(p: Painter, labels: list[str]) -> float:
+    return max(p.measure(label, CONTROL) for label in labels) + 12 + 44
+
+
+def slider(p: Painter, x: float, y: float, w: float, frac: float) -> None:
+    """Controle deslizante de 22 de altura; `frac` de 0 a 1."""
+    frac = min(1.0, max(0.0, frac))
+    p.rrect(x, y + 8, w, 6, 3, TRACK)
+    cx = x + 8 + (w - 16) * frac
+    if cx - x > 0:
+        p.rrect(x, y + 8, cx - x, 6, 3, gradient(p.px(cx - x), p.px(6), AMBER, ORANGE, horizontal=True))
+    p.shadow(cx - 8, y + 3, 16, 16, 8, (0, 0, 0, 128), dy=1, blur=4)
+    p.circle(cx, y + 11, 8, "#FFFFFF")
+
+
+def button(p: Painter, x: float, y: float, text: str, anchor: str = "l") -> float:
+    """Botão secundário (fundo claro e translúcido); devolve a largura."""
+    w = p.measure(text, BUTTON) + 28
+    if anchor == "r":
+        x -= w
+    p.rrect(x, y, w, 34, 10, BTN, outline=BTN_LINE)
+    p.text(x + 14, y + (34 - BUTTON.size * BUTTON.line) / 2, text, BUTTON)
+    return w
+
+
+# ---- prévia do Discord -----------------------------------------------------------------------------
+CARD_K = Style(11.5, 700, CARD_MUTED, line=1.38)
+CARD_TEXT = Style(13, 400, "#F2F3F5", line=1.38)
+CARD_APP = Style(13, 700, "#F2F3F5", line=1.38)
+CARD_EL = Style(13, 400, CARD_MUTED, line=1.38)
+CARD_BTN = Style(12.5, 600, "#F2F3F5", line=1.3)
+
+
+def discord_card_height(buttons: int) -> float:
+    rows = 4 * 13 * 1.38
+    return 12 + 11.5 * 1.38 + 8 + max(64, rows) + (10 + buttons * 30 + (buttons - 1) * 6 if buttons else 0) + 13
+
+
+def discord_card(p: Painter, x: float, y: float, w: float, verb: str, lines: list[str], buttons: list[str]) -> float:
+    """O cartão como o Discord mostra no perfil: título, imagem do amplificador e as 4 linhas."""
+    h = discord_card_height(len(buttons))
+    p.shadow(x, y, w, h, 8, (0, 0, 0, 191), dy=22, blur=44, spread=-14)
+    p.rrect(x, y, w, h, 8, CARD, outline=CARD_LINE)
+    p.text(x + 12, y + 12, verb, CARD_K)
+    top = y + 12 + 11.5 * 1.38 + 8
+    rows_h = 4 * 13 * 1.38
+    art_y = top + (max(64, rows_h) - 64) / 2
+    p.rrect(x + 12, art_y, 64, 64, 8, gradient(p.px(64), p.px(64), "#FF7A3D", "#B50F17"))
+    p.icon("amp", x + 12 + 12, art_y + 12, 40, "#FFFFFF", stroke=1.2)
+    p.icon("amp_grille", x + 12 + 12, art_y + 12, 40, "#FFFFFF", stroke=0.9, alpha=0.5)
+    tx, tw = x + 12 + 64 + 12, w - 12 - 64 - 12 - 12
+    ty = top + (max(64, rows_h) - rows_h) / 2
+    for i, (line, style) in enumerate(zip(lines, (CARD_APP, CARD_TEXT, CARD_TEXT, CARD_EL))):
+        if line:
+            p.text(tx, ty + i * 13 * 1.38, line, style, max_w=tw)
+    by = top + max(64, rows_h) + 10
+    for label in buttons:
+        p.rrect(x + 12, by, w - 24, 30, 4, CARD_BUTTON)
+        p.text(x + w / 2, by + (30 - 12.5 * 1.3) / 2, label, CARD_BTN, anchor="m", max_w=w - 40)
+        by += 36
+    return h
+
+
+MEMBER_NAME = Style(13.5, 600, TEXT, line=1.3)
+MEMBER_LINE = Style(12, 400, MUTED, line=1.3)
+
+
+def member_row(p: Painter, x: float, y: float, w: float, name: str, line: str) -> float:
+    """Como a pessoa aparece na lista de membros do servidor."""
+    p.rrect(x, y, w, 52, 10, PANEL, outline=PANEL_LINE)
+    p.circle(x + 12 + 16, y + 26, 16, "#3A3F52")
+    p.text(x + 12 + 16, y + 26 - 6.5, name[:1].upper(), Style(13, 700, TEXT, line=1.0), anchor="m")
+    p.circle(x + 12 + 32 - 4, y + 26 + 16 - 4, 7.5, PANEL)
+    p.circle(x + 12 + 32 - 4, y + 26 + 16 - 4, 5, GREEN)
+    tx = x + 12 + 32 + 10
+    p.text(tx, y + 26 - (13.5 * 1.3 + 12 * 1.3) / 2, name, MEMBER_NAME)
+    p.text(tx, y + 26 - (13.5 * 1.3 + 12 * 1.3) / 2 + 13.5 * 1.3, line, MEMBER_LINE, max_w=w - (tx - x) - 12)
+    return 52

@@ -16,8 +16,13 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
   - conquistas: 7 e 30 dias seguidos, 10 e 100 horas, e meta batida 5 dias na mesma semana;
   - calendário dos dias tocados nas últimas 16 semanas;
   - presets, amplificadores e sessões recentes, com a sessão de agora marcada.
-- **Meta diária de prática**, de 30 minutos. Por enquanto, para mudar, edite `daily_goal_minutes` no
-  `config.json` (Configurações na bandeja). A tela de Ajustes chega numa próxima versão.
+- **Tela de Ajustes**, no lugar do `config.json` aberto no Bloco de Notas. **Abrir configurações**, na
+  bandeja, abre a tela com tudo o que antes só dava para mudar no arquivo, com chaves, listas e campos.
+  Do lado direito, a prévia mostra na hora como o seu perfil fica no Discord e como você aparece na
+  lista de membros. As mudanças valem na hora, sem reiniciar. O `config.json` continua lá para quem
+  preferir (Ajustes › Programa › Abrir config.json).
+- **Meta diária de prática**, de 30 minutos no começo, e um **aviso do Windows quando você bate a meta**
+  do dia. Dá para mudar a meta e desligar o aviso nos Ajustes.
 
 ## [1.3.1] - 2026-11-03
 

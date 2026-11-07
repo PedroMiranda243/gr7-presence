@@ -15,8 +15,10 @@ from pathlib import Path
 import pystray
 
 from . import __version__, app_icon, autostart, updates
-from .config import CONFIG_PATH, DATA_DIR
+from .config import DATA_DIR
+from .i18n import Translator
 from .main_window import MainWindow
+from .settings_page import SettingsPage
 from .stats_page import StatsPage
 from .update_window import UpdateWindow
 
@@ -41,6 +43,7 @@ class TrayUI:
         self.icon = pystray.Icon("gr7_presence", self._images[False], "GR7 Presence", menu=self._menu())
         app.on_status = lambda text, active: self._queue.put(("status", text, active))
         app.on_update = lambda release: self._queue.put(("update", release))
+        app.on_note = lambda title, body: self._queue.put(("note", title, body))
         if app.updates.available:   # achada antes de a bandeja existir: o aviso não pode se perder
             self._queue.put(("update", app.updates.available))
 
@@ -54,7 +57,7 @@ class TrayUI:
             pystray.Menu.SEPARATOR,
             pystray.MenuItem(t("menu_pause"), self._toggle_pause, checked=lambda _i: self.app.paused),
             pystray.MenuItem(t("menu_stats"), lambda: self._queue.put(("stats",)), default=True),
-            pystray.MenuItem(t("menu_config"), self._open_config),
+            pystray.MenuItem(t("menu_config"), lambda: self._queue.put(("settings",))),
             pystray.MenuItem(t("menu_logs"), lambda: os.startfile(DATA_DIR)),
             pystray.MenuItem(t("menu_autostart"), self._toggle_autostart, checked=lambda _i: autostart.is_enabled()),
             pystray.Menu.SEPARATOR,
@@ -73,11 +76,6 @@ class TrayUI:
         except Exception:
             log.exception("Não consegui mudar o início com o Windows")
         self.icon.update_menu()
-
-    def _open_config(self) -> None:
-        if not CONFIG_PATH.exists():
-            self.app.config.save()
-        os.startfile(CONFIG_PATH)
 
     # ---- thread principal ----------------------------------------------------------------
     def _drain(self) -> None:
@@ -102,6 +100,10 @@ class TrayUI:
                         self._update_window.show_error(msg[1])
                 elif msg[0] == "stats":
                     self._show_stats()
+                elif msg[0] == "settings":
+                    self._show_main("settings")
+                elif msg[0] == "note":
+                    self._notify(msg[1], msg[2])
                 elif msg[0] == "quit":
                     self.icon.stop()
                     self.root.quit()
@@ -134,9 +136,11 @@ class TrayUI:
         if self._main_window and self._main_window.alive:
             self._main_window.show(page)
             return
-        pages = [StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"])]
+        pages = [StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"]),
+                 SettingsPage(self.app.config, self.app.stats, self.app.library, lambda: self.app.last_state)]
         available = lambda: self.app.updates.available.version if self.app.updates.available else None
-        self._main_window = MainWindow(self.root, pages, lambda: self.app.t, available,
+        # O idioma vem direto do config: mudar nos Ajustes troca a janela na hora, sem esperar o loop.
+        self._main_window = MainWindow(self.root, pages, lambda: Translator(self.app.config["language"]), available,
                                        on_update=self._show_update, page=page)
 
     # ---- atualização com um clique ---------------------------------------------------------
