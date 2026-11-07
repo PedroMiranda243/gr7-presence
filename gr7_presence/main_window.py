@@ -60,7 +60,9 @@ def dark_title_bar(win: tk.Misc) -> None:
 
 def render_rail(height: float, scale: float, pages: list, selected: str, hover: str | None,
                 update_label: str | None, t: Translator) -> K.Rendered:
-    """A barra lateral: o ícone, uma entrada por página e, embaixo, a versão nova quando houver."""
+    """A barra lateral: o ícone, uma entrada por página e, embaixo, a versão nova quando houver.
+    Páginas com `rail = False` (a de atualização) não ganham entrada própria."""
+    pages = [page for page in pages if getattr(page, "rail", True)]
     p = K.Painter(RAIL_W, height, scale, K.RAIL)
     p.rect(RAIL_W - 1, 0, 1, height, K.RAIL_LINE)
     p.picture(LOGO, 22, 12, 34)
@@ -77,8 +79,8 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
         y += ITEM_H + 6
     if update_label:
         uy = height - 14 - ITEM_H
-        if hover == "update":
-            p.rrect(7, uy, 64, ITEM_H, 12, "#151821")
+        if selected == "update" or hover == "update":
+            p.rrect(7, uy, 64, ITEM_H, 12, K.RAIL_ON if selected == "update" else "#151821")
         p.icon("up", 29, uy + 10, 20, K.AMBER)
         p.text(39, uy + 36, update_label, RAIL_LABEL, anchor="m", color=K.AMBER)
         p.circle(7 + 64 - 16 - 3.5, uy + 8 + 3.5, 3.5, K.ORANGE)
@@ -156,7 +158,10 @@ class _Entry:
 
 class MainWindow:
     def __init__(self, master: tk.Misc, pages: list, translator: Callable[[], Translator],
-                 update_version: Callable[[], str | None], on_update: Callable[[], None], page: str | None = None):
+                 update_version: Callable[[], str | None], on_update: Callable[[], None] | None = None,
+                 page: str | None = None, size: tuple[int, int] = SIZE, min_size: tuple[int, int] = MIN_SIZE,
+                 rail: bool = True, on_close: Callable[[], None] | None = None):
+        self.on_close = on_close
         self.pages = pages
         self.by_key = {p.key: p for p in pages}
         self.translator = translator
@@ -183,15 +188,16 @@ class MainWindow:
         self.win.configure(bg=K.BG)
         # O programa é DPI aware: o desenho é feito em pixels de tela, na escala do Windows.
         self.scale = s = max(1.0, self.win.winfo_fpixels("1i") / 96)
-        self.win.geometry(f"{round(SIZE[0] * s)}x{round(SIZE[1] * s)}")
-        self.win.minsize(round(MIN_SIZE[0] * s), round(MIN_SIZE[1] * s))
+        self.win.geometry(f"{round(size[0] * s)}x{round(size[1] * s)}")
+        self.win.minsize(round(min_size[0] * s), round(min_size[1] * s))
         self.win.protocol("WM_DELETE_WINDOW", self.close)   # o ícone vem do iconbitmap(default=) da bandeja
         families = set(tkfont.families(self.win))
         family = "Segoe UI Variable Text" if "Segoe UI Variable Text" in families else "Segoe UI"
         self.entry_font = tkfont.Font(self.win, family=family, size=-round(13.5 * s))
 
         self.rail = tk.Canvas(self.win, width=round(RAIL_W * s), bg=K.RAIL, highlightthickness=0, bd=0)
-        self.rail.pack(side="left", fill="y")
+        if rail:
+            self.rail.pack(side="left", fill="y")
         self.view = tk.Canvas(self.win, bg=K.BG, highlightthickness=0, bd=0, yscrollincrement=1, takefocus=1)
         self.view.pack(side="left", fill="both", expand=True)
         self.side = tk.Canvas(self.win, width=1, bg=K.BG, highlightthickness=0, bd=0)
@@ -248,6 +254,8 @@ class MainWindow:
             self.win.after_cancel(job)
         self._jobs.clear()
         self.win.destroy()
+        if self.on_close:
+            self.on_close()
 
     def later(self, ms: int, fn: Callable[[], None], key: str | None = None) -> None:
         """Agenda `fn` na thread da interface; com `key`, o pedido anterior igual é cancelado."""
@@ -291,6 +299,7 @@ class MainWindow:
         width = self.view.winfo_width()
         if width <= 1:
             return
+        self.page.view_height = self.view.winfo_height() / self.scale   # quem ocupa a altura toda usa
         try:
             rendered = self.page.render(width / self.scale, self.scale, self.translator())
         except Exception:   # uma página com defeito não pode derrubar a bandeja
@@ -516,7 +525,8 @@ class MainWindow:
         region = self._rail_region(event)
         if not region:
             return
-        if region.key == "update":
-            self.on_update()
+        if region.key == "update" and "update" not in self.by_key:
+            if self.on_update:
+                self.on_update()
         else:
             self.show(region.key)

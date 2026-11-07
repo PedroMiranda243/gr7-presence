@@ -6,7 +6,7 @@ Não abra uma issue pública. Use o botão **Report a vulnerability** na aba
 [Security](https://github.com/PedroMiranda243/gr7-presence/security) do repositório: a conversa fica
 privada entre você e quem mantém o projeto até a correção sair.
 
-Conte o que encontrou, como reproduzir e qual versão você usa (aparece no menu da bandeja). A resposta
+Conte o que encontrou, como reproduzir e qual versão você usa (aparece em Ajustes › Programa). A resposta
 pode levar alguns dias: é um projeto mantido no tempo livre.
 
 ## O que o programa faz de sensível

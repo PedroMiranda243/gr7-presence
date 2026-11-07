@@ -15,7 +15,7 @@ from gr7_presence.config import DEFAULTS
 from gr7_presence.gr7_state import PresetReader
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
-from gr7_presence.update_window import plain_notes
+from gr7_presence.update_page import note_sections
 from gr7_presence.updates import (CHECK_EVERY, Release, UpdateChecker, UpdateError, download, fetch_latest, is_newer,
                                   parse_version, pop_last_result)
 
@@ -165,7 +165,10 @@ class LastResultTest(unittest.TestCase):
 class NotesTest(unittest.TestCase):
     def test_plain_text(self):
         notes = "### Novidades\n- **Aviso** de versão: `check_updates`\n- Outro item"
-        self.assertEqual(plain_notes(notes), "Novidades\n• Aviso de versão: check_updates\n• Outro item")
+        self.assertEqual(note_sections(notes), [("Novidades", [("Aviso de versão: check_updates", 0), ("Outro item", 0)])])
+        changelog = ("### Como atualizar\n- Pela bandeja\n\n### Mudanças\n- **Painel** novo, com o\n  cartão de agora\n"
+                     "  - item de dentro\n")
+        self.assertEqual(note_sections(changelog), [("Mudanças", [("Painel novo, com o cartão de agora", 0), ("item de dentro", 1)])])
 
 
 class FakeConfig(dict):

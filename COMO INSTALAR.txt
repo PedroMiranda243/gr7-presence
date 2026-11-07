@@ -23,7 +23,7 @@ precisa estar ligada.
 
 NO DIA A DIA
 - Botão direito no ícone da bandeja: pausar, estatísticas, configurações, iniciar com o Windows, sair.
-  A versão instalada aparece no fim do menu.
+  A versão instalada aparece na janela do programa, em Ajustes > Programa.
 - Duplo clique no ícone: suas estatísticas de prática (ficam só no seu PC, na pasta "dados").
 - Com o Guitar Rig minimizado, o perfil fica no último preset lido até você restaurar a janela.
 

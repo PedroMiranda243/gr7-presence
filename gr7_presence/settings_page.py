@@ -13,6 +13,7 @@ import threading
 import time
 from typing import Callable
 
+from . import __version__
 from . import autostart as autostart_mod
 from . import ui_kit as K
 from .app import MIN_ROTATE_SECONDS
@@ -310,7 +311,7 @@ class SettingsPage:
                 K.button(p, bx, y, label)
                 regions.append(K.Region(bx, y, bx + bw, y + 34, action, label))
                 bx += bw + 8
-        return t("set_advanced"), t("set_advanced_hint"), width, 34, draw
+        return t("set_advanced"), t("set_advanced_hint", version=__version__), width, 34, draw
 
     def _control_width(self, m: K.Painter, row) -> float:
         width = row[2]
