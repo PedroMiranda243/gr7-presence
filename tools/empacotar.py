@@ -34,10 +34,11 @@ INCLUDE = [
     "requirements.txt", "requirements-ocr.txt",
     "gr7_presence/*.py", "tools/*.py", "tools/*.ps1", "assets/discord/*.png",
     "assets/gr7_presence.ico", "assets/gr7_presence.png",
+    "assets/fonts/Archivo.ttf", "assets/fonts/OFL.txt",   # a fonte da interface e a licença dela
 ]
 # Só servem para quem publica uma versão.
 EXCLUDE = {"tools/empacotar.py", "tools/notas_da_versao.py"}
-BINARY = {".png", ".ico", ".zip", ".ngrr", ".tle"}
+BINARY = {".png", ".ico", ".ttf", ".zip", ".ngrr", ".tle"}
 PRIVATE_FILE = ROOT / "dados" / "palavras-privadas.txt"
 USER_PATH = re.compile(r"(?i)\b[a-z]:[\\/]+users[\\/]+([^\\/\s\"'<>`]+)")
 EXAMPLE_USERS = {"x", "public", "default", "voce", "você", "usuario", "usuário"}
