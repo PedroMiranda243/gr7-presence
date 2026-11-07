@@ -46,6 +46,7 @@ Precisa de Windows 10 ou 11, do Guitar Rig 7 e do Discord desktop (o Discord no 
 - **Backing track.** Mostra a faixa aberta no Tape Deck, com o nome limpo: sem "backing track", "w/ vocals" e afins. As gravações temporárias do próprio Tape Deck são ignoradas.
 - **Modo plugin.** Com o Guitar Rig 7 aberto como VST3 numa DAW (REAPER, FL Studio, Ableton, Studio One, Cubase, Bitwig, Cakewalk…), mostra "🎛️ Guitar Rig 7 no REAPER".
 - **Estatísticas de prática.** Gráfico dos últimos 14 dias (ou por semana, ou por mês) com a meta do dia, sequência de dias seguidos 🔥 (vale a partir de 5 min por dia), recorde, conquistas, calendário dos dias tocados, presets e amps mais usados e as sessões recentes. Tudo fica no seu PC.
+- **Janela do programa.** Painel com o que está no seu perfil agora, Estatísticas e Ajustes, no visual escuro do programa.
 - **Bandeja do sistema.** Ponto verde quando está no Discord, cinza quando está esperando. Menu com pausar, estatísticas, configurações, iniciar com o Windows e a versão instalada.
 - **Ícone próprio.** Um pedal vermelho na bandeja, na barra de tarefas e nos atalhos, diferente do ícone do Guitar Rig 7 para não confundir os dois abertos ao mesmo tempo.
 - **Robusto.** Se o Discord fechar, ele reconecta sozinho. Um arquivo corrompido não derruba nada, e só uma cópia do programa roda por vez.
@@ -66,6 +67,7 @@ Clique com o botão direito no ícone da bandeja e escolha **Abrir configuraçõ
 | `show_stats` / `show_streak` | `true` | Cartão de prática, sequência de dias |
 | `daily_goal_minutes` | `30` | Meta diária de prática, em minutos (`0` = sem meta) |
 | `notify_goal` | `true` | Notificação do Windows quando a meta do dia é batida |
+| `notify_minimized` | `true` | Notificação quando o Guitar Rig é minimizado (o perfil para no último preset) |
 | `detect_plugin_hosts` | `true` | Procura o Guitar Rig 7 como VST3 dentro de DAWs |
 | `check_updates` | `true` | Confere uma vez por dia se saiu versão nova |
 | `buttons` | site do GR7 + vazio | Até 2 botões `{ "label", "url" }`. Só os outros veem os botões, você não. |

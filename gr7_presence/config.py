@@ -42,6 +42,8 @@ DEFAULTS: dict = {
     "daily_goal_minutes": 30,
     # Notificação do Windows quando a meta do dia é batida.
     "notify_goal": True,
+    # Notificação do Windows quando o Guitar Rig é minimizado (uma por vez que ele é aberto).
+    "notify_minimized": True,
     # Detecta o Guitar Rig 7 como plugin VST3 dentro de uma DAW (REAPER, FL Studio, Ableton...).
     "detect_plugin_hosts": True,
     # Uma vez por dia, confere no GitHub se saiu versão nova do GR7 Presence e avisa na bandeja.

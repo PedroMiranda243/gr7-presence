@@ -230,6 +230,7 @@ class SettingsPage:
             self._language_row(t),
             self._switch_row(t, None, t("set_autostart"), "", get=self._autostart_on, toggle=self._toggle_autostart),
             self._switch_row(t, "detect_plugin_hosts", t("set_daw"), t("set_daw_hint")),
+            self._switch_row(t, "notify_minimized", t("set_min_note"), t("set_min_note_hint")),
             self._switch_row(t, "check_updates", t("set_updates"), t("set_updates_hint")),
             self._advanced_row(t),
         ]
