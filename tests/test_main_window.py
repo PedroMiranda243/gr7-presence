@@ -9,7 +9,7 @@ from gr7_presence.app import PresenceApp
 from gr7_presence.config import DEFAULTS
 from gr7_presence.gr7_state import PresetReader
 from gr7_presence.i18n import Translator
-from gr7_presence.main_window import MainWindow, render_rail
+from gr7_presence.main_window import MainWindow, render_menu, render_rail
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
 from gr7_presence.stats_page import StatsPage
@@ -80,6 +80,63 @@ class TrayOpensMainWindowTest(unittest.TestCase):
         app.updates.available = Release("1.4.0", "https://exemplo")
         self.assertEqual(first.update_version(), "1.4.0")
         first.close()
+
+
+class MenuTest(unittest.TestCase):
+    """A lista de opções (Jogando, Ouvindo… nos Ajustes; Pausar no Painel) fecha com um clique fora dela,
+    como as listas do Windows. Até a 1.4.2 ela só fechava escolhendo uma opção."""
+
+    def setUp(self):
+        self.root = tk.Tk()
+        self.root.withdraw()
+        self.addCleanup(self.root.destroy)
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.page = StatsPage(Stats(Path(tmp.name) / "s.json"), lambda: 30)
+        self.win = MainWindow(self.root, [self.page], lambda: Translator("pt"), lambda: None)
+        self.addCleanup(lambda: self.win.alive and self.win.close())
+        self.root.update()
+        self.win.render_page()
+        self.picked = []
+        self.win.open_menu(20, 300, 200, [(1, "Um"), (2, "Dois")], 1, self.picked.append)
+        self.root.update()
+        self.assertIsNotNone(self.win._menu)
+
+    def click(self, widget, x, y, button=1):
+        """Um clique na posição (x, y) do `widget`, em pixels de tela. Com a lista aberta, o Tk desvia
+        para ela o clique em outra parte da janela, tanto o de verdade quanto este."""
+        root_x, root_y = widget.winfo_rootx() + round(x), widget.winfo_rooty() + round(y)
+        widget.event_generate(f"<ButtonPress-{button}>", x=round(x), y=round(y), rootx=root_x, rooty=root_y)
+        if widget.winfo_exists():   # escolher uma opção fecha a lista no aperto do botão
+            widget.event_generate(f"<ButtonRelease-{button}>", x=round(x), y=round(y), rootx=root_x, rooty=root_y)
+        self.root.update()
+
+    def test_click_outside_closes_without_reaching_the_page(self):
+        button = next(r for r in self.win._page.regions if r.key == "all")   # "Tudo", no alto da página
+        s = self.win.scale
+        self.click(self.win.view, (button.x0 + button.x1) / 2 * s, (button.y0 + button.y1) / 2 * s)
+        self.assertIsNone(self.win._menu)
+        self.assertEqual(self.picked, [])
+        self.assertNotEqual(self.page.period, "all")   # o clique que fecha a lista não aperta o botão
+
+    def test_right_click_outside_also_closes(self):
+        self.click(self.win.view, 600 * self.win.scale, 40 * self.win.scale, button=3)
+        self.assertIsNone(self.win._menu)
+        self.assertEqual(self.picked, [])
+
+    def test_click_on_an_option_picks_it(self):
+        canvas = self.win._menu.winfo_children()[0]
+        second = render_menu(200, [(1, "Um"), (2, "Dois")], 1, None, self.win.scale).regions[1]
+        s = self.win.scale
+        self.click(canvas, 100 * s, (second.y0 + second.y1) / 2 * s)
+        self.assertEqual(self.picked, [2])
+        self.assertIsNone(self.win._menu)
+
+    def test_moving_the_window_closes_the_list(self):
+        x, y = self.win.win.winfo_x(), self.win.win.winfo_y()
+        self.win.win.geometry(f"+{x + 40}+{y + 30}")   # como arrastar pela barra de título
+        self.root.update()
+        self.assertIsNone(self.win._menu)
 
 
 class KeyboardTest(unittest.TestCase):

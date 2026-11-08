@@ -436,7 +436,9 @@ hoje. O espaço vazio do cartão é um contorno tracejado (6 ligado, 4 desligado
 - **Focus:** contorno âmbar e um halo focus-ring de 3 px (raio 13) em volta.
 - **Error:** contorno laranja no campo e a mensagem em Brasa logo abaixo, dizendo o que fazer.
 - **Escolha:** igual ao campo, com a seta `down` de 14 px; abre uma lista de opções (field, raio 10,
-  itens de 32 px, item com o mouse em selected, o atual com um `check` âmbar).
+  itens de 32 px, item com o mouse em selected, o atual com um `check` âmbar). Um clique fora da lista
+  (até no próprio campo) ou arrastar a janela fecha a lista sem escolher, e esse clique não aciona o
+  que estava embaixo.
 - **Chave:** 38 × 22; ligada = degradê âmbar → laranja com círculo branco à direita; desligada =
   switch-off com círculo cinza-claro à esquerda.
 - **Deslizante:** trilho de 6 px em track, preenchido no degradê, círculo branco de 16 com sombra; as

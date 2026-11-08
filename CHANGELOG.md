@@ -14,6 +14,11 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 - **Estatísticas: o tempo total mostra horas e minutos** ("13 h 12 min"), como o dos últimos 7 dias. Antes
   aparecia só "13 h".
 
+### Correções
+- **As listas de opções fecham com um clique fora delas.** A lista do tipo de atividade (Jogando,
+  Ouvindo…) nos Ajustes e a do **Pausar** no Painel só fechavam escolhendo uma opção. Agora um clique
+  em qualquer outro ponto da janela fecha a lista sem mudar nada.
+
 ## [1.4.2] - 2026-11-07
 
 ### Como atualizar
