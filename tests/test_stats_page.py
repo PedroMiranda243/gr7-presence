@@ -9,7 +9,8 @@ from PIL import ImageColor
 from gr7_presence.i18n import Translator
 from gr7_presence.stats import Stats
 from gr7_presence import ui_kit as K
-from gr7_presence.stats_page import CAL_GAP, CAL_LEFT, CAL_WEEKS, StatsPage, calendar_grid, level, nice_ticks
+from gr7_presence.stats_page import (CAL_GAP, CAL_LEFT, CAL_WEEKS, CHART_W_BASE, StatsPage, calendar_grid, level,
+                                     nice_ticks)
 
 TODAY = date(2026, 11, 7)
 
@@ -95,6 +96,44 @@ class StatsPageTest(unittest.TestCase):
         wide = self.track_widths(1042)                            # janela de ~1120 px
         self.assertEqual(len(set(wide)), 1)
         self.assertAlmostEqual(wide[0], 92 + (1042 - 882) / 2, delta=0.1)   # o que a coluna cresceu vai para a barra
+
+    def bar_widths(self, width: float, period: str = "days") -> set[float]:
+        """As larguras das barras do gráfico (as com tempo; dia sem tempo é um traço)."""
+        widths = []
+        original = K.Painter.top_rounded_bar
+
+        def spy(painter, x, y, w, h, *args, **kwargs):
+            widths.append(round(w, 1))
+            return original(painter, x, y, w, h, *args, **kwargs)
+
+        page = StatsPage(make_stats(self), lambda: 30, today=lambda: TODAY)
+        page.period = period
+        with mock.patch.object(K.Painter, "top_rounded_bar", spy):
+            page.render(width, 1.0, Translator("pt"))
+        return set(widths)
+
+    def test_bars_grow_in_full_screen(self):
+        """Opção B, escolhida pelo dono do projeto: em tela cheia a barra engorda até 44 px; na janela
+        padrão, continua a do exemplo."""
+        self.assertEqual(self.bar_widths(882), {22})
+        self.assertEqual(self.bar_widths(882, "weeks"), {19.5})         # 16 semanas: 62 % do espaço, como antes
+        for period in ("days", "weeks", "all"):
+            self.assertEqual(self.bar_widths(1842, period), {44})       # janela maximizada em 1920 px
+        middle = self.bar_widths(1042).pop()                            # janela de ~1120 px: no meio do caminho
+        self.assertTrue(22 < middle < 44, middle)
+
+    def test_chart_width_in_the_default_window(self):
+        """A barra só engorda num gráfico mais largo que o da janela padrão: confere que a constante bate."""
+        seen = []
+        original = StatsPage._bars
+
+        def spy(page, p, x0, y0, w, *args, **kwargs):
+            seen.append(w)
+            return original(page, p, x0, y0, w, *args, **kwargs)
+
+        with mock.patch.object(StatsPage, "_bars", spy):
+            self.render(make_stats(self), width=882)
+        self.assertEqual(seen, [CHART_W_BASE])
 
     def test_goal_line_in_front_of_the_bars(self):
         order = []

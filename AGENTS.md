@@ -210,8 +210,10 @@ até o fim da rodada. No programa há um ícone só.
 
 **Janela mais larga que o exemplo e sobra espaço vazio.** Os exemplos têm 960 px, mas a pessoa pode
 alargar a janela. Na 1.4.1, o calendário (16 semanas de quadradinhos de 13 px) e as barras de 92 px
-das listas tinham tamanho fixo e deixavam um vazio grande à direita numa janela de 1120 px. Faça a
-peça crescer com a largura e confira em 860, 960, 1120 e 1920 px (`tests/test_stats_page.py`). O Painel
+das listas tinham tamanho fixo e deixavam um vazio grande à direita numa janela de 1120 px; na 1.4.3, as
+barras do gráfico (sempre 22 px) ficavam finas e espaçadas em tela cheia. Faça a peça crescer com a
+largura e confira em 860, 960, 1120 e 1920 px (`tests/test_stats_page.py`). Para o tamanho padrão não
+mudar, a peça só cresce a partir da largura que tem nele (`CHART_W_BASE` no gráfico). O Painel
 é a exceção: em tela cheia ele é ampliado por igual e, se tiver mais painéis, põe mais lado a lado
 (`DashboardPage._fit`, `DESIGN.md`). Painel novo entra no `_panels`, não desenhado à parte. Os textos
 medem um tico diferente em cada escala, então ele mede a altura de novo na escala ampliada.

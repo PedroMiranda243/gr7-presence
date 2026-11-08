@@ -373,7 +373,9 @@ Os exemplos têm 960 px, mas a pessoa pode alargar a janela: o que tem tamanho f
 Painéis, campos e barras crescem com a largura. O calendário mantém o quadradinho perto de 13 px e
 mostra mais semanas (16 no mínimo) até encostar na borda (`calendar_grid`). Nas listas de presets e
 amplificadores, o nome fica com a coluna do exemplo (200 px, ou o que um nome comprido precisar) e a
-barra fica com o resto.
+barra fica com o resto. No gráfico, a barra tem 22 px até a largura do gráfico da janela padrão (534
+px); num gráfico mais largo, engorda na mesma proporção, até 44 px em tela cheia, sem passar de 62 % do
+espaço de cada dia.
 
 O Painel é a exceção (opção B, escolhida pelo dono do projeto): ele tem pouco conteúdo e, esticado,
 abria um buraco entre o nome e o cartão. Numa janela maior que a padrão, ele é o desenho da janela
