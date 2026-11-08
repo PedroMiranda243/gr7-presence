@@ -9,6 +9,18 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+## [1.4.4] - 2026-11-07
+
+### Como atualizar
+- **Da 1.1.0 em diante:** botão direito no ícone da bandeja › **⬆️ Atualizar para a versão 1.4.4** ›
+  **Atualizar agora**.
+- **Da 1.0.0 ou de antes:** à mão. Botão direito na bandeja › **Sair**, extraia o zip **na mesma
+  pasta**, substituindo os arquivos, e rode o `instalar.bat`.
+- **Vindo da 1.3.1 ou de antes,** esta versão traz também a interface nova da 1.4.0: uma janela só,
+  com Painel, Estatísticas, Ajustes e Atualização, meta diária de prática, pausa de 1 hora, aviso de
+  Guitar Rig minimizado e a primeira abertura. Suas estatísticas e opções continuam: elas ficam na
+  pasta `dados`, que a atualização não toca.
+
 ### Mudanças
 - **O Painel ocupa a tela em tela cheia.** Antes, numa janela maximizada, o nome do preset ficava num
   canto, o cartão no outro e a metade de baixo vazia. Agora o Painel é o mesmo desenho do tamanho
@@ -191,7 +203,8 @@ Primeira versão publicada no GitHub.
 - O ícone oficial do Guitar Rig deixou de vir no zip, porque é arte da Native Instruments. O
   instalador copia o ícone do Guitar Rig instalado no seu PC.
 
-[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.4.3...HEAD
+[Não lançado]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.4.4...HEAD
+[1.4.4]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.4.3...v1.4.4
 [1.4.3]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.4.2...v1.4.3
 [1.4.2]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.4.1...v1.4.2
 [1.4.1]: https://github.com/PedroMiranda243/gr7-presence/compare/v1.4.0...v1.4.1
