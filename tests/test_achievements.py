@@ -42,17 +42,24 @@ JAN = date(2026, 1, 1)   # uma quinta-feira
 class CatalogTest(unittest.TestCase):
     def test_shape(self):
         keys = [d.key for d in A.CATALOG]
-        self.assertEqual(len(keys), 33)
-        self.assertEqual(len(set(keys)), 33)
+        self.assertEqual(len(keys), 35)
+        self.assertEqual(len(set(keys)), 35)
         families = [d for d in A.CATALOG if d.levels]
         self.assertEqual(len(families), 18)
-        self.assertEqual(sum(1 for d in A.CATALOG if not d.levels and not d.secret), 10)
+        self.assertEqual(sum(1 for d in A.CATALOG if not d.levels and not d.secret), 12)
         self.assertEqual(sum(1 for d in A.CATALOG if d.secret), 5)
         for d in families:
             self.assertEqual(list(d.levels), sorted(set(d.levels)), d.key)      # marcas crescentes
             self.assertIn(len(d.levels), (4, 5), d.key)
             self.assertIn(d.unit, ("hours", "days", "count"))
-        self.assertEqual(sum(len(d.levels) if d.levels else 1 for d in A.CATALOG), 100)
+        self.assertEqual(sum(len(d.levels) if d.levels else 1 for d in A.CATALOG), 102)
+
+    def test_groups_in_page_order(self):
+        """O catálogo vem na ordem dos grupos da página, e as secretas ficam no grupo delas."""
+        order = [A.GROUPS.index(d.group) for d in A.CATALOG]
+        self.assertEqual(order, sorted(order))
+        self.assertEqual({d.group for d in A.CATALOG}, set(A.GROUPS))
+        self.assertTrue(all(d.secret == (d.group == "secret") for d in A.CATALOG))
 
     def test_marks_and_points(self):
         self.assertEqual(A.parse_mark("hours:3"), ("hours", 3))
@@ -156,6 +163,23 @@ class TonesAndStudioTest(unittest.TestCase):
         self.assertEqual(r["backing"].dates, (date(2026, 2, 1),))     # 1 h 06
         self.assertEqual(r["bass"].dates, (date(2026, 2, 1),))
         self.assertTrue(A.BY_KEY["genres"].new_data)
+
+    def test_two_fronts(self):
+        guitar = session(datetime(2026, 2, 1, 10), 30, sources={"Guitar": 1800})
+        bass = session(datetime(2026, 2, 1, 20), 10, sources={"Bass": 600})
+        late_bass = session(datetime(2026, 2, 3, 20), 10, sources={"Bass": 600})
+        self.assertEqual(results([guitar, bass])["two_fronts"].dates, (date(2026, 2, 1),))
+        self.assertEqual(results([guitar, late_bass])["two_fronts"].level, 0)      # dias diferentes
+        short = session(datetime(2026, 2, 1, 20), 3, sources={"Bass": 180})        # 3 min de baixo
+        self.assertEqual(results([guitar, short])["two_fronts"].level, 0)
+        self.assertEqual(results(daily(JAN, 5))["two_fronts"].level, 0)            # sessões antigas
+        self.assertTrue(A.BY_KEY["two_fronts"].new_data)
+
+    def test_loyal_amp(self):
+        sessions = daily(JAN, 12, amps={"Lead 800": 3600, "Jump": 600})
+        self.assertEqual(results(sessions)["loyal_amp"].dates, (JAN + timedelta(days=9),))   # a 10ª hora
+        self.assertEqual(results(sessions[:9])["loyal_amp"].level, 0)
+        self.assertFalse(A.BY_KEY["loyal_amp"].new_data)                          # o tempo por amp já existe
 
     def test_studio(self):
         sessions = [session(datetime(2026, 1, 1, 10), 40),

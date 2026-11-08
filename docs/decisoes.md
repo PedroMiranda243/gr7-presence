@@ -170,7 +170,7 @@ quando uma sai, cartão no Discord, conquistas secretas, pontos e nível.
 **Decisão.**
 - **Níveis.** As conquistas em escada (horas, dias seguidos, presets diferentes…) são uma família com
   níveis (Bronze, Prata, Ouro, Platina, Diamante), escolha do dono do projeto entre "níveis" e "cada
-  marca separada". São 33 conquistas e 100 marcas, num catálogo de dados (`achievements.CATALOG`).
+  marca separada". São 35 conquistas e 102 marcas, num catálogo de dados (`achievements.CATALOG`).
 - **Calculadas do histórico.** O motor (`achievements.py`) lê as sessões e acha o dia em que cada marca
   foi alcançada. Assim a data é a de verdade, mesmo para o que foi conquistado antes da versão que
   trouxe o sistema.

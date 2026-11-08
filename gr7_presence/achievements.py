@@ -39,6 +39,8 @@ FULL_MONTH_DAYS = 20                  # "Mês cheio": 20 dias tocados no mesmo m
 COMEBACK_DAYS = 8                     # "De volta": 7 dias inteiros sem tocar entre um dia e outro
 RECORD_MIN = 3                        # "Superação" só vale contra um recorde de 3 dias ou mais
 BASS_SECONDS = 3600
+TWO_FRONTS_SECONDS = 5 * 60           # "Duas frentes": 5 min de guitarra e 5 de baixo no mesmo dia
+LOYAL_AMP_SECONDS = 10 * 3600         # "Fiel ao amp": 10 h somadas no mesmo amplificador
 WEEKEND_MARATHON_SECONDS = 8 * 3600
 
 
@@ -47,7 +49,7 @@ class Definition:
     """Uma conquista do catálogo. Com `levels`, é uma família em níveis (as marcas de cada nível, na
     unidade `unit`: "hours", "days" ou "count"); sem, é única (ou secreta, com `secret`)."""
     key: str
-    group: str                         # practice, consistency, goal, tones, studio, collection, single, secret
+    group: str                         # um dos GROUPS
     icon: str                          # nome do ícone no ui_kit
     levels: tuple[float, ...] | None = None
     unit: str = "count"
@@ -55,6 +57,10 @@ class Definition:
     needs_goal: bool = False           # só existe com uma meta diária definida
     new_data: bool = False             # usa um dado que as sessões só gravam a partir da 1.5.0
 
+
+# Os grupos, na ordem da página Conquistas. As únicas ficam no grupo do assunto delas.
+GROUPS = ("practice", "consistency", "goal", "schedule", "tones", "studio", "collection", "instrument",
+          "milestones", "secret")
 
 CATALOG: tuple[Definition, ...] = (
     # prática
@@ -67,9 +73,15 @@ CATALOG: tuple[Definition, ...] = (
     Definition("streak", "consistency", "flame", (3, 7, 30, 100, 365), "days"),
     Definition("weekends", "consistency", "star", (1, 4, 12, 26, 52)),
     Definition("full_months", "consistency", "calendar", (1, 3, 6, 12)),
+    Definition("comeback", "consistency", "return"),
+    Definition("one_year", "consistency", "gift"),
     # meta
     Definition("goal_days", "goal", "target", (5, 25, 100, 250, 500), "days", needs_goal=True),
     Definition("goal_weeks", "goal", "flag", (1, 4, 12, 26, 52), needs_goal=True),
+    Definition("perfect_week", "goal", "star", needs_goal=True),
+    # horários
+    Definition("owl", "schedule", "moon"),
+    Definition("early", "schedule", "sun"),
     # timbres
     Definition("presets", "tones", "compass", (10, 25, 50, 100, 250)),
     Definition("amps", "tones", "amp", (3, 5, 10, 15, 20)),
@@ -79,19 +91,17 @@ CATALOG: tuple[Definition, ...] = (
     # estúdio
     Definition("daw", "studio", "headphones", (1, 10, 50, 100), "hours"),
     Definition("backing", "studio", "note", (1, 10, 50, 100), "hours", new_data=True),
+    Definition("two_worlds", "studio", "swap"),
+    Definition("multi_daw", "studio", "headphones"),
     # coleção: conta as marcas das outras
     Definition("collector", "collection", "trophy", (10, 25, 50, 75, 100)),
-    # únicas
-    Definition("first", "single", "play"),
-    Definition("owl", "single", "moon"),
-    Definition("early", "single", "sun"),
-    Definition("perfect_week", "single", "star", needs_goal=True),
-    Definition("comeback", "single", "return"),
-    Definition("two_worlds", "single", "swap"),
-    Definition("multi_daw", "single", "headphones"),
-    Definition("one_year", "single", "gift"),
-    Definition("record", "single", "trend"),
-    Definition("bass", "single", "note", new_data=True),
+    # instrumento
+    Definition("bass", "instrument", "note", new_data=True),
+    Definition("two_fronts", "instrument", "strings", new_data=True),
+    Definition("loyal_amp", "instrument", "amp"),
+    # marcos
+    Definition("first", "milestones", "play"),
+    Definition("record", "milestones", "trend"),
     # secretas: aparecem como "?" até serem destravadas
     Definition("new_year", "secret", "star", secret=True),
     Definition("christmas", "secret", "gift", secret=True),
@@ -325,7 +335,7 @@ def collect_facts(sessions: list[dict], today: date, goal_minutes: int = 0) -> F
     series["backing"] = _cumulative((_end_date(s), float(s.get("backing") or 0) / 3600)
                                     for s in ss if isinstance(s.get("backing"), (int, float)) and s["backing"] > 0)
 
-    # únicas
+    # únicas (cada uma no grupo do assunto dela)
     singles["first"] = _dt(ss[0].get("start", 0)).date() if ss else None
     singles["owl"] = _window(ss, 0, 5)
     singles["early"] = _window(ss, 5, 7)
@@ -360,6 +370,25 @@ def collect_facts(sessions: list[dict], today: date, goal_minutes: int = 0) -> F
         acc += sum(secs for name, secs in _seconds_by_name(s, "sources") if name.casefold() == "bass")
         if acc >= BASS_SECONDS:
             singles["bass"] = _end_date(s)
+            break
+    per_day: dict[date, Counter] = defaultdict(Counter)
+    singles["two_fronts"] = None
+    for s in ss:
+        day = per_day[_end_date(s)]
+        for name, secs in _seconds_by_name(s, "sources"):
+            day[name.casefold()] += secs
+        if min(day["guitar"], day["bass"]) >= TWO_FRONTS_SECONDS:
+            singles["two_fronts"] = _end_date(s)
+            break
+    amp_totals: Counter = Counter()
+    singles["loyal_amp"] = None
+    for s in ss:
+        for name, secs in _seconds_by_name(s, "amps"):
+            amp_totals[name] += secs
+            if amp_totals[name] >= LOYAL_AMP_SECONDS:
+                singles["loyal_amp"] = _end_date(s)
+                break
+        if singles["loyal_amp"]:
             break
 
     # secretas
