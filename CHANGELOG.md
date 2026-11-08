@@ -9,6 +9,11 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Mudanças
+- **Estatísticas: barras mais largas em tela cheia.** Numa janela maximizada, as barras do gráfico
+  ficavam finas e muito separadas. Agora elas engordam com a largura, até o dobro. No tamanho padrão
+  nada muda.
+
 ## [1.4.3] - 2026-11-07
 
 ### Como atualizar

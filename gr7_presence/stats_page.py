@@ -18,6 +18,8 @@ from .stats import (Achievement, Bar, Stats, achievements, day_totals, period_ba
 PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 24, 14
 CHART_H, FACTS_W = 232, 230
 GOAL_DASH = (5, 4)          # traço e espaço da linha da meta
+BAR_W, BAR_W_MAX = 22, 44   # a barra do exemplo e a mais larga, em tela cheia (opção B do dono do projeto)
+CHART_W_BASE = 534          # a largura do gráfico na janela padrão: até ela, a barra é a do exemplo
 PERIODS = ("days", "weeks", "all")
 
 TITLE = K.Style(30, 800, K.TEXT, display=True, width=125, line=1.0)
@@ -218,7 +220,10 @@ class StatsPage:
         ch = h - pad_b - pad_t
         base = y0 + pad_t + ch
         slot = (w - pad_l) / len(bars)
-        bw = min(22, slot * 0.62)
+        # Gráfico mais largo que o da janela padrão: a barra engorda na mesma proporção, até 44 px, para não
+        # ficar fina e espaçada em tela cheia. Nunca passa de 62 % do espaço do dia, para não encostar.
+        grow = max(1.0, w / CHART_W_BASE)
+        bw = min(BAR_W_MAX, min(BAR_W, slot * 0.62) * grow, slot * 0.62)
         minutes = [b.seconds / 60 for b in bars]
         daily = self.period == "days"
         floor = 90 if daily else 360 if self.period == "weeks" else 1200
