@@ -160,3 +160,32 @@ visual mais padrão. Tkinter com widgets comuns: sem cantos suaves, degradês ne
 de texto (Ajustes) vão precisar de widgets do Tkinter por cima da imagem. A página se redesenha inteira a
 cada 10 segundos e a cada clique, em algumas dezenas de milissegundos. O zip cresce uns 650 KB por causa
 da fonte.
+
+## D10. Conquistas em níveis, calculadas do histórico e registradas para sempre
+
+**Situação.** Havia 5 conquistas fixas, calculadas na hora a partir do `stats.json` e mostradas só nas
+Estatísticas. O dono do projeto pediu, em 2026-11-08, um sistema completo: muito mais conquistas, aviso
+quando uma sai, cartão no Discord, conquistas secretas, pontos e nível.
+
+**Decisão.**
+- **Níveis.** As conquistas em escada (horas, dias seguidos, presets diferentes…) são uma família com
+  níveis (Bronze, Prata, Ouro, Platina, Diamante), escolha do dono do projeto entre "níveis" e "cada
+  marca separada". São 35 conquistas e 102 marcas, num catálogo de dados (`achievements.CATALOG`).
+- **Calculadas do histórico.** O motor (`achievements.py`) lê as sessões e acha o dia em que cada marca
+  foi alcançada. Assim a data é a de verdade, mesmo para o que foi conquistado antes da versão que
+  trouxe o sistema.
+- **Registradas para sempre.** O `AchievementTracker` guarda as marcas em `dados\conquistas.json`. Uma
+  conquista não volta atrás quando a meta diária muda (as de meta usam a meta de hoje, como no painel)
+  nem quando o `stats.json` se perde. O registro também garante um aviso só por marca, mesmo reiniciando.
+- **Primeira vez em silêncio.** Na primeira conta (sem arquivo), o que o histórico já tinha entra como
+  visto, sem uma enxurrada de avisos; fica só o número (`first_run_count`) para um aviso único.
+- **Dados novos.** Quatro conquistas usam o que as sessões só gravam a partir da 1.5.0 (preset próprio,
+  gênero, fonte e faixa do Tape Deck); elas contam dali em diante.
+
+**Alternativas.** Guardar só o registro, sem refazer a conta: perderia as datas do que veio antes e
+dependeria de o programa estar aberto na hora. Refazer a conta sem registro: a conquista poderia sumir
+com uma meta mais alta, e não daria para saber o que já foi avisado.
+
+**Preço.** A conta passa por todas as sessões a cada minuto: cerca de 25 ms com cinco anos de prática
+diária (`tests/test_achievements.py` confere com folga). Mudar uma marca do catálogo muda o que conta
+dali em diante, mas não tira o que já foi registrado.

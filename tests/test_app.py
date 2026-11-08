@@ -94,6 +94,36 @@ class RackStateTest(unittest.TestCase):
         self.assertEqual(self.app._recall_live(self.target), ("RTM2 Power", True))
 
 
+class AchievementsInTheLoopTest(unittest.TestCase):
+    """O loop grava o que as conquistas usam e confere as conquistas, sem nunca cair por causa delas."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.stats = Stats(self.base / "stats.json")
+        self.app = PresenceApp(FakeConfig(copy.deepcopy(DEFAULTS)), self.stats, PresetReader(self.base / "x.tle"),
+                               PresetLibrary(self.base, extra_dirs=[]), live_state_path=self.base / "l.json")
+
+    def test_tracker_lives_next_to_stats(self):
+        self.assertEqual(self.app.achievements.path, self.base / "conquistas.json")
+
+    def test_tick_passes_the_new_fields(self):
+        target = Target("standalone", 999_999_999, 1_792_985_871.2)
+        preset = PresetInfo(name="Meu Timbre", amp="Bass Pro", is_factory=False, genres=["Rock"], input_source="Bass")
+        self.app.detector.find = lambda: target
+        self.app._current_state = lambda _t: (preset, ["faixa.wav"], None)
+        self.app.paused = True                       # sem Discord neste teste
+        with mock.patch.object(self.stats, "tick") as tick:
+            self.app.tick()
+        tick.assert_called_with("Meu Timbre", "Bass Pro", own=True, genres=("Rock",), source="Bass", backing=True)
+
+    def test_a_broken_check_does_not_stop_the_loop(self):
+        with mock.patch.object(self.app.achievements, "maybe_check", side_effect=RuntimeError("defeito")):
+            with self.assertLogs("gr7_presence.app", "ERROR"):
+                self.app._check_achievements()      # registra no log e segue
+
+
 class GoalNoteTest(unittest.TestCase):
     """O aviso de meta batida sai uma vez, na virada, e só com o programa aberto."""
 

@@ -104,7 +104,11 @@ class Stats:
         self._tick_at = time.time()
         log.info("Sessão iniciada (%s%s)", mode, f" em {host}" if host else "")
 
-    def tick(self, preset: str | None, amp: str | None, now: float | None = None) -> None:
+    def tick(self, preset: str | None, amp: str | None, now: float | None = None, *, own: bool = False,
+             genres: tuple[str, ...] | list[str] = (), source: str | None = None, backing: bool = False) -> None:
+        """Soma o tempo desde o último passo. Para as conquistas (a partir da 1.5.0), também guarda o tempo
+        com preset próprio (`own`), por gênero, por fonte (guitarra, baixo) e com faixa aberta no Tape
+        Deck (`backing`). Da faixa só o tempo, nunca o nome."""
         if not self.current:
             return
         now = now or time.time()
@@ -119,9 +123,20 @@ class Stats:
             if preset:
                 cur["presets"][preset] = cur["presets"].get(preset, 0.0) + dt
                 cur["last_preset"] = preset
+                if own:
+                    mine = cur.setdefault("own", {})
+                    mine[preset] = mine.get(preset, 0.0) + dt
             if amp:
                 cur["amps"][amp] = cur["amps"].get(amp, 0.0) + dt
                 cur["last_amp"] = amp
+            for genre in genres or ():
+                by_genre = cur.setdefault("genres", {})
+                by_genre[genre] = by_genre.get(genre, 0.0) + dt
+            if source:
+                sources = cur.setdefault("sources", {})
+                sources[source] = sources.get(source, 0.0) + dt
+            if backing:
+                cur["backing"] = cur.get("backing", 0.0) + dt
 
     def end(self) -> None:
         with self._lock:

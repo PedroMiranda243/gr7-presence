@@ -74,6 +74,7 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `discord_ipc.py` | Pipe local do Discord (handshake, `SET_ACTIVITY`) | Montar texto |
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
 | `stats.py` | Sessões de prática e os números das estatísticas (barras, conquistas) | Desenhar |
+| `achievements.py` | O catálogo das conquistas, a conta a partir das sessões, os pontos e o registro em `dados\conquistas.json` | Desenhar, avisar ou falar com o Discord |
 | `main_window.py` | A janela principal: barra lateral, rolagem, cliques, barra de título escura | Desenhar o conteúdo das páginas |
 | `dashboard_page.py` | A página Painel: o preset no palco, o cartão no perfil agora, meta e conexões | Decidir o cartão (lê `app.showing`) |
 | `stats_page.py` | A página Estatísticas, desenhada numa imagem | Calcular os números (`stats.py`) |
