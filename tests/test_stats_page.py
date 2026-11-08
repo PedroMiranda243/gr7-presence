@@ -6,6 +6,7 @@ from unittest import mock
 
 from PIL import ImageColor
 
+from gr7_presence.achievements import unlocks
 from gr7_presence.i18n import Translator
 from gr7_presence.stats import Stats
 from gr7_presence import ui_kit as K
@@ -173,7 +174,7 @@ class StatsPageTest(unittest.TestCase):
         page, r = self.render(make_stats(self))
         changed = []
         page.on_change = lambda: changed.append(page.period)
-        self.assertEqual([reg.key for reg in r.regions], ["days", "weeks", "all"])
+        self.assertEqual([reg.key for reg in r.regions], ["days", "weeks", "all", "see_all"])
         r.regions[1].action()
         self.assertEqual((page.period, changed), ("weeks", ["weeks"]))
         r.regions[1].action()                      # de novo no mesmo: não redesenha à toa
@@ -181,6 +182,28 @@ class StatsPageTest(unittest.TestCase):
         for period in ("weeks", "all"):
             page.period = period
             self.assertGreater(page.render(882, 1.0, Translator("pt")).height, 600)
+
+    def test_achievements_row_and_see_all(self):
+        """Uma linha de 5 medalhas, a mais recente primeiro, e o "Ver todas" abre a página Conquistas."""
+        page, r = self.render(make_stats(self))
+        d = page._collect()
+        badges = page._badges(d, Translator("pt"))
+        self.assertEqual(len(badges), 5)
+        newest = unlocks(d["achievements"])[0]
+        self.assertEqual((badges[0].key, badges[0].level), (newest.key, newest.level))
+        self.assertIsNotNone(badges[0].colors)
+        shown = []
+        page.host = mock.Mock(show=shown.append)
+        next(reg for reg in r.regions if reg.key == "see_all").action()
+        self.assertEqual(shown, ["achievements"])
+
+    def test_achievements_from_the_tracker(self):
+        """Com o registro, a linha usa a conta dele (a mesma da página Conquistas)."""
+        tracker = mock.Mock()
+        tracker.current.return_value = []
+        page = StatsPage(make_stats(self), lambda: 30, today=lambda: TODAY, achievements=tracker)
+        self.assertEqual(page._collect()["achievements"], [])
+        tracker.current.assert_called_once_with(TODAY)
 
     def test_live_session_shows_now(self):
         stats = make_stats(self, 3)

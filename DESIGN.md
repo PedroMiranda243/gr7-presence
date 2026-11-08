@@ -54,6 +54,12 @@ colors:
   card-line: "#2B2D34"
   card-muted: "#B5BAC1"
   card-button: "#3A3D46"
+  medal-bronze: "#B8693F"
+  medal-silver: "#A2ABBA"
+  medal-gold: "#F29B26"
+  medal-platinum: "#4EA8D1"
+  medal-diamond: "#8B6EFF"
+  medal-secret: "#FF9466"
 typography:
   display-xl:
     fontFamily: "Archivo, Segoe UI Variable, Segoe UI"
@@ -275,6 +281,11 @@ Escuros frios em camadas, uma luz quente e um vermelho de marca guardado para um
   de alarme; é um laranja claro que se lê sobre o painel (7,9:1).
 - **Rampa do calendário** (grid, cal-1, cal-2, cal-3, amber): os cinco tons do calendário dos dias
   tocados, de nada tocado até mais de 75 minutos (`CAL_RAMP`).
+- **Medalhas** (`MEDAL_*` no `ui_kit`, aprovadas nos exemplos das conquistas): cada nível é um degradê
+  de cima para baixo com o ícone escuro. Bronze #F3B48C → #B8693F, Prata #F4F6FA → #A2ABBA, Ouro
+  #FFD978 → #F29B26, Platina #CFF5FF → #4EA8D1 e Diamante #EADFFF → #8B6EFF. A única usa o degradê aceso
+  (âmbar → laranja) e a secreta vai do brasa #FF9466 ao vermelho. A cor do pé também pinta o pontinho
+  do nível e a barra fina de quem está indo para aquele nível.
 
 ### Neutral
 - **Fundo do Palco** (bg): a janela, a barra de título (Windows 11) e o espaço entre painéis.
@@ -310,7 +321,8 @@ Escuros frios em camadas, uma luz quente e um vermelho de marca guardado para um
 recebem luz nem degradê no fundo.
 
 **The Red Pedal Rule.** O vermelho (#E0141C) é o pedal e o amplificador. Erro usa Brasa; ação usa o
-degradê âmbar → laranja.
+degradê âmbar → laranja. A única outra peça com vermelho é o pé do degradê da medalha secreta,
+aprovada assim nos exemplos.
 
 **The Lit Means Live Rule.** O degradê âmbar → laranja marca o que está aceso agora (ligado, hoje,
 progresso, ação principal). Se não está ao vivo nem é a ação principal, é cinza.
@@ -350,7 +362,9 @@ quebras de linha. Atenção: o Python arredonda o ,5 para o par, então em 100 %
 12 e 13,5 vira 14. Confira a quebra em 1×, 1,25×, 1,5× e 2×.
 
 **The Two Voices Rule.** Archivo só em títulos e números grandes; nenhum texto corrido, botão ou rótulo
-em Archivo. Sem caixa-alta, sem espaçamento entre letras, sem rótulo pequeno acima do título.
+em Archivo. Sem caixa-alta, sem espaçamento entre letras, sem rótulo pequeno acima do título. Exceções
+aprovadas nos exemplos: "META 30 MIN" no gráfico e os rótulos "NÍVEL DE MÚSICO" e "MAIS RECENTE" no
+palco das Conquistas (Segoe UI 11,5/600, muted).
 
 ## Layout
 
@@ -377,6 +391,11 @@ barra fica com o resto. No gráfico, a barra tem 22 px até a largura do gráfic
 px); num gráfico mais largo, engorda na mesma proporção, até 44 px em tela cheia, sem passar de 62 % do
 espaço de cada dia.
 
+Na página Conquistas, os grupos ficam em linhas de 5 medalhas, sem quebrar um grupo; grupos pequenos
+dividem a linha (Meta com Horários). Em cada linha, a medalha tem a mesma largura em todos os painéis.
+Numa janela larga (tela cheia), cabem 10 por linha, dois grupos lado a lado, e a linha do tempo ocupa a
+sobra da última linha (300 px ou mais); senão, ela fica embaixo, com as 8 mais recentes.
+
 O Painel é a exceção (opção B, escolhida pelo dono do projeto): ele tem pouco conteúdo e, esticado,
 abria um buraco entre o nome e o cartão. Numa janela maior que a padrão, ele é o desenho da janela
 padrão (882 px de página) ampliado por igual até ocupar a largura ou a altura visível, o que vier
@@ -400,8 +419,8 @@ ao palco, com centro acima da borda superior: âmbar a ~0,30–0,36 de opacidade
 ### Shadow Vocabulary
 - **Cartão flutuante** (preto a 75 %, deslocamento 22, desfoque 44, recuo −14): só o cartão do Discord,
   que é a única peça "de fora" sobre o palco.
-- **Brilho da conquista** (laranja a 80 %, deslocamento 10, desfoque 22, recuo −10): só a conquista
-  ganha, que acende.
+- **Brilho da conquista** (a cor do pé da medalha a 75 %, deslocamento 10, desfoque 22, recuo −10, numa
+  medalha de 52; proporcional nas outras): só a conquista ganha, que acende.
 - **Botão do deslizante** (preto a 50 %, deslocamento 1, desfoque 4): o círculo branco do deslizante.
 
 ### Named Rules
@@ -434,13 +453,23 @@ hoje. O espaço vazio do cartão é um contorno tracejado (6 ligado, 4 desligado
 - **Pílulas da cadeia:** cápsula de fundo branco a 6 % com contorno a 9 %, texto 12,5/500; 6 px entre
   elas, quebram em linhas. O amplificador é a única pílula vermelha, com texto branco 12,5/600.
 - **Segmentado:** fundo field com contorno panel-line (raio 11); o segmento escolhido é selected com
-  texto text, os outros muted, 12,5/600.
+  texto text, os outros muted, 12,5/600. Nas Estatísticas, o período; nas Conquistas, o filtro (Todas,
+  Destravadas, Faltam).
+- **Link do painel:** "Ver todas" em 12,5/600 âmbar com a seta `right` de 13, à direita do título do
+  painel (Conquistas nas Estatísticas).
 
 ### Cards / Containers
 - **Palco:** stage, raio 18, luz radial, 28 de respiro. Um por página, no topo.
 - **Painel:** panel, raio 16, contorno panel-line, título Title. Sem sombra.
-- **Conquista:** quadrado de 52 com raio 15; ganha = degradê âmbar → laranja com ícone escuro e brilho;
-  não ganha = tom escuro com ícone dim e trilho de progresso de 4 px.
+- **Conquista (medalha):** quadrado de 52 (56 na mais recente, 22 na linha do tempo) com raio de 29 % do
+  lado (`ui_kit.medal`). Acesa = o degradê do nível (ver Medalhas), ícone escuro e brilho na cor do pé;
+  apagada = badge-off com contorno field-line e ícone dim. A secreta ainda não destravada mostra o ícone
+  `question` e "Secreta · Continue tocando". Embaixo: os pontinhos de nível (`ui_kit.pips`, 2,4 de raio,
+  9 entre eles, a linha existe vazia nas únicas para os títulos alinharem), o nome (12,5/600), a linha
+  de baixo (12, text-soft: "Prata · 88 de 100 h", "em 07/11" ou o que fazer) e a barra fina de 4 px
+  até o próximo nível, na cor dele.
+- **Palco das Conquistas:** à esquerda, o nível de músico (Archivo 44), os pontos, a barra de 10 px até o
+  próximo nível (degradê aceso) e as marcas; à direita, a mais recente num painel de 250 px.
 - **Prévia do Discord:** reproduz o cartão real nas cores do Discord (card, raio 8, imagem de 64 com o
   amplificador desenhado, quatro linhas, botões de 30 px). Montada pelas mesmas funções que mandam a
   atividade. Embaixo, tracinhos de 16 × 4 indicam o cartão do rodízio (âmbar o atual).
@@ -460,7 +489,7 @@ hoje. O espaço vazio do cartão é um contorno tracejado (6 ligado, 4 desligado
   setas do teclado mexem nele.
 
 ### Navigation
-- **Trilho:** ícone de traço de 20 px sobre rótulo 10,5/600. Página atual: fundo rail-on, ícone âmbar,
+- **Trilho:** Painel, Estatísticas, Conquistas e Ajustes; ícone de traço de 20 px sobre rótulo 10,5/600. Página atual: fundo rail-on, ícone âmbar,
   rótulo text. Mouse por cima: fundo field. Fora: icon-off. A versão nova fica embaixo, em âmbar, com
   um ponto laranja.
 - **Teclado:** Tab e Shift+Tab percorrem trilho, página (de cima para baixo) e painel da direita; Enter

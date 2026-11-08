@@ -466,6 +466,14 @@ def evaluate(facts: Facts, permanent: dict[str, date] | None = None) -> list[Res
     return [by_key[d.key] for d in CATALOG if d.key in by_key]
 
 
+def unlocks(results: list[Result]) -> list[Unlock]:
+    """Todas as marcas alcançadas, da mais nova para a mais antiga (a linha do tempo da página). No mesmo
+    dia, a que vale mais pontos fica na frente, como no cartão do Discord."""
+    order = {d.key: i for i, d in enumerate(CATALOG)}
+    out = [Unlock(mark, r.key, level, day, mark_points(r.key, level)) for r in results for mark, level, day in r.marks()]
+    return sorted(out, key=lambda u: (u.got, u.points, order.get(u.key, 0), u.level), reverse=True)
+
+
 def total_points(results: list[Result]) -> int:
     return sum(r.points for r in results)
 
@@ -608,6 +616,15 @@ class AchievementTracker:
         """A última conta, com as marcas registradas somadas (vazia antes da primeira conta)."""
         with self._lock:
             return list(self._results)
+
+    def current(self, today: date | None = None) -> list[Result]:
+        """Para as telas: a última conta do loop ou, antes dela (o programa acabou de abrir), uma conta
+        feita agora sem registrar nada, para não roubar o aviso das marcas novas."""
+        with self._lock:
+            if self._results:
+                return list(self._results)
+            permanent = self._permanent()
+        return evaluate(collect_facts(self.stats.snapshot(), today or date.today(), self._goal()), permanent)
 
     def unseen(self) -> set[str]:
         """As marcas destravadas que a pessoa ainda não viu na página Conquistas."""
