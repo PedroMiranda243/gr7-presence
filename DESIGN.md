@@ -375,6 +375,19 @@ mostra mais semanas (16 no mínimo) até encostar na borda (`calendar_grid`). Na
 amplificadores, o nome fica com a coluna do exemplo (200 px, ou o que um nome comprido precisar) e a
 barra fica com o resto.
 
+O Painel é a exceção (opção B, escolhida pelo dono do projeto): ele tem pouco conteúdo e, esticado,
+abria um buraco entre o nome e o cartão. Numa janela maior que a padrão, ele é o desenho da janela
+padrão (882 px de página) ampliado por igual até ocupar a largura ou a altura visível, o que vier
+primeiro, e fica no meio da largura; a lista do Pausar cresce junto. Em tela cheia de 1920 × 1080, a
+ampliação fica perto de 1,8×. Na janela padrão, numa menor ou numa mais baixa que o conteúdo, é o
+desenho de sempre. As outras páginas não ampliam.
+
+Os painéis embaixo do palco são uma lista (`DashboardPage._panels`), dois por linha na janela padrão;
+painel novo entra nessa lista. Se o Painel ganhar painéis, na janela padrão a página rola, como as
+outras. Em tela cheia, eles vão para colunas a mais (cada painel com 400 px ou mais) para tudo caber
+numa tela só, e o `_fit` fica com o arranjo que deixa tudo maior. As letras nunca ficam menores que na
+janela padrão: se nem assim cabe, a página rola.
+
 ## Elevation & Depth
 
 A profundidade vem de camadas de tom (bg → rail → stage → panel → field → selected), não de sombra. Os

@@ -3,9 +3,15 @@
 No palco, com a luz em cima, o preset que está tocando, a cadeia do rack e o cartão que o Discord está
 mostrando, com o rodízio. Embaixo, a meta do dia e as conexões (Discord, Guitar Rig, leitura da tela).
 Com o Guitar Rig fechado, a luz apaga e a página diz o que acontece quando ele abrir.
+
+Numa janela maior que a padrão (tela cheia), o Painel é o desenho da janela padrão ampliado por igual
+até ocupar a largura ou a altura, centralizado (opção B, escolhida pelo dono do projeto). Se ganhar
+painéis, em tela cheia eles ficam mais lado a lado para tudo caber numa tela só (`_fit`); na janela
+padrão, a página rola como as outras.
 """
 from __future__ import annotations
 
+import dataclasses
 import math
 import time
 from datetime import date, datetime, timedelta
@@ -16,6 +22,8 @@ from .i18n import Translator, format_time
 
 PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 20, 14
 CARD_W = 290
+BASE_W = 960 - 78        # a página na janela padrão (o SIZE da main_window menos o trilho)
+PANEL_MIN_W = 400        # a menor largura de um painel de baixo: na janela padrão cabem dois lado a lado
 NAME = K.Style(46, 800, K.GLOW, display=True, width=125, line=0.98)
 NAME_MD = K.Style(38, 800, K.GLOW, display=True, width=125, line=0.98)
 META = K.Style(14, 400, K.TEXT_LEAD, line=1.5)
@@ -40,6 +48,14 @@ VERBS = {0: "playing", 2: "listening", 3: "watching", 5: "competing"}
 PILL_H = 6 + 12.5 * 1.2 + 6 + 2
 
 
+@dataclasses.dataclass
+class BottomPanel:
+    """Um painel embaixo do palco: o título, a altura do conteúdo numa largura e o desenho do conteúdo."""
+    title: str
+    height: Callable[[K.Painter, float], float]               # (medidor, largura do conteúdo) -> altura
+    draw: Callable[[K.Painter, float, float, float], None]    # (pintor, x, y, largura do conteúdo)
+
+
 class DashboardPage:
     key = "dashboard"
     icon = "dash"
@@ -52,6 +68,8 @@ class DashboardPage:
         self.now = now
         self.on_change: Callable[[], None] = lambda: None
         self.host = None
+        self.view_height = 0.0           # a janela informa a altura visível; sem ela, nada de ampliar
+        self._place = (1.0, 0.0)         # ampliação e deslocamento do último desenho, para a lista do Pausar
 
     # ---- ações ---------------------------------------------------------------------------------
     def _pause(self, how: str) -> None:
@@ -64,21 +82,82 @@ class DashboardPage:
 
     # ---- desenho -------------------------------------------------------------------------------
     def render(self, width: float, scale: float, t: Translator) -> K.Rendered:
+        state = self.app.last_state
+        layout_w, zoom = self._fit(width, scale, t, state)
+        if zoom == 1.0:
+            self._place = (1.0, 0.0)
+            return self._render(width, scale, t, state)
+        # O desenho numa largura menor, em pixels de tela maiores, no meio da largura.
+        dx = (width - layout_w * zoom) / 2
+        self._place = (zoom, dx)
+        inner = self._render(layout_w, scale * zoom, t, state)
+        p = K.Painter(width, inner.height * zoom, scale)
+        p.img.paste(inner.image, (p.px(dx), 0))
+        regions = [dataclasses.replace(r, x0=dx + r.x0 * zoom, y0=r.y0 * zoom, x1=dx + r.x1 * zoom, y1=r.y1 * zoom,
+                                       radius=r.radius * zoom) for r in inner.regions]
+        return K.Rendered(p.img, inner.height * zoom, regions)
+
+    def _fit(self, width: float, scale: float, t: Translator, state) -> tuple[float, float]:
+        """Em tela cheia: em que largura desenhar e quanto ampliar, até ocupar a largura ou a altura visível.
+
+        Experimenta a largura da janela padrão e as que põem mais painéis de baixo lado a lado, e fica com
+        a que deixa tudo maior sem passar da altura. Com os dois painéis de hoje, é sempre a da janela
+        padrão. Se o Painel ganhar painéis, eles vão para colunas a mais e tudo continua numa tela só. As
+        letras nunca ficam menores que na janela padrão: se nem assim cabe, é o desenho de sempre, na
+        largura toda, e a página rola. Na janela padrão, numa mais estreita ou numa mais baixa que o
+        conteúdo, a ampliação é 1."""
+        view_h = self.view_height or 0
+        if width < BASE_W * 1.01 or not view_h:
+            return width, 1.0
+        best_w, best = width, 1.0
+        for cols in range(2, max(2, len(self._panels(t, state))) + 1):
+            layout_w = max(BASE_W, cols * (PANEL_MIN_W + GAP) - GAP + 2 * PAD_X)
+            if layout_w * 1.01 > width:
+                break
+            zoom = min(width / layout_w, view_h / self._layout(layout_w, scale, t, state)["total"])
+            if zoom >= 1.01:
+                # O texto mede um tico diferente em outra escala: confere para não passar da altura e rolar.
+                zoom = min(zoom, view_h / self._layout(layout_w, scale * zoom, t, state)["total"])
+                zoom = math.floor(zoom * 100) / 100
+            if zoom > best:
+                best_w, best = layout_w, zoom
+        return (best_w, best) if best >= 1.01 else (width, 1.0)
+
+    def _layout(self, width: float, scale: float, t: Translator, state) -> dict:
+        """As medidas do Painel numa largura, sem desenhar."""
         m = K.Painter(1, 1, scale)
         inner = width - 2 * PAD_X
         left_w = inner - 56 - CARD_W - 26
-        state = self.app.last_state
         left = self._left(t, state)
-        left_h = self._left_height(m, left, left_w)
-        right_h = self._right_height(m, t, state)
-        stage_h = 28 + max(left_h, right_h) + 24
-        col = (inner - GAP) / 2
+        stage_h = 28 + max(self._left_height(m, left, left_w), self._right_height(m, t, state)) + 24
+        panels = self._panels(t, state)
+        # Dois por linha na janela padrão (e na mínima); numa largura maior, cabem mais lado a lado.
+        cols = max(1, min(len(panels), max(2, int((inner + GAP) // (PANEL_MIN_W + GAP)))))
+        col = (inner - GAP * (cols - 1)) / cols
+        rows = [panels[i:i + cols] for i in range(0, len(panels), cols)]
+        row_hs = [max(2 + 36 + 18 + 12 + panel.height(m, col - 42) for panel in row) for row in rows]
+        return {"inner": inner, "left_w": left_w, "left": left, "stage_h": stage_h, "col": col, "cols": cols,
+                "rows": rows, "row_hs": row_hs,
+                "total": PAD_TOP + stage_h + sum(GAP + h for h in row_hs) + PAD_BOTTOM}
+
+    def _panels(self, t: Translator, state) -> list[BottomPanel]:
+        """Os painéis embaixo do palco, na ordem. Painel novo entra nesta lista: na janela padrão eles ficam
+        de dois em dois, e a página rola se precisar; em tela cheia, o `_fit` põe mais lado a lado."""
         goal_note = self._goal_note(t, state)
-        goal_h = 2 + 36 + 18 + 12 + 34 + 12 + 10 + 10 + K.paragraph_height(m, goal_note, NOTE, col - 42)
         conns = self._connections(t, state)
-        conn_h = 2 + 36 + 18 + 12 + self._conn_height(m, conns, col - 42)
-        row_h = max(goal_h, conn_h)
-        total = PAD_TOP + stage_h + GAP + row_h + PAD_BOTTOM
+        return [
+            BottomPanel(t("dash_goal_title"),
+                        lambda m, w: 34 + 12 + 10 + 10 + K.paragraph_height(m, goal_note, NOTE, w),
+                        lambda p, x, y, w: self._draw_goal(p, x, y, w, t, goal_note)),
+            BottomPanel(t("conn_title"),
+                        lambda m, w: self._conn_height(m, conns, w),
+                        lambda p, x, y, w: self._draw_connections(p, x, y, w, conns)),
+        ]
+
+    def _render(self, width: float, scale: float, t: Translator, state) -> K.Rendered:
+        lay = self._layout(width, scale, t, state)
+        inner, left_w, left, stage_h, col = lay["inner"], lay["left_w"], lay["left"], lay["stage_h"], lay["col"]
+        total = lay["total"]
 
         p = K.Painter(width, total, scale)
         regions: list[K.Region] = []
@@ -88,12 +167,14 @@ class DashboardPage:
         p.rrect(PAD_X, y, inner, stage_h, 18, K.STAGE, light=light)
         self._draw_left(p, PAD_X + 28, y + 28, left_w, left, regions, t, state)
         self._draw_right(p, PAD_X + inner - 28 - CARD_W, y + 28, t, state)
-        y += stage_h + GAP
+        y += stage_h
 
-        cx, cy, cw = self._panel(p, PAD_X, y, col, row_h, t("dash_goal_title"))
-        self._draw_goal(p, cx, cy, cw, t, goal_note)
-        cx, cy, cw = self._panel(p, PAD_X + col + GAP, y, col, row_h, t("conn_title"))
-        self._draw_connections(p, cx, cy, cw, conns)
+        for row, row_h in zip(lay["rows"], lay["row_hs"]):
+            y += GAP
+            for i, panel in enumerate(row):
+                cx, cy, cw = self._panel(p, PAD_X + i * (col + GAP), y, col, row_h, panel.title)
+                panel.draw(p, cx, cy, cw)
+            y += row_h
         return K.Rendered(p.img, total, regions)
 
     def _panel(self, p: K.Painter, x: float, y: float, w: float, h: float, title: str) -> tuple[float, float, float]:
@@ -222,10 +303,12 @@ class DashboardPage:
             return
         p.icon("down", bx + bw - 14 - 13, y + 10.5, 13, K.TEXT, stroke=2.2)
         options = [("hour", t("pause_hour")), ("forever", t("pause_forever"))]
+        zoom, dx = self._place      # ampliado em tela cheia, a lista cresce junto e abre no mesmo lugar
 
         def open_menu():
             if self.host:
-                self.host.open_menu(bx + bw - 220, y + 34 + 4, 220, options, None, self._pause, above=y - 4)
+                self.host.open_menu(dx + (bx + bw - 220) * zoom, (y + 34 + 4) * zoom, 220, options, None, self._pause,
+                                    above=(y - 4) * zoom, zoom=zoom)
         regions.append(K.Region(bx, y, bx + bw, y + 34, open_menu, "pause"))
 
     # ---- o cartão, à direita ----

@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 from gr7_presence.config import DEFAULTS
-from gr7_presence.dashboard_page import DashboardPage
+from gr7_presence.dashboard_page import NOTE, BottomPanel, DashboardPage
 from gr7_presence.detector import Target
 from gr7_presence.gr7_state import PresetInfo
 from gr7_presence.i18n import Translator
@@ -124,6 +124,100 @@ class DashboardTest(unittest.TestCase):
         self.assertIn("minimizada", rows[2][3])
         rows = self.page._connections(self.t, None)
         self.assertEqual([r[2] for r in rows], ["fechado", "fechado", "esperando"])
+
+
+class FullScreenTest(unittest.TestCase):
+    """Tela cheia (opção B): o desenho da janela padrão ampliado por igual até ocupar a tela. Na janela
+    padrão e nas menores, o desenho de sempre."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.app = FakeApp(Stats(Path(tmp.name) / "stats.json"))
+        self.page = DashboardPage(self.app, today=lambda: TODAY, now=lambda: NOW)
+        self.t = Translator("pt")
+
+    def render(self, width: float, view_height: float, scale: float = 1.0):
+        self.page.view_height = view_height
+        return self.page.render(width, scale, self.t)
+
+    def test_default_window_is_untouched(self):
+        for width, height in ((882, 640), (782, 560), (882, 1000)):   # padrão, mínima, só mais alta
+            plain = DashboardPage(self.app, today=lambda: TODAY, now=lambda: NOW).render(width, 1.0, self.t)
+            r = self.render(width, height)
+            self.assertEqual(self.page._place, (1.0, 0.0))
+            self.assertEqual(r.image.tobytes(), plain.image.tobytes())
+
+    def test_full_screen_fills_the_screen(self):
+        for width, height, scale in ((1842, 1001, 1.0), (1842, 1001, 1.5), (2482, 1001, 1.0)):
+            r = self.render(width, height, scale)
+            zoom, dx = self.page._place
+            self.assertGreater(zoom, 1.5)
+            self.assertLessEqual(r.height, height)                     # cabe sem rolar
+            self.assertTrue(r.height > 0.98 * height or dx < 10)        # ocupa a altura ou a largura
+            self.assertAlmostEqual(dx * 2 + 882 * zoom, width)          # no meio da largura
+            self.assertEqual(r.image.size, (round(width * scale), round(r.height * scale)))
+            # O desenho da janela padrão na escala ampliada (o texto mede um tico diferente em cada escala).
+            default = DashboardPage(self.app, today=lambda: TODAY, now=lambda: NOW).render(882, scale * zoom, self.t)
+            self.assertEqual(len(default.regions), len(r.regions))
+            for a, b in zip(default.regions, r.regions):                # os cliques acompanham o desenho
+                self.assertEqual(a.key, b.key)
+                self.assertAlmostEqual(b.x0, dx + a.x0 * zoom, places=3)
+                self.assertAlmostEqual(b.y1, a.y1 * zoom, places=3)
+
+    def test_wide_but_short_window_stays_inside(self):
+        r = self.render(1800, 640)                                      # só mais larga que a padrão
+        zoom, dx = self.page._place
+        self.assertGreater(zoom, 1.0)                                   # cresce até a altura…
+        self.assertLessEqual(r.height, 640)                             # …sem passar dela
+        self.assertGreater(dx, 200)                                     # e o que sobra fica dos lados
+
+    def with_extra_panels(self, n: int) -> None:
+        """O Painel com `n` painéis a mais embaixo, como se ganhasse componentes novos."""
+        usual = self.page._panels
+        extra = [BottomPanel(f"Extra {i}", lambda m, w: 100, lambda p, x, y, w: p.text(x, y, "texto", NOTE))
+                 for i in range(n)]
+        self.page._panels = lambda t, state: usual(t, state) + extra
+
+    def test_more_panels_scroll_in_the_default_window(self):
+        self.with_extra_panels(4)
+        r = self.render(882, 640)
+        self.assertEqual(self.page._place, (1.0, 0.0))                  # nada de ampliar ou reorganizar
+        self.assertEqual(self.page._layout(882, 1.0, self.t, self.app.last_state)["cols"], 2)
+        self.assertGreater(r.height, 640)                               # a página rola, como as outras
+
+    def test_more_panels_fit_the_full_screen(self):
+        self.with_extra_panels(4)
+        only_default_width = min(1842 / 882, 1001 / self.page._layout(882, 1.0, self.t, self.app.last_state)["total"])
+        r = self.render(1842, 1001)
+        zoom, dx = self.page._place
+        layout_w = (1842 - 2 * dx) / zoom
+        self.assertLessEqual(r.height, 1001)                            # tudo numa tela só
+        self.assertGreater(zoom, only_default_width)                    # maior do que só ampliando
+        self.assertGreaterEqual(self.page._layout(layout_w, zoom, self.t, self.app.last_state)["cols"], 3)
+
+    def test_letters_never_shrink(self):
+        self.with_extra_panels(20)                                      # nem em quatro colunas cabe
+        r = self.render(1842, 1001)
+        self.assertEqual(self.page._place, (1.0, 0.0))                  # o tamanho de letra da janela padrão
+        self.assertEqual(self.page._layout(1842, 1.0, self.t, self.app.last_state)["cols"], 4)
+        self.assertGreater(r.height, 1001)                              # e a página rola
+
+    def test_pause_menu_grows_with_the_page(self):
+        host = mock.Mock()
+        self.page.host = host
+        self.render(882, 0)
+        normal = next(r for r in self.page.render(882, 1.0, self.t).regions if r.key == "pause")
+        normal.action()
+        x, y = host.open_menu.call_args.args[:2]
+        r = self.render(1842, 1001)
+        zoom, dx = self.page._place
+        next(reg for reg in r.regions if reg.key == "pause").action()
+        args, kwargs = host.open_menu.call_args
+        self.assertAlmostEqual(args[0], dx + x * zoom)
+        self.assertAlmostEqual(args[1], y * zoom)
+        self.assertEqual(args[2], 220)                                  # a largura da lista normal…
+        self.assertEqual(kwargs["zoom"], zoom)                          # …desenhada na escala ampliada
 
 
 if __name__ == "__main__":
