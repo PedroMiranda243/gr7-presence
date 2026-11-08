@@ -332,7 +332,7 @@ resto com cara de programa do Windows, legível e calmo.
   primeira abertura.
 - **Headline** (Archivo 800, largura 125, 30 px, cor text): título das páginas Estatísticas e Ajustes.
 - **Stat** (Archivo 800, largura 118, 34 px) e **Stat SM** (24 px, cor glow): minutos de hoje na meta;
-  números ao lado do gráfico.
+  números ao lado do gráfico, com os tempos em horas e minutos ("7 h 34 min", "87 h 46 min").
 - **Title** (Archivo 700, largura 112, 15 px, linha 1,2): título de cada painel ("Meta de hoje",
   "Conexões", "Prática").
 - **Body Lead** (14 px, linha 1,5, text-lead): o parágrafo sob o título do palco.
@@ -399,7 +399,9 @@ Cantos sempre arredondados e suavizados (desenho 4× maior e reduzido). Quanto m
 raio: palco 18, painel 16, conquista 15, item do trilho 12, botão principal 11, campos e botões 10,
 cartão do Discord e segmentos 8, item da lista de opções 6. Pílulas e chaves são cápsulas inteiras;
 trilhos de progresso usam metade da altura. Barras do gráfico só têm canto em cima
-(`top_rounded_bar`). O espaço vazio do cartão é um contorno tracejado (6 ligado, 4 desligado) de raio 8.
+(`top_rounded_bar`). A linha da meta passa na frente das barras: tracejado âmbar de 1,5 px (5 ligado,
+4 desligado), com um contorno na cor do palco só onde cruza uma barra, para não sumir na barra de
+hoje. O espaço vazio do cartão é um contorno tracejado (6 ligado, 4 desligado) de raio 8.
 
 ## Components
 

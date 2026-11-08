@@ -17,6 +17,7 @@ from .stats import (Achievement, Bar, Stats, achievements, day_totals, period_ba
 
 PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 24, 14
 CHART_H, FACTS_W = 232, 230
+GOAL_DASH = (5, 4)          # traço e espaço da linha da meta
 PERIODS = ("days", "weeks", "all")
 
 TITLE = K.Style(30, 800, K.TEXT, display=True, width=125, line=1.0)
@@ -127,7 +128,7 @@ class StatsPage:
                       else t("fact_no_streak_sub"))
         n = d["week_sessions"]
         week_sub = t("fact_week_sub", n=n) if n > 1 else t("fact_week_sub_one") if n == 1 else t("fact_week_sub_none")
-        return [streak, (format_time(s.week, long=True), week_sub), (f"{int(s.total // 3600)} h" if s.total >= 3600 else format_time(s.total), t("fact_total_sub"))]
+        return [streak, (format_time(s.week, long=True), week_sub), (format_time(s.total, long=True), t("fact_total_sub"))]
 
     # ---- desenho -----------------------------------------------------------------------------
     def render(self, width: float, scale: float, t: Translator) -> K.Rendered:
@@ -227,10 +228,6 @@ class StatsPage:
             gy = base - v / top * ch
             p.hline(x0 + pad_l, x0 + w, gy, K.GRID)
             p.label(x0 + pad_l - 8, gy, f"{v // 60} h" if hours and v else str(v), AXIS, anchor="r")
-        if daily and goal:
-            gy = base - goal / top * ch
-            p.hline(x0 + pad_l, x0 + w, gy, K.AMBER, width=1.5, dash=(5, 4))
-            p.label(x0 + pad_l + 4, gy - 10, t("chart_goal", n=goal), GOAL)
         initials = t("weekday_initials").split(",")
         months = t("months_short").split(",")
         for i, (bar, m) in enumerate(zip(bars, minutes)):
@@ -252,6 +249,26 @@ class StatsPage:
                 p.label(bx + bw / 2, y0 + h - 9, label, AXIS_NOW if bar.current else AXIS, anchor="m")
             if bar.current and m > 0:
                 p.label(bx + bw / 2, base - bh - 11, str(int(m)) if daily else format_time(bar.seconds), VALUE, anchor="m")
+        if daily and goal:
+            self._goal_line(p, x0 + pad_l, x0 + w, base - goal / top * ch, [
+                x0 + pad_l + i * slot + (slot - bw) / 2 for i, m in enumerate(minutes) if m >= goal], bw)
+            p.label(x0 + pad_l + 4, base - goal / top * ch - 10, t("chart_goal", n=goal), GOAL)
+
+    @staticmethod
+    def _goal_line(p: K.Painter, x1: float, x2: float, y: float, crossed: list[float], bw: float) -> None:
+        """A meta tracejada, desenhada depois das barras para ficar na frente delas. Onde ela cruza uma
+        barra (`crossed`, o x de cada uma), cada traço ganha um contorno na cor do palco, que separa o
+        âmbar da meta do âmbar da barra de hoje. Fora das barras não há contorno: a luz atrás da barra de
+        hoje mostraria uma faixa escura."""
+        on, off = GOAL_DASH
+        for bx in crossed:
+            x = x1 + math.floor((bx - x1) / (on + off)) * (on + off)   # o traço que começa antes da barra
+            while x < bx + bw:
+                a, b = max(x, bx), min(x + on, bx + bw)
+                if p.px(b) > p.px(a):          # pedaço de traço com menos de 1 pixel de tela fica de fora
+                    p.hline(a, b, y, K.STAGE, width=4.5)
+                x += on + off
+        p.hline(x1, x2, y, K.AMBER, width=1.5, dash=GOAL_DASH)
 
     # ---- conquistas ----
     def _badges(self, d: dict, t: Translator) -> list[tuple[Achievement, str, str]]:
