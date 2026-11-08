@@ -1,6 +1,7 @@
 """Página Estatísticas da janela principal, desenhada pelo Pillow como no exemplo aprovado (Palco).
 
-De cima para baixo: o gráfico com a luz na barra de hoje e os números ao lado; as conquistas; o
+De cima para baixo: o gráfico com a luz na barra de hoje e os números ao lado; uma linha com 5
+conquistas (as mais recentes e as mais perto do próximo nível) e o link para a página Conquistas; o
 calendário dos dias tocados (16 semanas ou mais, conforme a largura) e os presets mais tocados; os
 amplificadores e as sessões recentes.
 """
@@ -11,9 +12,10 @@ from datetime import date, datetime, timedelta
 from typing import Callable
 
 from . import ui_kit as K
+from .achievements import AchievementTracker, Result, collect_facts, evaluate
+from .achievements_page import Badge, badge, badge_height, draw_badge, first_session, highlights
 from .i18n import Translator, format_time
-from .stats import (Achievement, Bar, Stats, achievements, day_totals, period_bars, period_start,
-                    sessions_since, top_in, week_start)
+from .stats import Bar, Stats, day_totals, period_bars, period_start, sessions_since, top_in, week_start
 
 PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 24, 14
 CHART_H, FACTS_W = 232, 230
@@ -37,10 +39,8 @@ GOAL = K.Style(11, 600, K.AMBER)
 VALUE = K.Style(12, 700, K.GLOW)
 CAL = K.Style(10.5, 400, K.FAINT, line=1.0)
 LEGEND = K.Style(11.5, 400, K.FAINT)
-BADGE_TITLE = K.Style(12.5, 600, K.TEXT, line=1.3)
-BADGE_SUB = K.Style(12, 400, K.TEXT_SOFT, line=1.3)
-
-BADGE_ICONS = {"streak7": "flame", "hours10": "clock", "goal_week": "target", "streak30": "flame", "hours100": "clock"}
+LINK = K.Style(12.5, 600, K.AMBER, line=1.2)
+BADGE_COLS = 5
 LIGHT = [(0.0, (255, 179, 71, 0.32)), (0.55, (255, 106, 61, 0.12)), (1.0, (17, 19, 26, 0.0))]
 ROW_H = 6 + 13 * 1.4 + 6
 REC_H = 7 + 13 * 1.4 + 7
@@ -81,10 +81,12 @@ class StatsPage:
     icon = "chart"
     label_key = "nav_stats"
 
-    def __init__(self, stats: Stats, goal_minutes: Callable[[], int], today: Callable[[], date] = date.today):
+    def __init__(self, stats: Stats, goal_minutes: Callable[[], int], today: Callable[[], date] = date.today,
+                 achievements: AchievementTracker | None = None):
         self.stats = stats
         self.goal_minutes = goal_minutes
         self.today = today
+        self.achievements = achievements   # sem o registro (testes), a conta é feita aqui
         self.period = "days"
         self.on_change: Callable[[], None] = lambda: None
 
@@ -111,10 +113,15 @@ class StatsPage:
             "bars": period_bars(days, today, self.period),
             "presets": top_in(sessions, "presets", since),
             "amps": top_in(sessions, "amps", since),
-            "achievements": achievements(days, today, goal),
+            "achievements": self._achievements(sessions, today, goal),
             "week_sessions": sessions_since(sessions, today - timedelta(days=6)),
             "live_start": current.get("start") if current else None,
         }
+
+    def _achievements(self, sessions: list[dict], today: date, goal: int) -> list[Result]:
+        if self.achievements is not None:
+            return self.achievements.current(today)
+        return evaluate(collect_facts(sessions, today, goal))
 
     def _facts(self, d: dict, t: Translator) -> list[tuple[str | None, str]]:
         s = d["summary"]
@@ -144,9 +151,8 @@ class StatsPage:
                       + K.paragraph_height(m, small, FACT, FACTS_W) for big, small in facts) + 14 * (len(facts) - 1)
         chart_h = 2 + 40 + max(CHART_H, facts_h)
         badges = self._badges(d, t)
-        badge_cols = len(badges)
-        badge_w = (inner - 42 - 10 * (badge_cols - 1)) / badge_cols
-        badge_h = max(self._badge_height(m, b, badge_w) for b in badges)
+        badge_w = (inner - 42 - 10 * (BADGE_COLS - 1)) / BADGE_COLS
+        badge_h = max(badge_height(m, b, badge_w) for b in badges)
         ach_h = 2 + 36 + 15 * 1.2 + 12 + badge_h
         cal_h = 2 + 36 + 18 + 12 + CAL_TOP + 7 * calendar_grid(col - 42)[1] - CAL_GAP + 10 + 14
         presets_h = 2 + 36 + 18 + 12 + self._list_height(m, d["presets"], col)
@@ -171,7 +177,9 @@ class StatsPage:
         y += chart_h + GAP
 
         cx, cy, cw = self._panel(p, PAD_X, y, inner, ach_h, t("ach_title"))
-        self._draw_badges(p, cx, cy, cw, badges, badge_w)
+        regions.append(self._see_all(p, PAD_X + inner, y, t))
+        for i, b in enumerate(badges):
+            draw_badge(p, cx + i * (badge_w + 10) + badge_w / 2, cy, badge_w, b)
         y += ach_h + GAP
 
         cx, cy, cw = self._panel(p, PAD_X, y, col, row1, t("cal_title"))
@@ -276,51 +284,19 @@ class StatsPage:
         p.hline(x1, x2, y, K.AMBER, width=1.5, dash=GOAL_DASH)
 
     # ---- conquistas ----
-    def _badges(self, d: dict, t: Translator) -> list[tuple[Achievement, str, str]]:
-        out = []
-        for a in d["achievements"]:
-            if a.key.startswith("streak"):
-                title = t("ach_streak", n=a.target)
-                sub = t("ach_best", n=int(a.value)) if a.value else t("ach_of", n=0, total=a.target)
-            elif a.key.startswith("hours"):
-                title = t("ach_hours", n=a.target)
-                sub = t("ach_hours_of", n=int(a.value), total=a.target)
-            else:
-                title = t("ach_goal_week")
-                sub = t("ach_goal_of", n=int(a.value))
-            if a.got:
-                sub = t("ach_on", date=t("date_short", d=a.got.day, m=a.got.month))
-            out.append((a, title, sub))
-        return out
+    def _badges(self, d: dict, t: Translator) -> list[Badge]:
+        results = d["achievements"]
+        first = first_session(results)
+        return [badge(r, t, d["today"], first) for r in highlights(results, BADGE_COLS)]
 
-    def _badge_height(self, m: K.Painter, badge: tuple[Achievement, str, str], w: float) -> float:
-        a, title, sub = badge
-        h = 52 + 7 + K.paragraph_height(m, title, BADGE_TITLE, w) + K.paragraph_height(m, sub, BADGE_SUB, w)
-        return h + (0 if a.got else 7 + 4)
-
-    def _draw_badges(self, p: K.Painter, x: float, y: float, w: float, badges: list, col_w: float) -> None:
-        for i, (a, title, sub) in enumerate(badges):
-            cx = x + i * (col_w + 10) + col_w / 2
-            mx = cx - 26
-            if a.got:
-                p.shadow(mx, y, 52, 52, 15, (255, 106, 61, 204), dy=10, blur=22, spread=-10)
-                p.rrect(mx, y, 52, 52, 15, K.gradient(p.px(52), p.px(52), K.AMBER, K.ORANGE))
-                p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, K.BADGE_ICON)
-            else:
-                p.rrect(mx, y, 52, 52, 15, K.BADGE_OFF, outline=K.FIELD_LINE)
-                p.icon(BADGE_ICONS[a.key], cx - 12, y + 14, 24, K.DIM)
-            ty = y + 52 + 7
-            for line in p.wrap(title, BADGE_TITLE, col_w):
-                p.text(cx, ty, line, BADGE_TITLE, anchor="m")
-                ty += BADGE_TITLE.size * BADGE_TITLE.line
-            for line in p.wrap(sub, BADGE_SUB, col_w):
-                p.text(cx, ty, line, BADGE_SUB, anchor="m")
-                ty += BADGE_SUB.size * BADGE_SUB.line
-            if not a.got:
-                ty += 7
-                p.rrect(cx - col_w / 2, ty, col_w, 4, 2, K.TRACK)
-                if a.progress > 0:
-                    p.rrect(cx - col_w / 2, ty, max(4, col_w * a.progress), 4, 2, K.ICON_OFF)
+    def _see_all(self, p: K.Painter, right: float, top: float, t: Translator) -> K.Region:
+        """O "Ver todas ›" à direita do título do painel, que abre a página Conquistas."""
+        x = right - 21
+        p.icon("right", x - 13, top + 20.5, 13, K.AMBER, stroke=2.2)
+        tw = p.text(x - 16, top + 19.5, t("ach_see_all"), LINK, anchor="r")
+        host = lambda: getattr(self, "host", None)
+        return K.Region(x - 16 - tw - 6, top + 13, x + 4, top + 13 + 28,
+                        lambda: host() and host().show("achievements"), "see_all", radius=8)
 
     # ---- calendário ----
     def _calendar(self, p: K.Painter, x: float, y: float, w: float, d: dict, t: Translator) -> None:

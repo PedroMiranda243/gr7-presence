@@ -1,6 +1,7 @@
 import copy
 import tempfile
 import tkinter as tk
+import types
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -52,7 +53,7 @@ class MainWindowTest(unittest.TestCase):
         win.render_page()
         win.render_rail()
         self.assertIsNotNone(win._page)
-        self.assertEqual([r.key for r in win._page.regions], ["days", "weeks", "all"])
+        self.assertEqual([r.key for r in win._page.regions], ["days", "weeks", "all", "see_all"])
         page.set_period("all")                    # o clique redesenha a página
         self.assertEqual(win._page.regions[2].key, "all")
         win._rail_click(mock.Mock(x=40 * win.scale, y=(640 - 14 - 20) * win.scale))
@@ -60,6 +61,22 @@ class MainWindowTest(unittest.TestCase):
         win.close()
         self.assertFalse(win.alive)
         win.render_page()                         # depois de fechada, não faz nada nem quebra
+
+
+    def test_on_show_when_the_page_appears(self):
+        """A página Conquistas marca as novas como vistas quando aparece (ao abrir ou ao trocar de página)."""
+        stats = StatsPage(self.stats, lambda: 30)
+        shown = types.SimpleNamespace(key="achievements", icon="trophy", label_key="nav_achievements",
+                                      render=StatsPage(self.stats, lambda: 30).render, on_show=mock.Mock())
+        win = MainWindow(self.root, [stats, shown], lambda: Translator("pt"), lambda: None)
+        shown.on_show.assert_not_called()
+        win.show("achievements")
+        shown.on_show.assert_called_once_with()
+        win.show("stats")
+        win.close()
+        win2 = MainWindow(self.root, [stats, shown], lambda: Translator("pt"), lambda: None, page="achievements")
+        self.assertEqual(shown.on_show.call_count, 2)
+        win2.close()
 
 
 class TrayOpensMainWindowTest(unittest.TestCase):
@@ -75,6 +92,8 @@ class TrayOpensMainWindowTest(unittest.TestCase):
         ui._show_stats()
         first = ui._main_window
         self.assertTrue(first.alive)
+        self.assertEqual([p.key for p in first.pages], ["dashboard", "stats", "achievements", "settings", "update"])
+        self.assertIs(first.by_key["achievements"].tracker, app.achievements)
         ui._show_stats()
         self.assertIs(ui._main_window, first)     # a mesma janela volta para a frente
         app.updates.available = Release("1.4.0", "https://exemplo")
@@ -166,7 +185,8 @@ class KeyboardTest(unittest.TestCase):
         win.render_page()
         win.render_rail()
         targets = win._targets()
-        self.assertEqual(targets, [("rail", "stats"), ("page", "days"), ("page", "weeks"), ("page", "all")])
+        self.assertEqual(targets, [("rail", "stats"), ("page", "days"), ("page", "weeks"), ("page", "all"),
+                                   ("page", "see_all")])
         win._tab(1)
         win._tab(1)
         win._tab(1)

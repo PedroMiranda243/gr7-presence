@@ -9,6 +9,18 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Mudanças
+- **Conquistas: uma página nova, com 35 conquistas.** Ela fica na barra lateral e mostra o seu nível de
+  músico, os pontos e a conquista mais recente. Cada conquista é uma medalha, em grupos como Prática,
+  Constância, Timbres e Estúdio. As de níveis vão do Bronze ao Diamante, e a barra embaixo mostra
+  quanto falta para o próximo. Há conquistas únicas e 5 secretas, que aparecem com "?" até você
+  destravar. A linha do tempo mostra cada uma com o dia em que saiu, inclusive as que você já tinha
+  antes desta versão.
+- **Estatísticas: a linha de conquistas mudou.** Ela mostra as 5 mais recentes ou mais perto do
+  próximo nível, e o **Ver todas** abre a página nova.
+- **Algumas conquistas contam só daqui para a frente:** as que usam o gênero, o preset próprio, a
+  guitarra ou o baixo e o Tape Deck. A página avisa quais são.
+
 ## [1.4.4] - 2026-11-07
 
 ### Como atualizar

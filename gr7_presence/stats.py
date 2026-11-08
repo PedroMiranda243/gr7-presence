@@ -198,15 +198,6 @@ class Bar:
     current: bool      # hoje, esta semana ou este mês
 
 
-@dataclass
-class Achievement:
-    key: str           # streak7, hours10, goal_week, streak30, hours100
-    target: int        # dias, horas ou dias da semana com a meta
-    got: date | None   # o dia em que foi conquistada
-    value: float       # recorde de dias, horas tocadas ou dias com a meta nesta semana
-    progress: float    # de 0 a 1
-
-
 def day_totals(sessions: list[dict]) -> dict[date, float]:
     """Segundos tocados por dia."""
     days: Counter = Counter()
@@ -265,47 +256,3 @@ def top_in(sessions: list[dict], field: str, since: date | None, n: int = 5) -> 
 
 def sessions_since(sessions: list[dict], since: date) -> int:
     return sum(1 for s in sessions if datetime.fromtimestamp(s.get("start", 0)).date() >= since)
-
-
-def achievements(days: dict[date, float], today: date, goal_minutes: int) -> list[Achievement]:
-    """As conquistas, na ordem da tela. A da meta só existe com uma meta diária definida."""
-    good = sorted(d for d, secs in days.items() if secs >= STREAK_DAY_SECONDS)
-    _current, best = _streaks({d.isoformat(): days[d] for d in days}, today)
-
-    def streak_reached(n: int) -> date | None:
-        run, prev = 0, None
-        for d in good:
-            run = run + 1 if prev and d - prev == timedelta(days=1) else 1
-            prev = d
-            if run >= n:
-                return d
-        return None
-
-    def hours_reached(hours: int) -> date | None:
-        acc = 0.0
-        for d in sorted(days):
-            acc += days[d]
-            if acc >= hours * 3600:
-                return d
-        return None
-
-    total_h = sum(days.values()) / 3600
-    out = [
-        Achievement("streak7", 7, streak_reached(7), best, min(1.0, best / 7)),
-        Achievement("hours10", 10, hours_reached(10), total_h, min(1.0, total_h / 10)),
-    ]
-    if goal_minutes > 0:
-        per_week: Counter = Counter()
-        first = None
-        for d in sorted(days):
-            if days[d] >= goal_minutes * 60:
-                per_week[week_start(d)] += 1
-                if per_week[week_start(d)] == 5 and first is None:
-                    first = d
-        this_week = per_week[week_start(today)]
-        out.append(Achievement("goal_week", 5, first, this_week, min(1.0, this_week / 5)))
-    out += [
-        Achievement("streak30", 30, streak_reached(30), best, min(1.0, best / 30)),
-        Achievement("hours100", 100, hours_reached(100), total_h, min(1.0, total_h / 100)),
-    ]
-    return out

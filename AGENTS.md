@@ -73,11 +73,12 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `presence.py` | Monta os cartões e o payload, com os limites do Discord | Rede, estado |
 | `discord_ipc.py` | Pipe local do Discord (handshake, `SET_ACTIVITY`) | Montar texto |
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
-| `stats.py` | Sessões de prática e os números das estatísticas (barras, conquistas) | Desenhar |
+| `stats.py` | Sessões de prática e os números das estatísticas (barras, sequência) | Desenhar |
 | `achievements.py` | O catálogo das conquistas, a conta a partir das sessões, os pontos e o registro em `dados\conquistas.json` | Desenhar, avisar ou falar com o Discord |
 | `main_window.py` | A janela principal: barra lateral, rolagem, cliques, barra de título escura | Desenhar o conteúdo das páginas |
 | `dashboard_page.py` | A página Painel: o preset no palco, o cartão no perfil agora, meta e conexões | Decidir o cartão (lê `app.showing`) |
-| `stats_page.py` | A página Estatísticas, desenhada numa imagem | Calcular os números (`stats.py`) |
+| `stats_page.py` | A página Estatísticas, desenhada numa imagem, com a linha de 5 conquistas | Calcular os números (`stats.py`) |
+| `achievements_page.py` | A página Conquistas: o nível de músico, uma medalha por conquista, a linha do tempo; e as medalhas da linha das Estatísticas | Calcular as conquistas (`achievements.py`) |
 | `settings_page.py` | A página Ajustes: as opções do `config.json` e a prévia do cartão | Montar o cartão (usa `presence.py`) |
 | `ui_kit.py` | Cores, fontes e peças da direção "Palco", desenhadas com o Pillow | Usar o Tkinter |
 | `tray.py` | Ícone, menu curto, notificações; abre a janela principal e a primeira abertura | Lógica de presença |
@@ -238,6 +239,11 @@ parte com `grab_set`, e o Tk manda para ela todo clique na janela do programa. O
 janela da lista, não ao desenho dentro dela, e com o x e o y do evento zerados. Até a 1.4.2 o clique era
 tratado só no desenho, e o clique fora se perdia. Trate o clique na janela da lista, pelas coordenadas
 de tela (`x_root`, `y_root`). O `MenuTest` de `tests/test_main_window.py` gera esse clique.
+
+**Conquista nova que sai sem aviso.** A janela pode abrir antes de o loop fazer a primeira conta das
+conquistas. Se a página chamasse `check()`, as marcas novas ficariam registradas pela janela, e o loop
+não as veria como novas: nada de aviso nem de cartão. As telas leem o `AchievementTracker.current()`,
+que antes da primeira conta calcula sem registrar nada. Só o loop chama `check()` e `maybe_check()`.
 
 **Fonte diferente no Windows 10.** A Segoe UI Variable só existe no Windows 11; no 10, o `ui_kit` usa a
 Segoe UI comum. A Archivo é variável, e o Pillow recebe os eixos na ordem [peso, largura].

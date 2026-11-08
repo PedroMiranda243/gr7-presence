@@ -172,36 +172,6 @@ class PageNumbersTest(unittest.TestCase):
         self.assertEqual(stats_mod.top_in([old, new], "presets", None)[0][0], "Antigo")
         self.assertEqual(stats_mod.sessions_since([old, new], self.TODAY - timedelta(days=6)), 1)
 
-    def test_achievements(self):
-        full = 30 * 60
-        start = date(2026, 8, 1)
-        days = {start + timedelta(days=i): full for i in range(8)}                 # 8 dias seguidos
-        days.update({self.TODAY - timedelta(days=i): 3600 for i in range(2)})      # meta batida 2 dias nesta semana
-        got = {a.key: a for a in stats_mod.achievements(days, self.TODAY, goal_minutes=60)}
-        self.assertEqual(list(got), ["streak7", "hours10", "goal_week", "streak30", "hours100"])
-        self.assertEqual(got["streak7"].got, start + timedelta(days=6))            # o 7º dia
-        self.assertIsNone(got["streak30"].got)
-        self.assertEqual(got["streak30"].value, 8)
-        self.assertAlmostEqual(got["streak30"].progress, 8 / 30)
-        self.assertIsNone(got["hours10"].got)                                      # 4 h + 2 h
-        self.assertAlmostEqual(got["hours10"].value, 6)
-        self.assertEqual(got["goal_week"].value, 2)
-        self.assertIsNone(got["goal_week"].got)
-
-    def test_goal_week_reached_and_hidden_without_goal(self):
-        monday = date(2026, 10, 5)
-        days = {monday + timedelta(days=i): 3600 for i in range(5)}
-        got = {a.key: a for a in stats_mod.achievements(days, self.TODAY, goal_minutes=45)}
-        self.assertEqual(got["goal_week"].got, monday + timedelta(days=4))
-        self.assertEqual(got["hours10"].value, 5)
-        keys = [a.key for a in stats_mod.achievements(days, self.TODAY, goal_minutes=0)]
-        self.assertNotIn("goal_week", keys)
-
-    def test_hours_reached_date(self):
-        days = {date(2026, 9, 1): 6 * 3600, date(2026, 9, 3): 5 * 3600}
-        got = {a.key: a for a in stats_mod.achievements(days, self.TODAY, 0)}
-        self.assertEqual(got["hours10"].got, date(2026, 9, 3))
-
 
 if __name__ == "__main__":
     unittest.main()

@@ -6,8 +6,9 @@ os campos de texto (tk.Entry por cima do desenho), as listas de opções, a atua
 10 segundos e a barra de título escura.
 
 Uma página tem `key`, `icon`, `label_key` e `render(largura, escala, t)`. Opcionalmente, `side_width` e
-`render_side(...)` para um painel fixo à direita (a prévia dos Ajustes), `focus_field(chave)` e
-`end_drag()`. A janela dá à página `on_change` (pede para redesenhar) e `host` (esta janela).
+`render_side(...)` para um painel fixo à direita (a prévia dos Ajustes), `focus_field(chave)`,
+`end_drag()` e `on_show()`, chamado quando a página aparece (a Conquistas marca as novas como vistas).
+A janela dá à página `on_change` (pede para redesenhar) e `host` (esta janela).
 """
 from __future__ import annotations
 
@@ -234,6 +235,7 @@ class MainWindow:
         self._jobs["title"] = self.win.after_idle(lambda: dark_title_bar(self.win))
         self._layout_side()
         self._jobs["refresh"] = self.win.after(self._refresh_ms(), self._refresh)
+        self._shown()
         self.focus()
 
     # ---- abrir, trocar de página, fechar ----------------------------------------------------
@@ -249,9 +251,18 @@ class MainWindow:
             self.current = page
             self.view.yview_moveto(0)
             self._layout_side()
+            self._shown()
             self.render_page()
             self.render_rail()
         self.focus()
+
+    def _shown(self) -> None:
+        hook = getattr(self.page, "on_show", None)
+        if hook:
+            try:
+                hook()
+            except Exception:   # um defeito aqui não pode impedir a página de abrir
+                log.exception("Falha ao abrir a página %s", self.current)
 
     def focus(self) -> None:
         self.win.deiconify()

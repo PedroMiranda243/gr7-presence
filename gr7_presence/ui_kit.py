@@ -251,7 +251,52 @@ ICONS: dict[str, list[tuple]] = {
     "amp": [("path", "M9.6 5.4V3.9h4.8v1.5"), ("rect", 3, 5.4, 18, 13.8, 1.8), ("path", "M3 9h18"),
             ("circle", 6, 7.2, 0.25), ("circle", 8.4, 7.2, 0.25), ("circle", 10.8, 7.2, 0.25)],
     "amp_grille": [("path", "M6 12.3h12M6 14.7h12M6 17.1h12")],
+    "right": [("path", "m9 6 6 6-6 6")],
+    # as conquistas (os desenhos aprovados nos exemplos)
+    "trophy": [("path", "M7 4H17V9C17 11.8 14.8 14 12 14C9.2 14 7 11.8 7 9Z"),
+               ("path", "M7 6H4.5C4.5 8.8 5.6 10.4 7.6 10.9M17 6H19.5C19.5 8.8 18.4 10.4 16.4 10.9M12 14V17.5"),
+               ("rect", 8, 17.5, 8, 3, 1)],
+    "moon": [("path", "M20 14.6C18.9 15.2 17.6 15.5 16.3 15.5C11.7 15.5 8 11.8 8 7.2C8 5.9 8.3 4.6 8.9 3.5"
+                      "C5.4 4.6 3 7.9 3 11.7C3 16.6 6.9 20.5 11.8 20.5C15.6 20.5 18.9 18.1 20 14.6Z")],
+    "sun": [("circle", 12, 12, 4), ("path", "M12 2.5V4.5M12 19.5V21.5M4.6 4.6 6 6M18 18 19.4 19.4M2.5 12H4.5"
+                                            "M19.5 12H21.5M4.6 19.4 6 18M18 6 19.4 4.6")],
+    "calendar": [("rect", 3.5, 5, 17, 15.5, 2), ("path", "M3.5 10H20.5M8 3V7M16 3V7")],
+    "hourglass": [("path", "M6.5 3H17.5M6.5 21H17.5"),
+                  ("path", "M8 3C8 7.5 16 7.5 16 12C16 16.5 8 16.5 8 21M16 3C16 7.5 8 7.5 8 12C8 16.5 16 16.5 16 21")],
+    "bolt": [("path", "M13 2.5 5 13.5H11.5L10.5 21.5 18.5 10.5H12Z")],
+    "star": [("path", "M12 3.5 14.6 8.8 20.4 9.6 16.2 13.7 17.2 19.5 12 16.8 6.8 19.5 7.8 13.7 3.6 9.6 9.4 8.8Z")],
+    "flag": [("path", "M5.5 21V3.5M5.5 4H16.5L14.5 8 16.5 12H5.5")],
+    "compass": [("circle", 12, 12, 9), ("path", "M15.5 8.5 13.4 13.4 8.5 15.5 10.6 10.6Z")],
+    "heart": [("path", "M12 20C12 20 3.5 14.8 3.5 9.2C3.5 6.6 5.5 4.5 8 4.5C9.7 4.5 11.1 5.4 12 6.8"
+                       "C12.9 5.4 14.3 4.5 16 4.5C18.5 4.5 20.5 6.6 20.5 9.2C20.5 14.8 12 20 12 20Z")],
+    "globe": [("circle", 12, 12, 9), ("path", "M3 12H21"),
+              ("path", "M12 3C9.6 5.5 8.4 8.6 8.4 12C8.4 15.4 9.6 18.5 12 21C14.4 18.5 15.6 15.4 15.6 12C15.6 8.6 14.4 5.5 12 3Z")],
+    "pen": [("path", "M15.5 4.5 19.5 8.5 8.5 19.5H4.5V15.5ZM13.5 6.5 17.5 10.5")],
+    "headphones": [("path", "M4 15V12C4 7.6 7.6 4 12 4C16.4 4 20 7.6 20 12V15"),
+                   ("rect", 3, 14, 4.5, 6.5, 1.5), ("rect", 16.5, 14, 4.5, 6.5, 1.5)],
+    "note": [("path", "M9 18V5.5L19 3.5V16"), ("circle", 6.5, 18, 2.5), ("circle", 16.5, 16, 2.5)],
+    "return": [("path", "M4.5 4V8.5H9"),
+               ("path", "M5 8.3C6.5 5.7 9.1 4 12 4C16.4 4 20 7.6 20 12C20 16.4 16.4 20 12 20C8.7 20 5.9 18 4.7 15.1")],
+    "swap": [("path", "M4 8H19M15.5 4.5 19 8 15.5 11.5M20 16H5M8.5 12.5 5 16 8.5 19.5")],
+    "gift": [("rect", 3.5, 8, 17, 4, 1), ("rect", 5, 12, 14, 8.5, 1), ("path", "M12 8V20.5"),
+             ("path", "M12 8C10.6 5.2 7 4.6 7 6.6C7 8 9.6 8 12 8C14.4 8 17 8 17 6.6C17 4.6 13.4 5.2 12 8")],
+    "trend": [("path", "M3 17 9 11 13 15 21 7M15.5 7H21V12.5")],
+    "question": [("circle", 12, 12, 9),
+                 ("path", "M9.4 9.4C9.4 7.9 10.6 6.8 12 6.8C13.4 6.8 14.6 7.9 14.6 9.3C14.6 11.3 12 11.6 12 13.6"),
+                 ("circle", 12, 17, 0.35)],
+    "strings": [("path", "M7 3V21M10.3 3V21M13.7 3V21M17 3V21")],
 }
+
+# As medalhas das conquistas: (topo do degradê, pé do degradê, cor do ícone). Cada nível tem a sua cor
+# (aprovadas nos exemplos); a única usa o degradê aceso do Palco e a secreta vai do brasa ao vermelho.
+MEDAL_BRONZE = ("#F3B48C", "#B8693F", BADGE_ICON)
+MEDAL_SILVER = ("#F4F6FA", "#A2ABBA", "#232733")
+MEDAL_GOLD = ("#FFD978", "#F29B26", BADGE_ICON)
+MEDAL_PLATINUM = ("#CFF5FF", "#4EA8D1", "#0B2533")
+MEDAL_DIAMOND = ("#EADFFF", "#8B6EFF", "#1F1446")
+MEDAL_LEVELS = (MEDAL_BRONZE, MEDAL_SILVER, MEDAL_GOLD, MEDAL_PLATINUM, MEDAL_DIAMOND)
+MEDAL_SINGLE = (AMBER, ORANGE, BADGE_ICON)
+MEDAL_SECRET = ("#FF9466", RED, "#2A0606")
 _NUM = re.compile(r"[-+]?(?:\d*\.\d+|\d+)")
 
 
@@ -548,6 +593,32 @@ def _picture(path: str, px: int) -> Image.Image:
 
 def paragraph_height(painter: Painter, text: str, style: Style, max_w: float) -> float:
     return len(painter.wrap(text, style, max_w)) * style.size * style.line
+
+
+def _rgba(color: str, alpha: int) -> tuple[int, int, int, int]:
+    return (*_rgb(color), alpha)
+
+
+def medal(p: Painter, cx: float, y: float, size: float, icon: str, colors: tuple[str, str, str] | None) -> None:
+    """A medalha de uma conquista, centrada em `cx`: com `colors` (um dos MEDAL_*), acesa, com o brilho
+    na cor do pé; sem, apagada (badge-off com o ícone em dim)."""
+    x, r = cx - size / 2, size * 0.29
+    if colors:
+        top, bottom, ink = colors
+        p.shadow(x, y, size, size, r, _rgba(bottom, 190), dy=size * 0.19, blur=size * 0.42, spread=-size * 0.19)
+        p.rrect(x, y, size, size, r, gradient(p.px(size), p.px(size), top, bottom))
+        p.icon(icon, cx - size * 0.23, y + size * 0.27, size * 0.46, ink)
+    else:
+        p.rrect(x, y, size, size, r, BADGE_OFF, outline=FIELD_LINE)
+        p.icon(icon, cx - size * 0.23, y + size * 0.27, size * 0.46, DIM)
+
+
+def pips(p: Painter, cx: float, cy: float, total: int, level: int) -> None:
+    """Os pontinhos de nível sob a medalha: os alcançados na cor de cada nível, os outros em track."""
+    gap = 9
+    x0 = cx - (total - 1) * gap / 2
+    for i in range(total):
+        p.circle(x0 + i * gap, cy, 2.4, MEDAL_LEVELS[i][1] if i < level else TRACK)
 
 
 @dataclass

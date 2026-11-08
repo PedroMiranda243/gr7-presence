@@ -61,6 +61,14 @@ class CatalogTest(unittest.TestCase):
         self.assertEqual({d.group for d in A.CATALOG}, set(A.GROUPS))
         self.assertTrue(all(d.secret == (d.group == "secret") for d in A.CATALOG))
 
+    def test_unlocks_newest_first(self):
+        """A linha do tempo: do dia mais novo para o mais antigo e, no mesmo dia, a que vale mais pontos."""
+        r = A.evaluate(A.collect_facts([session(datetime(2026, 3, 2, 14), 210)], date(2026, 12, 31)))
+        timeline = A.unlocks(r)
+        self.assertEqual(timeline[0].mark, "marathon:3")                     # Ouro, 40 pontos
+        self.assertEqual(len(timeline), A.unlocked_marks(r))
+        self.assertTrue(all(a.got >= b.got for a, b in zip(timeline, timeline[1:])))
+
     def test_marks_and_points(self):
         self.assertEqual(A.parse_mark("hours:3"), ("hours", 3))
         self.assertEqual(A.parse_mark("owl"), ("owl", 1))
@@ -281,6 +289,18 @@ class TrackerTest(unittest.TestCase):
         self.assertIsNone(t.card())
         self.assertTrue((self.base / "conquistas.json").exists())
         self.assertEqual(A.unlocked_marks(t.results()), t.first_run_count)
+
+    def test_screens_before_the_first_check(self):
+        """A janela pode abrir antes de o loop fazer a conta: ela vê a conta, mas nada é registrado (senão
+        as marcas novas sairiam sem aviso)."""
+        self.stats.sessions = daily(JAN, 12)
+        t = self.tracker()
+        results = t.current(date(2026, 2, 1))
+        self.assertGreater(A.unlocked_marks(results), 5)
+        self.assertEqual(t.results(), [])
+        self.assertFalse((self.base / "conquistas.json").exists())
+        t.check(date(2026, 2, 1))
+        self.assertEqual(t.current(), t.results())                        # depois da conta, a do loop
 
     def test_new_marks_are_announced_once(self):
         self.stats.sessions = daily(JAN, 6)

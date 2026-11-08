@@ -17,6 +17,7 @@ from pathlib import Path
 import pystray
 
 from . import __version__, app_icon, updates
+from .achievements_page import AchievementsPage
 from .dashboard_page import DashboardPage
 from .i18n import Translator
 from .main_window import MainWindow
@@ -146,7 +147,9 @@ class TrayUI:
         self._update_page = UpdatePage(lambda: self.app.updates.available, __version__, on_confirm=self._download,
                                        on_later=lambda: self._main_window and self._main_window.show("dashboard"))
         pages = [DashboardPage(self.app),
-                 StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"]),
+                 StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"],
+                           achievements=self.app.achievements),
+                 AchievementsPage(self.app.achievements),
                  SettingsPage(self.app.config, self.app.stats, self.app.library, lambda: self.app.last_state),
                  self._update_page]
         available = lambda: self.app.updates.available.version if self.app.updates.available else None

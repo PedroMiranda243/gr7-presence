@@ -51,7 +51,9 @@ A cada 5 segundos, o `app.tick()`:
    conquistas, a sessão guarda também o tempo com preset próprio, por gênero, por fonte (guitarra,
    baixo) e com faixa aberta no Tape Deck (só o tempo, nunca o nome da faixa).
    A cada minuto, e quando uma sessão termina, o `AchievementTracker` (`achievements.py`) refaz a
-   conta das conquistas a partir das sessões e registra o que foi destravado.
+   conta das conquistas a partir das sessões e registra o que foi destravado. A janela (página
+   Conquistas e Estatísticas) lê a última conta com `current()`, sob a mesma trava, sem recalcular a
+   cada desenho; ao abrir, a página Conquistas marca as novas como vistas.
 5. Monta os cartões (`presence.build_cards`) e envia o da vez ao Discord. Os cartões se revezam a
    cada `rotate_seconds`. Quando o preset muda, o primeiro cartão vai na hora.
 
@@ -85,8 +87,8 @@ thread mexe em widget do tkinter.
 
 ## A janela principal
 
-Uma janela só (`main_window.py`), com uma barra lateral e uma página para cada assunto. Por enquanto
-existem as páginas Painel, Estatísticas e Ajustes. Cada página tem
+Uma janela só (`main_window.py`), com uma barra lateral e uma página para cada assunto: Painel,
+Estatísticas, Conquistas e Ajustes (e Atualização, quando há versão nova). Cada página tem
 `render(largura, escala, t)` e devolve uma imagem do Pillow com as áreas clicáveis. O Tkinter só mostra
 essa imagem num `Canvas`, rola com a roda do mouse, repassa os cliques e redesenha a cada 10 segundos.
 
