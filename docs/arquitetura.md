@@ -47,7 +47,11 @@ A cada 5 segundos, o `app.tick()`:
    - o nome lido é casado com a biblioteca de presets, e o `.ngrr` encontrado dá o amp, a cadeia e as
      tags;
    - os arquivos de áudio abertos pelo processo dão a faixa do Tape Deck.
-4. Soma o tempo nas estatísticas (`dados\stats.json`, salvo a cada minuto e no fim da sessão).
+4. Soma o tempo nas estatísticas (`dados\stats.json`, salvo a cada minuto e no fim da sessão). Para as
+   conquistas, a sessão guarda também o tempo com preset próprio, por gênero, por fonte (guitarra,
+   baixo) e com faixa aberta no Tape Deck (só o tempo, nunca o nome da faixa).
+   A cada minuto, e quando uma sessão termina, o `AchievementTracker` (`achievements.py`) refaz a
+   conta das conquistas a partir das sessões e registra o que foi destravado.
 5. Monta os cartões (`presence.build_cards`) e envia o da vez ao Discord. Os cartões se revezam a
    cada `rotate_seconds`. Quando o preset muda, o primeiro cartão vai na hora.
 
@@ -119,6 +123,7 @@ Tudo em `dados\`, dentro da pasta do programa (ver a decisão D3):
 | `config.json` | Opções (README › Configuração); recarregado ao salvar |
 | `stats.json` | Sessões de prática; um arquivo ilegível é guardado como `stats.corrompido-<horário>.json` |
 | `live_state.json` | Último preset lido na tela, para sobreviver a um reinício com o Guitar Rig minimizado |
+| `conquistas.json` | As marcas de conquista já destravadas (com o dia em que saíram), as ainda não vistas e o cartão de 24 h do Discord; um arquivo ilegível vira `conquistas.corrompido-<horário>.json` e o registro recomeça em silêncio |
 | `gr7_presence.log` | Log rotativo (512 KB, 3 arquivos) |
 | `atualizacao.log` | Passo a passo de cada atualização, com a saída do instalador |
 | `atualizacao.json` | Resultado da última atualização; a bandeja avisa e apaga |

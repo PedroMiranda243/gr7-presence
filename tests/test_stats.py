@@ -35,6 +35,29 @@ class StatsTest(unittest.TestCase):
         self.assertAlmostEqual(data["sessions"][0]["seconds"], 600)
         self.assertAlmostEqual(data["sessions"][0]["presets"]["RTM2 Power"], 600)
 
+    def test_new_fields_for_achievements(self):
+        """A partir da 1.5.0: tempo com preset próprio, por gênero, por fonte e com faixa no Tape Deck."""
+        s = Stats(self.path)
+        start = ts(date.today())
+        s.start(start, "standalone")
+        s._tick_at = start
+        s.tick("Meu Timbre", "Bass Pro", now=start + 20, own=True, genres=("Rock", "Metal"), source="Bass", backing=True)
+        s.tick("Clean Cristalino", "Jump", now=start + 40, genres=("Funk & Soul",), source="Guitar")
+        s.tick(None, None, now=start + 70, backing=True)          # rack vazio, com a faixa tocando
+        s.end()
+        saved = json.loads(self.path.read_text(encoding="utf-8"))["sessions"][0]
+        self.assertEqual(saved["own"], {"Meu Timbre": 20})
+        self.assertEqual(saved["genres"], {"Rock": 20, "Metal": 20, "Funk & Soul": 20})
+        self.assertEqual(saved["sources"], {"Bass": 20, "Guitar": 20})
+        self.assertEqual(saved["backing"], 50)
+        self.assertNotIn("tracks", saved)                         # o nome da faixa nunca é gravado
+
+    def test_old_ticks_add_no_new_fields(self):
+        s = Stats(self.path)
+        self.play(s, ts(date.today()), 600)
+        saved = json.loads(self.path.read_text(encoding="utf-8"))["sessions"][0]
+        self.assertFalse({"own", "genres", "sources", "backing"} & set(saved))
+
     def test_short_session_is_dropped(self):
         s = Stats(self.path)
         self.play(s, ts(date.today()), 30)

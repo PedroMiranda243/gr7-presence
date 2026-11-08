@@ -19,6 +19,7 @@ PROJECT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = PROJECT_DIR / "dados"
 CONFIG_PATH = DATA_DIR / "config.json"
 STATS_PATH = DATA_DIR / "stats.json"
+ACHIEVEMENTS_PATH = DATA_DIR / "conquistas.json"   # as conquistas já destravadas (achievements.py)
 LOG_PATH = DATA_DIR / "gr7_presence.log"
 
 DEFAULTS: dict = {

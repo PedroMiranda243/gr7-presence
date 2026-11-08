@@ -11,7 +11,8 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from .config import DATA_DIR, Config
+from .achievements import AchievementTracker
+from .config import ACHIEVEMENTS_PATH, DATA_DIR, Config
 from .assets import AssetResolver
 from .detector import Detector, Target, file_version
 from .discord_ipc import DiscordError, DiscordIPC
@@ -34,12 +35,15 @@ DEFAULT_EXE = r"C:\Program Files\Native Instruments\Guitar Rig 7\Guitar Rig 7.ex
 class PresenceApp:
     def __init__(self, config: Config, stats: Stats, reader: PresetReader | None = None,
                  library: PresetLibrary | None = None, live_state_path: Path = DATA_DIR / "live_state.json",
-                 updates: UpdateChecker | None = None):
+                 updates: UpdateChecker | None = None, achievements_path: Path | None = None):
         self.config = config
         self.updates = updates or UpdateChecker()
         self.on_update: Callable[[Release], None] | None = None
         self.live_state_path = Path(live_state_path)
         self.stats = stats
+        # Ao lado do stats.json (em dados\ no programa; na pasta temporária nos testes).
+        self.achievements = AchievementTracker(achievements_path or stats.path.with_name(ACHIEVEMENTS_PATH.name),
+                                               stats, self._goal_minutes)
         self.reader = reader or PresetReader()
         self.library = library or PresetLibrary()
         self.live = LivePresetReader(self.library)
@@ -93,6 +97,7 @@ class PresenceApp:
     def _shutdown(self) -> None:
         if self._target:
             self.stats.end()
+            self._check_achievements(force=True)
             self._target = None
         if self.ipc:
             self.ipc.clear_activity()
@@ -128,6 +133,7 @@ class PresenceApp:
         if not _same_target(target, self._target):
             if self._target:
                 self.stats.end()
+                self._check_achievements(force=True)   # a sessão que acabou pode ter destravado algo
                 self._clear()
             if target:
                 self.stats.start(target.started_at, target.kind, target.host)
@@ -146,13 +152,15 @@ class PresenceApp:
             return
 
         preset, tracks, rack_state = self._current_state(target)
-        if rack_state:   # rack vazio/montado na hora: não conta tempo para o preset antigo
-            self.stats.tick(None, None)
+        if rack_state or not preset:   # rack vazio/montado na hora: não conta tempo para o preset antigo
+            self.stats.tick(None, None, backing=bool(tracks))
         else:
-            self.stats.tick(preset.name if preset else None, preset.amp if preset else None)
+            self.stats.tick(preset.name, preset.amp, own=preset.is_factory is False, genres=tuple(preset.genres),
+                            source=preset.input_source, backing=bool(tracks))
         self.stats.save_if_due()
         self.last_state = (preset, target, tracks, rack_state)
         self._check_goal()
+        self._check_achievements()
         self._check_minimized(target, preset)
 
         if self.paused:
@@ -172,6 +180,21 @@ class PresenceApp:
     def _check_updates(self) -> None:
         if self.config["check_updates"] and self.updates.due():
             self.updates.check_in_background(self._update_found)
+
+    def _goal_minutes(self) -> int:
+        try:
+            return max(0, int(self.config["daily_goal_minutes"] or 0))
+        except (TypeError, ValueError):   # meta escrita errada no config.json: fica sem meta
+            return 0
+
+    def _check_achievements(self, force: bool = False) -> None:
+        """Refaz a conta das conquistas a cada minuto e quando uma sessão termina. Por enquanto só
+        registra (no log e no `conquistas.json`); o aviso, o cartão do Discord e as telas vêm depois e
+        leem o `self.achievements`."""
+        try:
+            self.achievements.check() if force else self.achievements.maybe_check()
+        except Exception:   # o loop nunca cai por causa de uma conta
+            log.exception("Falha ao conferir as conquistas")
 
     def _check_goal(self, today: date | None = None) -> None:
         """Avisa uma vez quando o tempo de hoje passa da meta. Só conta a virada que acontece com o
