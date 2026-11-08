@@ -382,6 +382,12 @@ primeiro, e fica no meio da largura; a lista do Pausar cresce junto. Em tela che
 ampliação fica perto de 1,8×. Na janela padrão, numa menor ou numa mais baixa que o conteúdo, é o
 desenho de sempre. As outras páginas não ampliam.
 
+Os painéis embaixo do palco são uma lista (`DashboardPage._panels`), dois por linha na janela padrão;
+painel novo entra nessa lista. Se o Painel ganhar painéis, na janela padrão a página rola, como as
+outras. Em tela cheia, eles vão para colunas a mais (cada painel com 400 px ou mais) para tudo caber
+numa tela só, e o `_fit` fica com o arranjo que deixa tudo maior. As letras nunca ficam menores que na
+janela padrão: se nem assim cabe, a página rola.
+
 ## Elevation & Depth
 
 A profundidade vem de camadas de tom (bg → rail → stage → panel → field → selected), não de sombra. Os

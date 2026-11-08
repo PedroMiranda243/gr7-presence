@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 from gr7_presence.config import DEFAULTS
-from gr7_presence.dashboard_page import DashboardPage
+from gr7_presence.dashboard_page import NOTE, BottomPanel, DashboardPage
 from gr7_presence.detector import Target
 from gr7_presence.gr7_state import PresetInfo
 from gr7_presence.i18n import Translator
@@ -171,6 +171,37 @@ class FullScreenTest(unittest.TestCase):
         self.assertGreater(zoom, 1.0)                                   # cresce até a altura…
         self.assertLessEqual(r.height, 640)                             # …sem passar dela
         self.assertGreater(dx, 200)                                     # e o que sobra fica dos lados
+
+    def with_extra_panels(self, n: int) -> None:
+        """O Painel com `n` painéis a mais embaixo, como se ganhasse componentes novos."""
+        usual = self.page._panels
+        extra = [BottomPanel(f"Extra {i}", lambda m, w: 100, lambda p, x, y, w: p.text(x, y, "texto", NOTE))
+                 for i in range(n)]
+        self.page._panels = lambda t, state: usual(t, state) + extra
+
+    def test_more_panels_scroll_in_the_default_window(self):
+        self.with_extra_panels(4)
+        r = self.render(882, 640)
+        self.assertEqual(self.page._place, (1.0, 0.0))                  # nada de ampliar ou reorganizar
+        self.assertEqual(self.page._layout(882, 1.0, self.t, self.app.last_state)["cols"], 2)
+        self.assertGreater(r.height, 640)                               # a página rola, como as outras
+
+    def test_more_panels_fit_the_full_screen(self):
+        self.with_extra_panels(4)
+        only_default_width = min(1842 / 882, 1001 / self.page._layout(882, 1.0, self.t, self.app.last_state)["total"])
+        r = self.render(1842, 1001)
+        zoom, dx = self.page._place
+        layout_w = (1842 - 2 * dx) / zoom
+        self.assertLessEqual(r.height, 1001)                            # tudo numa tela só
+        self.assertGreater(zoom, only_default_width)                    # maior do que só ampliando
+        self.assertGreaterEqual(self.page._layout(layout_w, zoom, self.t, self.app.last_state)["cols"], 3)
+
+    def test_letters_never_shrink(self):
+        self.with_extra_panels(20)                                      # nem em quatro colunas cabe
+        r = self.render(1842, 1001)
+        self.assertEqual(self.page._place, (1.0, 0.0))                  # o tamanho de letra da janela padrão
+        self.assertEqual(self.page._layout(1842, 1.0, self.t, self.app.last_state)["cols"], 4)
+        self.assertGreater(r.height, 1001)                              # e a página rola
 
     def test_pause_menu_grows_with_the_page(self):
         host = mock.Mock()
