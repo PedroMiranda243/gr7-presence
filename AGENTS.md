@@ -227,6 +227,12 @@ regras só para a tela. Um botão com link inválido, por exemplo, some da prév
 quando o `config.json` muda no disco. A janela grava com `Config.update`, que força essa recarga; o
 `Config.set` não força.
 
+**A lista de opções não fecha com o clique fora.** A lista (Jogando/Ouvindo, Pausar) é uma janela à
+parte com `grab_set`, e o Tk manda para ela todo clique na janela do programa. O clique fora chega à
+janela da lista, não ao desenho dentro dela, e com o x e o y do evento zerados. Até a 1.4.2 o clique era
+tratado só no desenho, e o clique fora se perdia. Trate o clique na janela da lista, pelas coordenadas
+de tela (`x_root`, `y_root`). O `MenuTest` de `tests/test_main_window.py` gera esse clique.
+
 **Fonte diferente no Windows 10.** A Segoe UI Variable só existe no Windows 11; no 10, o `ui_kit` usa a
 Segoe UI comum. A Archivo é variável, e o Pillow recebe os eixos na ordem [peso, largura].
 

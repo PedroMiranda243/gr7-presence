@@ -176,6 +176,7 @@ class MainWindow:
         self._entries: dict[str, _Entry] = {}
         self._drag: K.Region | None = None
         self._menu: tk.Toplevel | None = None
+        self._menu_at = ""                          # posição e tamanho da janela quando a lista abriu
         self._thumb_h = 0
         self._jobs: dict[str, str] = {}
         self._kb: tuple[str, str] | None = None   # controle com o foco do teclado: (área, chave)
@@ -219,6 +220,8 @@ class MainWindow:
         self.side.bind("<Motion>", self._side_motion)
         self.side.bind("<Button-1>", self._side_click)
         self.win.bind("<MouseWheel>", self._wheel)
+        self.win.bind("<Configure>", self._window_moved, add="+")
+        self.win.bind("<Unmap>", self._window_moved, add="+")
         # Teclado: Tab e Shift+Tab andam pelos controles, Enter ou espaço acionam, setas mexem no deslizante.
         self.win.bind("<Tab>", lambda _e: self._tab(1))
         self.win.bind("<Shift-Tab>", lambda _e: self._tab(-1))
@@ -414,8 +417,11 @@ class MainWindow:
             canvas.itemconfigure(item, image=self._photos["menu"])
 
         def region(event):
-            inside = 0 <= event.x < canvas.winfo_width() and 0 <= event.y < canvas.winfo_height()
-            hit = [r for r in state["rendered"].regions if r.hit(event.x / s, event.y / s)] if inside else []
+            # Pelas coordenadas de tela: o clique fora da lista chega a ela pelo grab, com o x e o y
+            # do evento sem valor.
+            x, y = event.x_root - canvas.winfo_rootx(), event.y_root - canvas.winfo_rooty()
+            inside = 0 <= x < canvas.winfo_width() and 0 <= y < canvas.winfo_height()
+            hit = [r for r in state["rendered"].regions if r.hit(x / s, y / s)] if inside else []
             return hit[0] if hit else None
 
         def motion(event):
@@ -426,7 +432,7 @@ class MainWindow:
                 draw()
 
         def click(event):
-            r = region(event)
+            r = region(event) if event.num == 1 else None   # fora da lista, ou outro botão: só fecha
             self.close_menu()
             if r is not None:
                 on_pick(r.action)
@@ -452,14 +458,17 @@ class MainWindow:
             sy = self.view.winfo_rooty() + round(above * s - self.view.canvasy(0)) - img.height
         menu.geometry(f"{img.width}x{img.height}+{sx}+{sy}")
         canvas.bind("<Motion>", motion)
-        canvas.bind("<Button-1>", click)
+        # Na janela da lista, não no desenho: com o grab, o clique em qualquer ponto da janela do programa
+        # chega à janela da lista, e o clique fora fecha sem chegar ao que estava embaixo.
+        menu.bind("<ButtonPress>", click)
         menu.bind("<Escape>", lambda _e: self.close_menu())
         menu.bind("<Down>", lambda _e: move(1))
         menu.bind("<Up>", lambda _e: move(-1))
         menu.bind("<Return>", choose)
         menu.bind("<space>", choose)
-        menu.bind("<FocusOut>", lambda _e: self.close_menu())
+        menu.bind("<FocusOut>", lambda _e: self.close_menu())   # outro programa veio para a frente
         self._menu = menu
+        self._menu_at = self.win.winfo_geometry()
         menu.focus_force()
         try:
             menu.grab_set()   # clique fora da lista chega aqui e fecha a lista
@@ -476,6 +485,14 @@ class MainWindow:
                 pass
             if self.alive:
                 self.field_focus(None)   # o campo de escolha perde a borda âmbar quando a lista fecha
+
+    def _window_moved(self, event) -> None:
+        """Arrastar a janela pela barra de título, mudar o tamanho ou minimizar também é clicar fora. A
+        lista é uma janela à parte e ficaria solta na tela, longe do campo."""
+        if self._menu is None or event.widget is not self.win:
+            return
+        if event.type == tk.EventType.Unmap or self.win.winfo_geometry() != self._menu_at:
+            self.close_menu()
 
     # ---- eventos ------------------------------------------------------------------------------
     def _refresh(self) -> None:
