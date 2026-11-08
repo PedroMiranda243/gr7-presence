@@ -4,6 +4,8 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from unittest import mock
 
+from PIL import ImageColor
+
 from gr7_presence.i18n import Translator
 from gr7_presence.stats import Stats
 from gr7_presence import ui_kit as K
@@ -93,6 +95,40 @@ class StatsPageTest(unittest.TestCase):
         wide = self.track_widths(1042)                            # janela de ~1120 px
         self.assertEqual(len(set(wide)), 1)
         self.assertAlmostEqual(wide[0], 92 + (1042 - 882) / 2, delta=0.1)   # o que a coluna cresceu vai para a barra
+
+    def test_goal_line_in_front_of_the_bars(self):
+        order = []
+        hline, bar = K.Painter.hline, K.Painter.top_rounded_bar
+
+        def spy_hline(painter, x1, x2, y, color, width=1, dash=None):
+            if color == K.AMBER and dash:
+                order.append("meta")
+            return hline(painter, x1, x2, y, color, width, dash)
+
+        def spy_bar(painter, *args, **kwargs):
+            order.append("barra")
+            return bar(painter, *args, **kwargs)
+
+        with mock.patch.object(K.Painter, "hline", spy_hline), mock.patch.object(K.Painter, "top_rounded_bar", spy_bar):
+            self.render(make_stats(self), goal=15)
+        self.assertEqual(order[:15], ["barra"] * 14 + ["meta"])   # as 14 barras do gráfico, depois a meta
+
+    def test_goal_outline_only_over_the_bars(self):
+        """Sobre a barra, o traço ganha contorno escuro (a barra de hoje também é âmbar); fora dela, não."""
+        p = K.Painter(200, 20, 1.0, K.BG)
+        p.rect(90, 0, 22, 20, K.AMBER)                          # a barra de hoje, de x = 90 a 112
+        StatsPage._goal_line(p, 0, 200, 10, [90], 22)
+        color = lambda x, y: p.img.getpixel((x, y))[:3]         # noqa: E731
+        self.assertEqual(color(92, 9), ImageColor.getrgb(K.AMBER))   # o traço
+        self.assertEqual(color(92, 8), ImageColor.getrgb(K.STAGE))   # o contorno, na barra
+        self.assertEqual(color(96, 8), ImageColor.getrgb(K.AMBER))   # entre dois traços, a barra aparece
+        self.assertEqual(color(2, 9), ImageColor.getrgb(K.AMBER))    # o traço fora da barra
+        self.assertEqual(color(2, 8), ImageColor.getrgb(K.BG))       # sem contorno fora da barra
+
+    def test_total_with_hours_and_minutes(self):
+        page = StatsPage(make_stats(self), lambda: 30, today=lambda: TODAY)
+        facts = page._facts(page._collect(), Translator("pt"))
+        self.assertEqual(facts[2][0], "5 h 40 min")   # 20 sessões, 20 400 s; antes aparecia só "5 h"
 
     def test_period_buttons(self):
         page, r = self.render(make_stats(self))

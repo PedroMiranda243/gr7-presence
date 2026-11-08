@@ -9,6 +9,11 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 
 ## [Não lançado]
 
+### Mudanças
+- **Estatísticas: a linha da meta passa na frente das barras,** em vez de sumir atrás delas.
+- **Estatísticas: o tempo total mostra horas e minutos** ("13 h 12 min"), como o dos últimos 7 dias. Antes
+  aparecia só "13 h".
+
 ## [1.4.2] - 2026-11-07
 
 ### Como atualizar
