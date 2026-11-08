@@ -6,11 +6,14 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+from PIL import ImageColor
+
 from gr7_presence.app import PresenceApp
 from gr7_presence.config import DEFAULTS
 from gr7_presence.gr7_state import PresetReader
 from gr7_presence.i18n import Translator
-from gr7_presence.main_window import MainWindow, render_menu, render_rail
+from gr7_presence import ui_kit as K
+from gr7_presence.main_window import ITEM_H, MainWindow, render_menu, render_rail
 from gr7_presence.preset_library import PresetLibrary
 from gr7_presence.stats import Stats
 from gr7_presence.stats_page import StatsPage
@@ -34,6 +37,29 @@ class RailTest(unittest.TestCase):
         with_update = render_rail(640, 1.5, [page], "stats", "stats", "1.4.0", t)
         self.assertEqual([r.key for r in with_update.regions], ["stats", "update"])
         self.assertEqual(with_update.image.size, (round(78 * 1.5), 960))
+
+
+    def test_dot_when_a_page_has_news(self):
+        """A página Conquistas com conquista não vista ganha o ponto laranja, como a versão nova."""
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        stats = StatsPage(Stats(Path(tmp.name) / "s.json"), lambda: 30)
+        news = [True]
+        ach = types.SimpleNamespace(key="achievements", icon="trophy", label_key="nav_achievements",
+                                    has_news=lambda: news[0])
+        t = Translator("pt")
+        y = 12 + 34 + 10 + ITEM_H + 6                      # o segundo item
+        dot = (round(7 + 64 - 16 - 3.5), round(y + 8 + 3.5))
+        img = render_rail(640, 1.0, [stats, ach], "stats", None, None, t).image
+        self.assertEqual(img.getpixel(dot), ImageColor.getrgb(K.ORANGE))
+        img = render_rail(640, 1.0, [stats, ach], "achievements", None, None, t).image
+        self.assertNotEqual(img.getpixel(dot), ImageColor.getrgb(K.ORANGE))   # na página aberta, não
+        news[0] = False
+        img = render_rail(640, 1.0, [stats, ach], "stats", None, None, t).image
+        self.assertNotEqual(img.getpixel(dot), ImageColor.getrgb(K.ORANGE))
+        ach.has_news = mock.Mock(side_effect=RuntimeError("defeito"))
+        with self.assertLogs("gr7_presence.main_window", "ERROR"):
+            render_rail(640, 1.0, [stats, ach], "stats", None, None, t)
 
 
 class MainWindowTest(unittest.TestCase):

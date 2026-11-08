@@ -43,6 +43,11 @@ DEFAULTS: dict = {
     "daily_goal_minutes": 30,
     # Notificação do Windows quando a meta do dia é batida.
     "notify_goal": True,
+    # Conquistas: notificação do Windows quando sai uma; o cartão "🏆 Conquista: …" no rodízio por 24 h; e
+    # o nível de músico no texto do ícone pequeno (ao passar o mouse), que fica desligado até a pessoa ligar.
+    "notify_achievements": True,
+    "show_achievement_card": True,
+    "show_level": False,
     # Notificação do Windows quando o Guitar Rig é minimizado (uma por vez que ele é aberto).
     "notify_minimized": True,
     # A janela de primeira abertura já apareceu (ela aparece uma vez, depois de instalar).
@@ -65,6 +70,7 @@ DEFAULTS: dict = {
         "clock": "clock",
         "fire": "fire",
         "daw": "daw",
+        "trophy": "trophy",
     },
 }
 

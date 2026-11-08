@@ -51,9 +51,12 @@ A cada 5 segundos, o `app.tick()`:
    conquistas, a sessão guarda também o tempo com preset próprio, por gênero, por fonte (guitarra,
    baixo) e com faixa aberta no Tape Deck (só o tempo, nunca o nome da faixa).
    A cada minuto, e quando uma sessão termina, o `AchievementTracker` (`achievements.py`) refaz a
-   conta das conquistas a partir das sessões e registra o que foi destravado. A janela (página
-   Conquistas e Estatísticas) lê a última conta com `current()`, sob a mesma trava, sem recalcular a
-   cada desenho; ao abrir, a página Conquistas marca as novas como vistas.
+   conta das conquistas a partir das sessões e registra o que foi destravado. As novas viram um aviso
+   na bandeja (`on_note`; várias de uma vez, um aviso só; na primeira vez depois de atualizar, um só
+   com quantas o histórico já tinha) e, por 24 h, um cartão a mais no rodízio do Discord. As frases
+   ficam no `achievement_view.py`. A janela (Conquistas, Estatísticas, o destaque do Painel, o ponto
+   da barra lateral e a prévia dos Ajustes) lê a última conta com `current()`, sob a mesma trava, sem
+   recalcular a cada desenho; a página Conquistas, aberta, marca as novas como vistas.
 5. Monta os cartões (`presence.build_cards`) e envia o da vez ao Discord. Os cartões se revezam a
    cada `rotate_seconds`. Quando o preset muda, o primeiro cartão vai na hora.
 

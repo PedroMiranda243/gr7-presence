@@ -18,6 +18,15 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
   antes desta versão.
 - **Estatísticas: a linha de conquistas mudou.** Ela mostra as 5 mais recentes ou mais perto do
   próximo nível, e o **Ver todas** abre a página nova.
+- **Aviso de conquista nova.** Quando sai uma conquista, aparece uma notificação do Windows com o que
+  você fez e os pontos. Se saírem várias de uma vez, vem um aviso só. Na primeira vez depois de
+  atualizar, um aviso diz quantas você já tinha, sem uma enxurrada.
+- **A conquista no Discord por 24 horas.** Um cartão a mais entra no rodízio, com "🏆 Conquista: …".
+- **Destaque no Painel e na barra lateral.** O Painel mostra a conquista nova, com o botão **Ver
+  conquistas**, e a Conquistas ganha um ponto laranja na barra lateral até você abrir a página.
+- **Ajustes, seção Prática:** três opções novas. **Avisar conquista nova** e **Mostrar conquista nova
+  no perfil por 24 h** vêm ligadas. **Mostrar meu nível no perfil** vem desligada: ligada, o seu nível
+  aparece quando alguém passa o mouse no ícone pequeno do tempo de prática e da conquista.
 - **Algumas conquistas contam só daqui para a frente:** as que usam o gênero, o preset próprio, a
   guitarra ou o baixo e o Tape Deck. A página avisa quais são.
 

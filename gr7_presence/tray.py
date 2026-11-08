@@ -150,7 +150,8 @@ class TrayUI:
                  StatsPage(self.app.stats, lambda: self.app.config["daily_goal_minutes"],
                            achievements=self.app.achievements),
                  AchievementsPage(self.app.achievements),
-                 SettingsPage(self.app.config, self.app.stats, self.app.library, lambda: self.app.last_state),
+                 SettingsPage(self.app.config, self.app.stats, self.app.library, lambda: self.app.last_state,
+                              achievements=self.app.achievements),
                  self._update_page]
         available = lambda: self.app.updates.available.version if self.app.updates.available else None
         # O idioma vem direto do config: mudar nos Ajustes troca a janela na hora, sem esperar o loop.

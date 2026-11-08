@@ -4,6 +4,9 @@ from datetime import date, datetime, timedelta
 from pathlib import Path
 from unittest import mock
 
+from gr7_presence import ui_kit as K
+from gr7_presence import achievements as A
+from gr7_presence.achievements import AchievementTracker
 from gr7_presence.config import DEFAULTS
 from gr7_presence.dashboard_page import NOTE, BottomPanel, DashboardPage
 from gr7_presence.detector import Target
@@ -124,6 +127,68 @@ class DashboardTest(unittest.TestCase):
         self.assertIn("minimizada", rows[2][3])
         rows = self.page._connections(self.t, None)
         self.assertEqual([r[2] for r in rows], ["fechado", "fechado", "esperando"])
+
+
+class AchievementPanelTest(unittest.TestCase):
+    """O painel "Conquista nova" entra primeiro enquanto houver conquista não vista na página Conquistas."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.stats = Stats(Path(tmp.name) / "stats.json")
+        self.app = FakeApp(self.stats)
+        self.app.achievements = AchievementTracker(Path(tmp.name) / "conquistas.json", self.stats, lambda: 60)
+        self.app.achievements.check(TODAY)                       # a primeira vez, em silêncio
+        self.page = DashboardPage(self.app, today=lambda: TODAY, now=lambda: NOW)
+        self.t = Translator("pt")
+
+    def unlock_marathon(self):
+        start = datetime(2026, 11, 7, 14).timestamp()
+        self.stats.sessions.append({"start": start, "end": start + 7800, "seconds": 7800, "mode": "standalone",
+                                    "days": {TODAY.isoformat(): 7800}, "presets": {"Clean Cristalino": 7800}})
+        return self.app.achievements.check(TODAY)
+
+    def test_only_with_something_new(self):
+        titles = [panel.title for panel in self.page._panels(self.t, self.app.last_state)]
+        self.assertNotIn("Conquista nova", titles)
+        self.assertTrue(self.unlock_marathon())
+        panels = self.page._panels(self.t, self.app.last_state)
+        self.assertEqual([panel.title for panel in panels], ["Conquista nova", "Meta de hoje", "Conexões"])
+        self.app.achievements.mark_seen()                        # abriu a página Conquistas
+        self.assertNotIn("Conquista nova", [panel.title for panel in self.page._panels(self.t, None)])
+
+    def test_button_opens_the_page(self):
+        self.unlock_marathon()
+        host = mock.Mock()
+        self.page.host = host
+        r = self.page.render(882, 1.0, self.t)
+        button = next(reg for reg in r.regions if reg.key == "see_achievements")
+        button.action()
+        host.show.assert_called_once_with("achievements")
+        for scale in (1.0, 1.25, 1.5, 2.0):
+            self.assertEqual(self.page.render(882, scale, self.t).image.width, round(882 * scale))
+        self.page.view_height = 1001                              # tela cheia: os três painéis lado a lado
+        wide = self.page.render(1842, 1.0, self.t)
+        self.assertEqual(self.page._layout(1842, 1.0, self.t, self.app.last_state)["cols"], 3)
+        self.assertLessEqual(wide.height, 1001)
+        self.assertTrue(any(reg.key == "see_achievements" for reg in wide.regions))
+
+    def test_texts(self):
+        self.unlock_marathon()
+        self.unlock_marathon()                                     # 4 h 20 no dia: Dia puxado Ouro e mais
+        with mock.patch.object(K.Painter, "text", autospec=True, side_effect=K.Painter.text) as text:
+            self.page.render(882, 1.0, self.t)
+        shown = [call.args[3] for call in text.call_args_list]
+        self.assertIn("Dia puxado · Ouro", shown)                   # a que vale mais pontos
+        more = next(s for s in shown if s.startswith("+40 pontos"))
+        news = {u.key for u in A.unlocks(self.app.achievements.current(TODAY)) if u.mark in self.app.achievements.unseen()}
+        self.assertTrue(more.endswith(f"e mais {len(news) - 1}"))      # conta conquistas, não níveis
+        panel = self.page._panels(self.t, self.app.last_state)[0]
+        m = K.Painter(1, 1, 1.0)
+        self.assertGreaterEqual(panel.height(m, 320), 52 + 14 + 34)
+        p = K.Painter(400, 200, 1.0)
+        regions = panel.draw(p, 21, 10, 358)
+        self.assertEqual(len(regions), 1)
 
 
 class FullScreenTest(unittest.TestCase):

@@ -66,8 +66,11 @@ def _short_chain(effects: list[str]) -> str:
 
 def build_cards(preset: PresetInfo | None, target: Target, summary: Summary | None,
                 cfg, t: Translator, tracks: list[str] | None = None,
-                rack_state: str | None = None) -> list[Card]:
-    """`rack_state`: "empty" (rack limpo) ou "scratch" (timbre montado depois de limpar o rack)."""
+                rack_state: str | None = None, achievement: tuple[str, str] | None = None,
+                level: str | None = None) -> list[Card]:
+    """`rack_state`: "empty" (rack limpo) ou "scratch" (timbre montado depois de limpar o rack).
+    `achievement`: (linha "🏆 Conquista: …", o que ela diz) enquanto vale o cartão de 24 h; `level`: a linha
+    "Nível 7 · 1.060 pontos" (`achievement_view.card_bits`). As opções dizem se eles aparecem."""
     assets = cfg["assets"]
     plugin = target.kind == "plugin"
     if plugin:
@@ -123,8 +126,15 @@ def build_cards(preset: PresetInfo | None, target: Target, summary: Summary | No
             hover = t("stats_hover_one", t=format_duration(summary.total))
         else:
             hover = t("stats_hover", t=format_duration(summary.total), n=summary.sessions)
+        if level and cfg["show_level"]:
+            hover = f"{hover} · {level}"
         icon = assets["fire"] if cfg["show_streak"] and summary.streak >= 2 else assets["clock"]
         cards.append(Card("stats", title, " · ".join(parts), icon, hover))
+
+    if achievement and cfg["show_achievement_card"]:
+        line, says = achievement
+        hover = level if level and cfg["show_level"] else says
+        cards.append(Card("achievement", title, line, assets.get("trophy") or "trophy", hover))
 
     if not cards:
         state = "🎚️ VST3" if plugin else "🎛️ Guitar Rig 7"

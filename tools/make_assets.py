@@ -9,8 +9,8 @@
 - gr7_logo.png / app_icon.png / tray.ico: ícone oficial tirado do "Guitar Rig 7.exe", só para o app
   do Discord (docs/app-do-discord.md). É arte da Native Instruments: não vai para o repositório nem
   para o zip, e o programa não depende dela.
-- amp, pedal, tape, clock, fire, metronome, daw: ícones pequenos do perfil, desenhados aqui (o
-  Discord recorta em círculo). Também do projeto e versionados.
+- amp, pedal, tape, clock, fire, metronome, daw, trophy: ícones pequenos do perfil, desenhados aqui
+  (o Discord recorta em círculo). Também do projeto e versionados. O trophy é o da conquista nova.
 """
 from __future__ import annotations
 
@@ -155,6 +155,27 @@ def daw() -> Image.Image:
     return finish(img)
 
 
+def trophy() -> Image.Image:
+    """O troféu do cartão "🏆 Conquista: …": o desenho do ícone `trophy` da janela, cheio, sobre o dourado
+    da medalha de Ouro."""
+    img = Image.new("RGBA", (S, S))
+    top, bottom = (255, 217, 120), (242, 155, 38)
+    grad = ImageDraw.Draw(img)
+    for y in range(S):
+        k = y / (S - 1)
+        grad.line((0, y, S, y), fill=tuple(int(a + (b - a) * k) for a, b in zip(top, bottom)) + (255,))
+    d = ImageDraw.Draw(img)
+    d.rounded_rectangle((C - 470, 420, C + 470, 540), radius=40, fill=WHITE)              # boca da taça
+    d.rectangle((C - 420, 500, C + 420, 760), fill=WHITE)                                   # taça
+    d.pieslice((C - 420, 280, C + 420, 1240), 0, 180, fill=WHITE)
+    for side in (-1, 1):                                                                   # alças
+        x0, x1 = (C - 700, C - 340) if side < 0 else (C + 340, C + 700)
+        d.arc((x0, 470, x1, 900), 90 if side < 0 else -90, 270 if side < 0 else 90, fill=WHITE, width=80)
+    d.rectangle((C - 70, 1180, C + 70, 1440), fill=WHITE)                                   # haste
+    d.rounded_rectangle((C - 330, 1420, C + 330, 1600), radius=50, fill=WHITE)            # base
+    return finish(img)
+
+
 def main() -> None:
     if "--locais" not in sys.argv:
         icone_pedal.save(ROOT / "assets" / "gr7_presence.ico", ROOT / "assets" / "gr7_presence.png")
@@ -171,7 +192,7 @@ def main() -> None:
         print("Ícone do Guitar Rig copiado para", OUT)
         return
     for name, make in (("amp", amp), ("pedal", pedal), ("tape", tape), ("clock", clock),
-                       ("fire", fire), ("metronome", metronome), ("daw", daw)):
+                       ("fire", fire), ("metronome", metronome), ("daw", daw), ("trophy", trophy)):
         make().save(OUT / f"{name}.png")
     preview(sorted(OUT.glob("*.png")))
     print("Imagens geradas em", OUT)

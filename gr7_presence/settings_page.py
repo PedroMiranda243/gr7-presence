@@ -16,6 +16,7 @@ from typing import Callable
 from . import __version__
 from . import autostart as autostart_mod
 from . import ui_kit as K
+from .achievement_view import card_bits
 from .app import MIN_ROTATE_SECONDS
 from .config import DATA_DIR
 from .detector import Target
@@ -58,8 +59,9 @@ class SettingsPage:
     side_width = SIDE_W
 
     def __init__(self, config, stats, library=None, app_state: Callable[[], tuple | None] = lambda: None,
-                 autostart=autostart_mod, open_path: Callable[[object], None] = os.startfile):
+                 autostart=autostart_mod, open_path: Callable[[object], None] = os.startfile, achievements=None):
         self.config = config
+        self.achievements = achievements   # o registro das conquistas, para o cartão de 24 h na prévia
         self.stats = stats
         self.library = library
         self.app_state = app_state
@@ -190,7 +192,10 @@ class SettingsPage:
         else:
             preset, target, tracks, rack_state = self._sample(t), Target("standalone", 0, time.time() - 2535), [], None
         summary = self.stats.summary() if self.config["show_stats"] else None
-        cards = build_cards(preset, target, summary, self.config, t, tracks, rack_state)
+        achievement, level = None, None
+        if self.achievements is not None:
+            achievement, level = card_bits(self.achievements.card(), self.achievements.current(), t)
+        cards = build_cards(preset, target, summary, self.config, t, tracks, rack_state, achievement, level)
         return [build_activity(c, target, self.config, t, None, None) for c in cards], target
 
     # ---- desenho do formulário -----------------------------------------------------------------
@@ -230,6 +235,9 @@ class SettingsPage:
         rows_practice = [
             self._select_row("daily_goal_minutes", t("set_goal"), t("set_goal_hint"), goals, current=goal),
             self._switch_row(t, "notify_goal", t("set_goal_note"), t("set_goal_note_hint")),
+            self._switch_row(t, "notify_achievements", t("set_ach_note"), t("set_ach_note_hint")),
+            self._switch_row(t, "show_achievement_card", t("set_ach_card"), t("set_ach_card_hint")),
+            self._switch_row(t, "show_level", t("set_level"), t("set_level_hint")),
         ]
         rows_program = [
             self._language_row(t),
