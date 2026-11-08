@@ -5,7 +5,8 @@ from pathlib import Path
 from unittest import mock
 
 from gr7_presence import achievements as A
-from gr7_presence.achievements_page import (AchievementsPage, badge, columns, highlights, medal_colors, pack)
+from gr7_presence.achievement_view import medal_colors
+from gr7_presence.achievements_page import AchievementsPage, badge, columns, highlights, pack
 from gr7_presence.i18n import STRINGS, Translator
 from gr7_presence.stats import Stats
 from gr7_presence import ui_kit as K

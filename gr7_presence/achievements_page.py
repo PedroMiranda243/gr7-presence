@@ -8,12 +8,12 @@ As medalhas também aparecem na linha das Estatísticas (`badge_height` e `draw_
 """
 from __future__ import annotations
 
-import math
 from dataclasses import dataclass
 from datetime import date, timedelta
 from typing import Callable
 
 from . import ui_kit as K
+from .achievement_view import level_name, mark_title, medal_colors, number, short_date, thousands, unit
 from .achievements import (BY_KEY, CATALOG, GROUPS, AchievementTracker, Result, Unlock, musician_level,
                            total_marks, total_points, unlocked_marks, unlocks)
 from .dashboard_page import LIGHT, META
@@ -28,7 +28,6 @@ TIMELINE_ROWS = 8          # na janela padrão, a linha do tempo mostra as 8 mai
 REC_H = 34
 TIMELINE_MIN_W = 300       # sobra mais estreita que isso numa linha: a linha do tempo vai para baixo
 FILTERS = ("all", "got", "missing")
-UNIT_ONE = ("weekends", "full_months", "goal_weeks", "own")   # o primeiro nível é 1: "0 de 1 mês"
 
 TITLE = K.Style(30, 800, K.TEXT, display=True, width=125, line=1.0)
 H3 = K.Style(15, 700, K.TEXT, display=True, width=112, line=1.2)
@@ -60,43 +59,6 @@ class Badge:
     progress: float | None       # a barra fina até o próximo nível (None: sem barra)
 
 
-def medal_colors(key: str, level: int) -> tuple[str, str, str] | None:
-    """As cores da medalha de `key` no nível `level` (0 = apagada)."""
-    d = BY_KEY[key]
-    if level <= 0:
-        return None
-    if d.levels:
-        return K.MEDAL_LEVELS[level - 1]
-    return K.MEDAL_SECRET if d.secret else K.MEDAL_SINGLE
-
-
-def level_name(key: str, level: int, t: Translator) -> str:
-    """"Ouro" numa família; "Única" ou "Secreta" nas outras."""
-    d = BY_KEY[key]
-    if d.levels:
-        return t(f"ach_level_{level}")
-    return t("ach_secret") if d.secret else t("ach_single")
-
-
-def mark_title(u: Unlock, t: Translator) -> str:
-    """"Maratona · Ouro" numa família, só o nome nas outras (linha do tempo)."""
-    name = t(f"ach_{u.key}")
-    return f"{name} · {t(f'ach_level_{u.level}')}" if BY_KEY[u.key].levels else name
-
-
-def short_date(d: date, t: Translator) -> str:
-    return t("date_short", d=d.day, m=d.month)
-
-
-def number(value: float, t: Translator) -> str:
-    """88 · 6,8 · 3: inteiro a partir de 10, uma casa abaixo disso, sempre para baixo (para nunca mostrar
-    "100 de 100" antes de chegar lá)."""
-    if value >= 10:
-        return str(int(value + 1e-9))
-    v = math.floor(value * 10 + 1e-9) / 10
-    return str(int(v)) if v.is_integer() else f"{v:.1f}".replace(".", t("decimal_sep"))
-
-
 def badge(r: Result, t: Translator, today: date, first: date | None = None) -> Badge:
     """A medalha de uma conquista. `first`: o dia da primeira sessão (para "1 ano tocando")."""
     d = r.definition
@@ -111,9 +73,8 @@ def badge(r: Result, t: Translator, today: date, first: date | None = None) -> B
         elif d.new_data and r.value <= 0:
             sub, progress = t("ach_new_data"), None
         else:
-            one = r.next_target == 1 and r.key in UNIT_ONE
-            unit = t(f"ach_{r.key}_unit_one" if one else f"ach_{r.key}_unit")
-            prog = t("ach_progress", n=number(r.value, t), total=number(r.next_target, t), unit=unit)
+            prog = t("ach_progress", n=number(r.value, t), total=number(r.next_target, t),
+                     unit=unit(r.key, r.next_target, t))
             sub = t("ach_level_progress", level=t(f"ach_level_{r.level}"), progress=prog) if r.level else prog
             progress = r.progress
         return Badge(r.key, d.icon, medal_colors(r.key, r.level), title, sub, total, r.level, progress)
@@ -222,6 +183,10 @@ class AchievementsPage:
         """A janela chama quando a página aparece: as conquistas novas passam a ser vistas."""
         self.tracker.mark_seen()
 
+    def has_news(self) -> bool:
+        """O ponto laranja na barra lateral: há conquista que a pessoa ainda não viu aqui."""
+        return bool(self.tracker.unseen())
+
     # ---- dados ----
     def _groups(self, results: list[Result], t: Translator, today: date) -> list[tuple[str, list[Badge]]]:
         first = first_session(results)
@@ -236,6 +201,8 @@ class AchievementsPage:
     # ---- desenho ----
     def render(self, width: float, scale: float, t: Translator) -> K.Rendered:
         today = self.today()
+        # A janela só desenha a página que está aberta: o que sair enquanto ela está na tela já foi visto.
+        self.tracker.mark_seen()
         results = self.tracker.current(today)
         timeline = unlocks(results)
         inner = width - 2 * PAD_X
@@ -316,7 +283,7 @@ class AchievementsPage:
         sx, sy = x + 28, y + 26
         p.text(sx, sy, t("ach_level_label"), LABEL)
         p.text(sx, sy + 18, t("ach_level", n=level), LEVEL_BIG)
-        pts = f"{points:,}".replace(",", t("thousands_sep"))
+        pts = thousands(points, t)
         p.text(sx, sy + 70, t("ach_points_line", points=pts, missing=missing, next=level + 1), META)
         bar_w = min(380, w * 0.45)
         p.rrect(sx, sy + 100, bar_w, 10, 5, K.TRACK)

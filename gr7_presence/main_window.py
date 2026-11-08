@@ -61,7 +61,8 @@ def dark_title_bar(win: tk.Misc) -> None:
 def render_rail(height: float, scale: float, pages: list, selected: str, hover: str | None,
                 update_label: str | None, t: Translator) -> K.Rendered:
     """A barra lateral: o ícone, uma entrada por página e, embaixo, a versão nova quando houver.
-    Páginas com `rail = False` (a de atualização) não ganham entrada própria."""
+    Páginas com `rail = False` (a de atualização) não ganham entrada própria. Uma página com
+    `has_news()` verdadeiro (a Conquistas, com conquista não vista) ganha o ponto laranja."""
     pages = [page for page in pages if getattr(page, "rail", True)]
     p = K.Painter(RAIL_W, height, scale, K.RAIL)
     p.rect(RAIL_W - 1, 0, 1, height, K.RAIL_LINE)
@@ -75,6 +76,8 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
         color = K.TEXT if on else K.ICON_OFF
         p.icon(page.icon, 29, y + 10, 20, K.AMBER if on else K.ICON_OFF)
         p.text(39, y + 36, t(page.label_key), RAIL_LABEL, anchor="m", color=color)
+        if not on and _has_news(page):
+            p.circle(7 + 64 - 16 - 3.5, y + 8 + 3.5, 3.5, K.ORANGE)
         regions.append(K.Region(7, y, 71, y + ITEM_H, page.key, page.key, radius=12))
         y += ITEM_H + 6
     if update_label:
@@ -86,6 +89,15 @@ def render_rail(height: float, scale: float, pages: list, selected: str, hover: 
         p.circle(7 + 64 - 16 - 3.5, uy + 8 + 3.5, 3.5, K.ORANGE)
         regions.append(K.Region(7, uy, 71, uy + ITEM_H, "update", "update", radius=12))
     return K.Rendered(p.img, height, regions)
+
+
+def _has_news(page) -> bool:
+    news = getattr(page, "has_news", None)
+    try:
+        return bool(news and news())
+    except Exception:   # o ponto é um extra: sem ele, a barra continua
+        log.exception("Falha ao conferir as novidades de %s", getattr(page, "key", "?"))
+        return False
 
 
 def render_menu(width: float, options: list[tuple[object, str]], current: object, hover: int | None,

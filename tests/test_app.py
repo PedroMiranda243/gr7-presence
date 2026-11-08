@@ -1,6 +1,7 @@
 import copy
 import tempfile
 import unittest
+from datetime import date, datetime, timedelta
 from unittest import mock
 from pathlib import Path
 
@@ -122,6 +123,75 @@ class AchievementsInTheLoopTest(unittest.TestCase):
         with mock.patch.object(self.app.achievements, "maybe_check", side_effect=RuntimeError("defeito")):
             with self.assertLogs("gr7_presence.app", "ERROR"):
                 self.app._check_achievements()      # registra no log e segue
+
+
+class AchievementNoticeTest(unittest.TestCase):
+    """O aviso de conquista: um por vez, um só para várias, um só na primeira vez; e o cartão de 24 h."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.stats = Stats(self.base / "stats.json")
+        self.app = PresenceApp(FakeConfig(copy.deepcopy(DEFAULTS)), self.stats, PresetReader(self.base / "x.tle"),
+                               PresetLibrary(self.base, extra_dirs=[]), live_state_path=self.base / "l.json")
+        self.notes = []
+        self.app.on_note = lambda title, body: self.notes.append((title, body))
+
+    def played(self, day: date, minutes: float):
+        start = datetime(day.year, day.month, day.day, 20).timestamp()
+        secs = minutes * 60
+        self.stats.sessions.append({"start": start, "end": start + secs, "seconds": secs, "mode": "standalone",
+                                    "days": {day.isoformat(): secs}, "presets": {"Clean Cristalino": secs}})
+
+    def test_first_time_one_notice_then_one_per_unlock(self):
+        for i in range(12):
+            self.played(date(2026, 1, 1) + timedelta(days=i), 60)
+        self.app._check_achievements(force=True)
+        self.assertEqual(len(self.notes), 1)
+        self.assertEqual(self.notes[0][0], "As conquistas chegaram")
+        self.app._check_achievements(force=True)                  # nada novo: nada de aviso
+        self.assertEqual(len(self.notes), 1)
+        self.played(date(2026, 1, 13), 130)                        # mais de 2 h numa sessão
+        self.app._check_achievements(force=True)
+        self.assertEqual(len(self.notes), 2)
+        self.assertIn("Maratona (Prata)", self.notes[1][0] + self.notes[1][1])
+
+    def test_new_user_gets_no_first_notice(self):
+        self.app._check_achievements(force=True)                  # sem histórico: nada a contar
+        self.assertEqual(self.notes, [])
+        self.played(date(2026, 1, 1), 30)
+        self.app._check_achievements(force=True)
+        self.assertEqual(self.notes[0][0], "Conquista nova: Primeiros acordes")
+
+    def test_notice_can_be_turned_off(self):
+        self.app.config["notify_achievements"] = False
+        self.app._check_achievements(force=True)
+        self.played(date(2026, 1, 1), 30)
+        self.app._check_achievements(force=True)
+        self.assertEqual(self.notes, [])
+        self.assertIn("first", {u.key for u in self.app.achievements.timeline()})   # registrada mesmo assim
+
+    def test_a_broken_notice_does_not_stop_the_loop(self):
+        self.app.on_note = mock.Mock(side_effect=RuntimeError("bandeja"))
+        self.app._check_achievements(force=True)
+        self.played(date(2026, 1, 1), 30)
+        with self.assertLogs("gr7_presence.app", "ERROR"):
+            self.app._check_achievements(force=True)
+
+    def test_card_goes_to_discord_for_24_hours(self):
+        self.app._check_achievements(force=True)
+        self.played(date(2026, 1, 1), 30)
+        self.app._check_achievements(force=True)                  # "Primeiros acordes": o cartão vale 24 h
+        achievement, _level = self.app._achievement_bits()
+        self.assertEqual(achievement[0], "🏆 Conquista: Primeiros acordes")
+        self.app.ipc = FakeIpc()
+        target = Target("standalone", 999_999_999, 1_792_985_871.2)
+        self.app._update_discord(target, PresetInfo(name="Clean Cristalino", amp="Jump", chain=["Jump"]), [], None)
+        self.assertEqual(self.app.showing["count"], 3)              # timbre, tempo e a conquista
+        with mock.patch.object(self.app.achievements, "card", side_effect=RuntimeError("defeito")):
+            with self.assertLogs("gr7_presence.app", "ERROR"):
+                self.assertEqual(self.app._achievement_bits(), (None, None))
 
 
 class GoalNoteTest(unittest.TestCase):

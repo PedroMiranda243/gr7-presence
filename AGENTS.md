@@ -75,6 +75,7 @@ tray (thread principal, tkinter + pystray) ◄── status e aviso de versão n
 | `assets.py` | Plano B quando o Discord não reconhece as imagens | — |
 | `stats.py` | Sessões de prática e os números das estatísticas (barras, sequência) | Desenhar |
 | `achievements.py` | O catálogo das conquistas, a conta a partir das sessões, os pontos e o registro em `dados\conquistas.json` | Desenhar, avisar ou falar com o Discord |
+| `achievement_view.py` | O que se mostra de uma conquista: nome com nível, números, cor da medalha, as frases do aviso, do cartão do Discord e do destaque do Painel | Desenhar, mandar o aviso ou falar com o Discord |
 | `main_window.py` | A janela principal: barra lateral, rolagem, cliques, barra de título escura | Desenhar o conteúdo das páginas |
 | `dashboard_page.py` | A página Painel: o preset no palco, o cartão no perfil agora, meta e conexões | Decidir o cartão (lê `app.showing`) |
 | `stats_page.py` | A página Estatísticas, desenhada numa imagem, com a linha de 5 conquistas | Calcular os números (`stats.py`) |
@@ -169,7 +170,9 @@ Python do `.venv` enquanto o `pip` atualiza esse ambiente.
 
 **Ícone pequeno em branco no Discord.** O Discord guarda em cache a lista de imagens do app; se a
 chave não é reconhecida, o `assets.py` passa a mandar o link do CDN. O ícone ao lado do nome só
-atualiza com Ctrl+R no Discord.
+atualiza com Ctrl+R no Discord. Ícone novo (o `trophy` da 1.5.0) não existe no app até alguém enviá-lo
+no Developer Portal: sem isso, nem o link do CDN resolve, e o cartão sai sem o ícone pequeno. Envie
+antes de publicar a versão (`docs/app-do-discord.md`).
 
 **Ler o pipe do Discord numa thread trava a escrita.** O pipe é síncrono no Windows e serializa as
 operações: o `discord_ipc.py` consulta com `PeekNamedPipe` em vez de deixar uma leitura pendurada.

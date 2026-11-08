@@ -1,7 +1,8 @@
 """Página Painel da janela principal: o que está no perfil agora, como no exemplo aprovado (Palco).
 
 No palco, com a luz em cima, o preset que está tocando, a cadeia do rack e o cartão que o Discord está
-mostrando, com o rodízio. Embaixo, a meta do dia e as conexões (Discord, Guitar Rig, leitura da tela).
+mostrando, com o rodízio. Embaixo, a conquista nova (enquanto a pessoa não abre a página Conquistas), a
+meta do dia e as conexões (Discord, Guitar Rig, leitura da tela).
 Com o Guitar Rig fechado, a luz apaga e a página diz o que acontece quando ele abrir.
 
 Numa janela maior que a padrão (tela cheia), o Painel é o desenho da janela padrão ampliado por igual
@@ -18,6 +19,8 @@ from datetime import date, datetime, timedelta
 from typing import Callable
 
 from . import ui_kit as K
+from .achievement_view import best_per_key, mark_title, medal_colors, what
+from .achievements import BY_KEY, musician_level, total_points, unlocks
 from .i18n import Translator, format_time
 
 PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 20, 14
@@ -41,6 +44,9 @@ CONN_HINT = K.Style(13, 400, K.MUTED, line=1.4)   # quebra onde o 12,5 do exempl
 ROTATION = K.Style(12, 400, K.MUTED, line=1.3)
 EMPTY = K.Style(13, 400, K.MUTED, line=1.45)
 BUTTON = K.Style(13, 600, K.TEXT, line=1.3)
+NEW_TITLE = K.Style(15, 700, K.TEXT, display=True, width=112, line=1.25)
+NEW_POINTS = K.Style(13, 600, K.AMBER, line=1.3)
+NEW_MEDAL = 52
 
 LIGHT = [(0.0, (255, 183, 77, 0.36)), (0.40, (255, 106, 61, 0.15)), (0.72, (17, 19, 26, 0.0)), (1.0, (17, 19, 26, 0.0))]
 LIGHT_OFF = [(0.0, (160, 170, 200, 0.12)), (0.70, (17, 19, 26, 0.0)), (1.0, (17, 19, 26, 0.0))]
@@ -50,10 +56,11 @@ PILL_H = 6 + 12.5 * 1.2 + 6 + 2
 
 @dataclasses.dataclass
 class BottomPanel:
-    """Um painel embaixo do palco: o título, a altura do conteúdo numa largura e o desenho do conteúdo."""
+    """Um painel embaixo do palco: o título, a altura do conteúdo numa largura e o desenho do conteúdo. O
+    desenho pode devolver as áreas clicáveis dele (o botão "Ver conquistas")."""
     title: str
     height: Callable[[K.Painter, float], float]               # (medidor, largura do conteúdo) -> altura
-    draw: Callable[[K.Painter, float, float, float], None]    # (pintor, x, y, largura do conteúdo)
+    draw: Callable[[K.Painter, float, float, float], list | None]   # (pintor, x, y, largura do conteúdo)
 
 
 class DashboardPage:
@@ -145,7 +152,8 @@ class DashboardPage:
         de dois em dois, e a página rola se precisar; em tela cheia, o `_fit` põe mais lado a lado."""
         goal_note = self._goal_note(t, state)
         conns = self._connections(t, state)
-        return [
+        news = self._achievement_panel(t)
+        return news + [
             BottomPanel(t("dash_goal_title"),
                         lambda m, w: 34 + 12 + 10 + 10 + K.paragraph_height(m, goal_note, NOTE, w),
                         lambda p, x, y, w: self._draw_goal(p, x, y, w, t, goal_note)),
@@ -173,7 +181,9 @@ class DashboardPage:
             y += GAP
             for i, panel in enumerate(row):
                 cx, cy, cw = self._panel(p, PAD_X + i * (col + GAP), y, col, row_h, panel.title)
-                panel.draw(p, cx, cy, cw)
+                drawn = panel.draw(p, cx, cy, cw)
+                if isinstance(drawn, list):   # só o desenho que tem botão devolve as áreas clicáveis
+                    regions += drawn
             y += row_h
         return K.Rendered(p.img, total, regions)
 
@@ -181,6 +191,50 @@ class DashboardPage:
         p.rrect(x, y, w, h, 16, K.PANEL, outline=K.PANEL_LINE)
         p.text(x + 21, y + 19, title, H3)
         return x + 21, y + 19 + 18 + 12, w - 42
+
+    # ---- a conquista nova ----
+    def _achievement_panel(self, t: Translator) -> list[BottomPanel]:
+        """O painel "Conquista nova", primeiro da lista, enquanto houver conquista que a pessoa ainda não
+        viu na página Conquistas: a mais nova (a de mais pontos, no mesmo dia), e quantas mais saíram."""
+        tracker = getattr(self.app, "achievements", None)
+        unseen = tracker.unseen() if tracker else set()
+        if not unseen:
+            return []
+        results = tracker.current(self.today())
+        news = best_per_key([u for u in unlocks(results) if u.mark in unseen])   # uma por conquista
+        if not news:
+            return []
+        u = news[0]
+        level = musician_level(total_points(results))[0]
+        title = mark_title(u, t)
+        says = what(u.key, {r.key: r for r in results}, t) + "."
+        points = t("ach_panel_points", points=u.points, level=level)
+        if len(news) > 1:
+            points += " · " + t("ach_panel_more", n=len(news) - 1)
+        label = t("ach_panel_button")
+
+        def top(said: float) -> float:
+            """Onde o botão começa: 14 abaixo da medalha ou 9 abaixo da linha dos pontos (a do exemplo)."""
+            return max(NEW_MEDAL + 14, 21 + said + 26)
+
+        def height(m: K.Painter, w: float) -> float:
+            return top(K.paragraph_height(m, says, NOTE, w - NEW_MEDAL - 16)) + 34
+
+        def draw(p: K.Painter, x: float, y: float, w: float) -> list:
+            K.medal(p, x + NEW_MEDAL / 2, y + 2, NEW_MEDAL, BY_KEY[u.key].icon, medal_colors(u.key, u.level))
+            tx, text_w = x + NEW_MEDAL + 16, w - NEW_MEDAL - 16
+            p.text(tx, y, title, NEW_TITLE, max_w=text_w)
+            said = p.paragraph(tx, y + 21, says, NOTE, text_w)
+            p.text(tx, y + 21 + said + 0.5, points, NEW_POINTS, max_w=text_w)
+            by = y + top(said)
+            bw = 14 + p.measure(label, BUTTON) + 14
+            p.rrect(x, by, bw, 34, 10, K.BTN_STAGE, outline=K.BTN_STAGE_LINE)
+            p.text(x + 14, by + (34 - BUTTON.size * BUTTON.line) / 2, label, BUTTON)
+            host = self.host
+            return [K.Region(x, by, x + bw, by + 34, lambda: host and host.show("achievements"), "see_achievements",
+                             radius=10)]
+
+        return [BottomPanel(t("ach_new_title"), height, draw)]
 
     # ---- o palco, à esquerda ----
     def _left(self, t: Translator, state) -> dict:

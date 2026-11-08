@@ -3,9 +3,11 @@ import tempfile
 import time
 import tkinter as tk
 import unittest
+from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
+from gr7_presence.achievements import AchievementTracker
 from gr7_presence.config import Config
 from gr7_presence.detector import Target
 from gr7_presence.gr7_state import PresetInfo
@@ -147,6 +149,42 @@ class SettingsPageTest(unittest.TestCase):
         self.assertEqual([v for v, _ in args[3]], ["playing", "listening", "watching", "competing"])
         args[5]("watching")
         self.assertEqual(self.saved()["activity_type"], "watching")
+
+
+class AchievementOptionsTest(unittest.TestCase):
+    """As três opções das conquistas, na seção Prática, e o cartão de 24 h na prévia do perfil."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.base = Path(tmp.name)
+        self.config = Config(self.base / "config.json")
+        self.stats = Stats(self.base / "stats.json")
+        self.tracker = AchievementTracker(self.base / "conquistas.json", self.stats, lambda: 30)
+        state = (PRESET, Target("standalone", 0, time.time() - 60), [], None)
+        self.page = SettingsPage(self.config, self.stats, None, lambda: state, autostart=FakeAutostart(),
+                                 open_path=lambda _p: None, achievements=self.tracker)
+
+    def test_switches(self):
+        self.assertEqual((self.config["notify_achievements"], self.config["show_achievement_card"],
+                          self.config["show_level"]), (True, True, False))
+        regions = {r.key: r for r in self.page.render(538, 1.0, Translator("pt")).regions}
+        for key in ("notify_achievements", "show_achievement_card", "show_level"):
+            self.assertIn(key, regions)
+        regions["show_level"].action()
+        self.assertTrue(json.loads(self.config.path.read_text(encoding="utf-8"))["show_level"])
+
+    def test_preview_has_the_achievement_card(self):
+        self.tracker.check()
+        before = [a.get("state") for a in self.page.preview(Translator("pt"))[0]]
+        self.assertFalse(any("Conquista" in (s or "") for s in before))
+        start = datetime(2026, 1, 1, 20).timestamp()              # às 20 h: só "Primeiros acordes"
+        self.stats.sessions.append({"start": start, "end": start + 1800, "seconds": 1800, "mode": "standalone",
+                                    "days": {"2026-01-01": 1800}, "presets": {"Clean Cristalino": 1800}})
+        self.tracker.check()
+        states = [a.get("state") for a in self.page.preview(Translator("pt"))[0]]
+        self.assertIn("🏆 Conquista: Primeiros acordes", states)
+        self.page.render_side(344, 640, 1.0, Translator("pt"))     # a prévia desenha com o cartão a mais
 
 
 class SettingsWindowTest(unittest.TestCase):

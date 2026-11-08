@@ -17,7 +17,8 @@ versão, gera o zip e publica a release. Quem usa recebe o aviso na bandeja em a
 
 1. **Confira a `main`.** Tudo que vai na versão já foi mesclado, a CI está verde, e o `CHANGELOG.md`
    tem as mudanças em *Não lançado*. Rode os testes numa máquina com o Guitar Rig 7: os de instalação
-   real não rodam na CI.
+   real não rodam na CI. Se a versão traz uma imagem nova em `assets\discord\`, envie-a no Developer
+   Portal antes (`docs/app-do-discord.md`, "Imagem nova numa versão").
 2. **PR de versão** (ramo `chore/versao-X.Y.Z`):
    - `gr7_presence/__init__.py`: `__version__ = "X.Y.Z"`;
    - `CHANGELOG.md`: *Não lançado* vira `## [X.Y.Z] - AAAA-MM-DD`, uma seção *Não lançado* vazia volta

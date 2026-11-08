@@ -11,7 +11,8 @@ from datetime import date
 from pathlib import Path
 from typing import Callable
 
-from .achievements import AchievementTracker
+from . import achievement_view
+from .achievements import AchievementTracker, Unlock
 from .config import ACHIEVEMENTS_PATH, DATA_DIR, Config
 from .assets import AssetResolver
 from .detector import Detector, Target, file_version
@@ -59,6 +60,7 @@ class PresenceApp:
         # O que o loop viu na última volta (preset, alvo, faixas, estado do rack), para a prévia dos
         # Ajustes mostrar o cartão de verdade. None com o Guitar Rig fechado.
         self.last_state: tuple | None = None
+        self._first_achievements_noted = False
         self._goal_day: date | None = None
         self._goal_before = 0.0
         # Para o Painel: o cartão que está no perfil agora (atividade, posição, total, quando foi) e o
@@ -188,13 +190,34 @@ class PresenceApp:
             return 0
 
     def _check_achievements(self, force: bool = False) -> None:
-        """Refaz a conta das conquistas a cada minuto e quando uma sessão termina. Por enquanto só
-        registra (no log e no `conquistas.json`); o aviso, o cartão do Discord e as telas vêm depois e
-        leem o `self.achievements`."""
+        """Refaz a conta das conquistas a cada minuto e quando uma sessão termina, e avisa as novas. O
+        cartão do Discord e as telas leem o `self.achievements`."""
         try:
-            self.achievements.check() if force else self.achievements.maybe_check()
+            new = self.achievements.check() if force else self.achievements.maybe_check()
         except Exception:   # o loop nunca cai por causa de uma conta
             log.exception("Falha ao conferir as conquistas")
+            return
+        self._announce_achievements(new)
+
+    def _announce_achievements(self, new: list[Unlock]) -> None:
+        """Um aviso na bandeja: um por conquista, um só para várias de uma vez e, na primeira vez depois de
+        atualizar, um só dizendo quantas o histórico já tinha (sem a enxurrada de uma por marca)."""
+        first = bool(self.achievements.first_run_count) and not self._first_achievements_noted
+        if not new and not first:
+            return
+        if first:
+            self._first_achievements_noted = True
+        if not (self.config["notify_achievements"] and self.on_note):
+            return
+        try:
+            results = self.achievements.current()
+            if first:
+                title, body = achievement_view.first_note(self.achievements.first_run_count, results, self.t)
+            else:
+                title, body = achievement_view.note(new, results, self.t)
+            self.on_note(title, body)
+        except Exception:
+            log.exception("Falha ao avisar das conquistas")
 
     def _check_goal(self, today: date | None = None) -> None:
         """Avisa uma vez quando o tempo de hoje passa da meta. Só conta a virada que acontece com o
@@ -331,7 +354,8 @@ class PresenceApp:
                         rack_state: str | None = None) -> None:
         now = time.time()
         summary = self.stats.summary() if self.config["show_stats"] else None
-        cards = build_cards(preset, target, summary, self.config, self.t, tracks, rack_state)
+        achievement, level = self._achievement_bits()
+        cards = build_cards(preset, target, summary, self.config, self.t, tracks, rack_state, achievement, level)
 
         signature = ((preset.name, preset.amp, tuple(preset.chain)) if preset else (target.kind, target.host),
                      tuple(tracks), rack_state)
@@ -379,6 +403,14 @@ class PresenceApp:
         else:
             shown = (preset.name if preset and preset.name else None) or target.host or "Guitar Rig 7"
         self._set_status(self.t("tray_playing", name=shown), True)
+
+    def _achievement_bits(self) -> tuple[tuple[str, str] | None, str | None]:
+        """O cartão da conquista das últimas 24 h e a linha do nível, para o `build_cards`."""
+        try:
+            return achievement_view.card_bits(self.achievements.card(), self.achievements.current(), self.t)
+        except Exception:   # sem o cartão da conquista, os outros continuam
+            log.exception("Falha ao montar o cartão da conquista")
+            return None, None
 
     def _clear(self) -> None:
         if self._last_activity is not None and self.ipc:

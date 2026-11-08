@@ -468,6 +468,10 @@ hoje. O espaço vazio do cartão é um contorno tracejado (6 ligado, 4 desligado
   9 entre eles, a linha existe vazia nas únicas para os títulos alinharem), o nome (12,5/600), a linha
   de baixo (12, text-soft: "Prata · 88 de 100 h", "em 07/11" ou o que fazer) e a barra fina de 4 px
   até o próximo nível, na cor dele.
+- **Conquista nova (painel do Painel):** o primeiro painel de baixo, enquanto houver conquista não
+  vista. Medalha de 52 à esquerda; à direita, o nome com o nível (Archivo 700, 15), o que ela diz
+  (Body SM, muted) e "+40 pontos · nível 7" (13/600, âmbar), com "e mais N" quando saíram outras;
+  embaixo, o botão secundário "Ver conquistas" (btn-stage). Some quando a página Conquistas abre.
 - **Palco das Conquistas:** à esquerda, o nível de músico (Archivo 44), os pontos, a barra de 10 px até o
   próximo nível (degradê aceso) e as marcas; à direita, a mais recente num painel de 250 px.
 - **Prévia do Discord:** reproduz o cartão real nas cores do Discord (card, raio 8, imagem de 64 com o
@@ -491,7 +495,8 @@ hoje. O espaço vazio do cartão é um contorno tracejado (6 ligado, 4 desligado
 ### Navigation
 - **Trilho:** Painel, Estatísticas, Conquistas e Ajustes; ícone de traço de 20 px sobre rótulo 10,5/600. Página atual: fundo rail-on, ícone âmbar,
   rótulo text. Mouse por cima: fundo field. Fora: icon-off. A versão nova fica embaixo, em âmbar, com
-  um ponto laranja.
+  um ponto laranja. O mesmo ponto (3,5 de raio, no canto de cima do item) marca a Conquistas com
+  conquista não vista, a não ser que ela seja a página aberta.
 - **Teclado:** Tab e Shift+Tab percorrem trilho, página (de cima para baixo) e painel da direita; Enter
   ou espaço acionam; setas mexem no deslizante; na lista de opções, setas escolhem, Enter confirma, Esc
   fecha. O controle com foco ganha um contorno âmbar de 2 px (no mínimo 2 px de tela), 3 px para fora,
