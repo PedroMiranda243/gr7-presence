@@ -10,6 +10,10 @@ Request que muda algo visível escreve aqui, em **Não lançado**.
 ## [Não lançado]
 
 ### Mudanças
+- **O Painel ocupa a tela em tela cheia.** Antes, numa janela maximizada, o nome do preset ficava num
+  canto, o cartão no outro e a metade de baixo vazia. Agora o Painel é o mesmo desenho do tamanho
+  padrão, ampliado por igual até ocupar a tela, com a lista do **Pausar** ampliada junto. No tamanho
+  padrão nada muda.
 - **Estatísticas: barras mais largas em tela cheia.** Numa janela maximizada, as barras do gráfico
   ficavam finas e muito separadas. Agora elas engordam com a largura, até o dobro. No tamanho padrão
   nada muda.

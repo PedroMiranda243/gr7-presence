@@ -132,6 +132,17 @@ class MenuTest(unittest.TestCase):
         self.assertEqual(self.picked, [2])
         self.assertIsNone(self.win._menu)
 
+    def test_zoomed_list_grows_with_the_page(self):
+        """O Painel ampliado em tela cheia abre a lista do Pausar ampliada na mesma proporção."""
+        self.win.close_menu()
+        self.win.open_menu(20, 300, 200, [(1, "Um"), (2, "Dois")], 1, self.picked.append, zoom=2.0)
+        self.root.update()
+        s = self.win.scale * 2.0
+        self.assertEqual(self.win._menu.winfo_width(), round(200 * s))
+        second = render_menu(200, [(1, "Um"), (2, "Dois")], 1, None, s).regions[1]
+        self.click(self.win._menu.winfo_children()[0], 100 * s, (second.y0 + second.y1) / 2 * s)
+        self.assertEqual(self.picked, [2])
+
     def test_moving_the_window_closes_the_list(self):
         x, y = self.win.win.winfo_x(), self.win.win.winfo_y()
         self.win.win.geometry(f"+{x + 40}+{y + 30}")   # como arrastar pela barra de título

@@ -394,12 +394,13 @@ class MainWindow:
 
     # ---- lista de opções -----------------------------------------------------------------------
     def open_menu(self, x: float, y: float, width: float, options: list[tuple[object, str]], current: object,
-                  on_pick: Callable[[object], None], above: float | None = None) -> None:
+                  on_pick: Callable[[object], None], above: float | None = None, zoom: float = 1.0) -> None:
         """Abre a lista de opções logo abaixo de um campo (`x`, `y` em pixels lógicos da página). Se ela
         passar do pé da janela, abre acima, terminando em `above` (o topo do campo, menos a folga).
-        Setas para cima e para baixo escolhem, Enter confirma, Esc fecha."""
+        Setas para cima e para baixo escolhem, Enter confirma, Esc fecha. Com `zoom` (o Painel ampliado
+        em tela cheia), a lista é desenhada maior na mesma proporção; `width` continua a da lista normal."""
         self.close_menu()
-        s = self.scale
+        s = self.scale * zoom     # a escala do desenho da lista
         menu = tk.Toplevel(self.win)
         menu.overrideredirect(True)
         try:
@@ -451,11 +452,11 @@ class MainWindow:
 
         draw()
         img = state["rendered"].image
-        sx = self.view.winfo_rootx() + round(x * s - self.view.canvasx(0))
-        sy = self.view.winfo_rooty() + round(y * s - self.view.canvasy(0))
+        sx = self.view.winfo_rootx() + round(x * self.scale - self.view.canvasx(0))
+        sy = self.view.winfo_rooty() + round(y * self.scale - self.view.canvasy(0))
         bottom = self.win.winfo_rooty() + self.win.winfo_height()
         if above is not None and sy + img.height > bottom:   # não cabe embaixo: abre para cima
-            sy = self.view.winfo_rooty() + round(above * s - self.view.canvasy(0)) - img.height
+            sy = self.view.winfo_rooty() + round(above * self.scale - self.view.canvasy(0)) - img.height
         menu.geometry(f"{img.width}x{img.height}+{sx}+{sy}")
         canvas.bind("<Motion>", motion)
         # Na janela da lista, não no desenho: com o grab, o clique em qualquer ponto da janela do programa
