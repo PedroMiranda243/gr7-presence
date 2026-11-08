@@ -126,5 +126,68 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual([r[2] for r in rows], ["fechado", "fechado", "esperando"])
 
 
+class FullScreenTest(unittest.TestCase):
+    """Tela cheia (opção B): o desenho da janela padrão ampliado por igual até ocupar a tela. Na janela
+    padrão e nas menores, o desenho de sempre."""
+
+    def setUp(self):
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.app = FakeApp(Stats(Path(tmp.name) / "stats.json"))
+        self.page = DashboardPage(self.app, today=lambda: TODAY, now=lambda: NOW)
+        self.t = Translator("pt")
+
+    def render(self, width: float, view_height: float, scale: float = 1.0):
+        self.page.view_height = view_height
+        return self.page.render(width, scale, self.t)
+
+    def test_default_window_is_untouched(self):
+        for width, height in ((882, 640), (782, 560), (882, 1000)):   # padrão, mínima, só mais alta
+            plain = DashboardPage(self.app, today=lambda: TODAY, now=lambda: NOW).render(width, 1.0, self.t)
+            r = self.render(width, height)
+            self.assertEqual(self.page._place, (1.0, 0.0))
+            self.assertEqual(r.image.tobytes(), plain.image.tobytes())
+
+    def test_full_screen_fills_the_screen(self):
+        for width, height, scale in ((1842, 1001, 1.0), (1842, 1001, 1.5), (2482, 1001, 1.0)):
+            r = self.render(width, height, scale)
+            zoom, dx = self.page._place
+            self.assertGreater(zoom, 1.5)
+            self.assertLessEqual(r.height, height)                     # cabe sem rolar
+            self.assertTrue(r.height > 0.98 * height or dx < 10)        # ocupa a altura ou a largura
+            self.assertAlmostEqual(dx * 2 + 882 * zoom, width)          # no meio da largura
+            self.assertEqual(r.image.size, (round(width * scale), round(r.height * scale)))
+            # O desenho da janela padrão na escala ampliada (o texto mede um tico diferente em cada escala).
+            default = DashboardPage(self.app, today=lambda: TODAY, now=lambda: NOW).render(882, scale * zoom, self.t)
+            self.assertEqual(len(default.regions), len(r.regions))
+            for a, b in zip(default.regions, r.regions):                # os cliques acompanham o desenho
+                self.assertEqual(a.key, b.key)
+                self.assertAlmostEqual(b.x0, dx + a.x0 * zoom, places=3)
+                self.assertAlmostEqual(b.y1, a.y1 * zoom, places=3)
+
+    def test_wide_but_short_window_stays_inside(self):
+        r = self.render(1800, 640)                                      # só mais larga que a padrão
+        zoom, dx = self.page._place
+        self.assertGreater(zoom, 1.0)                                   # cresce até a altura…
+        self.assertLessEqual(r.height, 640)                             # …sem passar dela
+        self.assertGreater(dx, 200)                                     # e o que sobra fica dos lados
+
+    def test_pause_menu_grows_with_the_page(self):
+        host = mock.Mock()
+        self.page.host = host
+        self.render(882, 0)
+        normal = next(r for r in self.page.render(882, 1.0, self.t).regions if r.key == "pause")
+        normal.action()
+        x, y = host.open_menu.call_args.args[:2]
+        r = self.render(1842, 1001)
+        zoom, dx = self.page._place
+        next(reg for reg in r.regions if reg.key == "pause").action()
+        args, kwargs = host.open_menu.call_args
+        self.assertAlmostEqual(args[0], dx + x * zoom)
+        self.assertAlmostEqual(args[1], y * zoom)
+        self.assertEqual(args[2], 220)                                  # a largura da lista normal…
+        self.assertEqual(kwargs["zoom"], zoom)                          # …desenhada na escala ampliada
+
+
 if __name__ == "__main__":
     unittest.main()

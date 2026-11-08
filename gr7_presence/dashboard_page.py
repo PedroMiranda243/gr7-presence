@@ -3,9 +3,13 @@
 No palco, com a luz em cima, o preset que está tocando, a cadeia do rack e o cartão que o Discord está
 mostrando, com o rodízio. Embaixo, a meta do dia e as conexões (Discord, Guitar Rig, leitura da tela).
 Com o Guitar Rig fechado, a luz apaga e a página diz o que acontece quando ele abrir.
+
+Numa janela maior que a padrão (tela cheia), o Painel é o desenho da janela padrão ampliado por igual
+até ocupar a largura ou a altura, centralizado (opção B, escolhida pelo dono do projeto).
 """
 from __future__ import annotations
 
+import dataclasses
 import math
 import time
 from datetime import date, datetime, timedelta
@@ -16,6 +20,7 @@ from .i18n import Translator, format_time
 
 PAD_X, PAD_TOP, PAD_BOTTOM, GAP = 24, 20, 20, 14
 CARD_W = 290
+BASE_W = 960 - 78        # a página na janela padrão (o SIZE da main_window menos o trilho)
 NAME = K.Style(46, 800, K.GLOW, display=True, width=125, line=0.98)
 NAME_MD = K.Style(38, 800, K.GLOW, display=True, width=125, line=0.98)
 META = K.Style(14, 400, K.TEXT_LEAD, line=1.5)
@@ -52,6 +57,8 @@ class DashboardPage:
         self.now = now
         self.on_change: Callable[[], None] = lambda: None
         self.host = None
+        self.view_height = 0.0           # a janela informa a altura visível; sem ela, nada de ampliar
+        self._place = (1.0, 0.0)         # ampliação e deslocamento do último desenho, para a lista do Pausar
 
     # ---- ações ---------------------------------------------------------------------------------
     def _pause(self, how: str) -> None:
@@ -64,21 +71,56 @@ class DashboardPage:
 
     # ---- desenho -------------------------------------------------------------------------------
     def render(self, width: float, scale: float, t: Translator) -> K.Rendered:
+        state = self.app.last_state
+        zoom = self._zoom(width, scale, t, state)
+        if zoom == 1.0:
+            self._place = (1.0, 0.0)
+            return self._render(width, scale, t, state)
+        # O desenho da janela padrão, em pixels de tela maiores, no meio da largura.
+        dx = (width - BASE_W * zoom) / 2
+        self._place = (zoom, dx)
+        inner = self._render(BASE_W, scale * zoom, t, state)
+        p = K.Painter(width, inner.height * zoom, scale)
+        p.img.paste(inner.image, (p.px(dx), 0))
+        regions = [dataclasses.replace(r, x0=dx + r.x0 * zoom, y0=r.y0 * zoom, x1=dx + r.x1 * zoom, y1=r.y1 * zoom,
+                                       radius=r.radius * zoom) for r in inner.regions]
+        return K.Rendered(p.img, inner.height * zoom, regions)
+
+    def _zoom(self, width: float, scale: float, t: Translator, state) -> float:
+        """Quanto ampliar: até o desenho da janela padrão ocupar a largura ou a altura visível, o que vier
+        primeiro. Na janela padrão, numa mais estreita ou numa mais baixa que o conteúdo, é 1: o desenho
+        de sempre."""
+        view_h = self.view_height or 0
+        if width < BASE_W * 1.01 or not view_h:
+            return 1.0
+        zoom = min(width / BASE_W, view_h / self._layout(BASE_W, scale, t, state)["total"])
+        if zoom >= 1.01:
+            # O texto mede um tico diferente em outra escala: confere para não passar da altura e rolar.
+            zoom = min(zoom, view_h / self._layout(BASE_W, scale * zoom, t, state)["total"])
+            zoom = math.floor(zoom * 100) / 100
+        return zoom if zoom >= 1.01 else 1.0
+
+    def _layout(self, width: float, scale: float, t: Translator, state) -> dict:
+        """As medidas do Painel numa largura, sem desenhar."""
         m = K.Painter(1, 1, scale)
         inner = width - 2 * PAD_X
         left_w = inner - 56 - CARD_W - 26
-        state = self.app.last_state
         left = self._left(t, state)
-        left_h = self._left_height(m, left, left_w)
-        right_h = self._right_height(m, t, state)
-        stage_h = 28 + max(left_h, right_h) + 24
+        stage_h = 28 + max(self._left_height(m, left, left_w), self._right_height(m, t, state)) + 24
         col = (inner - GAP) / 2
         goal_note = self._goal_note(t, state)
         goal_h = 2 + 36 + 18 + 12 + 34 + 12 + 10 + 10 + K.paragraph_height(m, goal_note, NOTE, col - 42)
         conns = self._connections(t, state)
         conn_h = 2 + 36 + 18 + 12 + self._conn_height(m, conns, col - 42)
         row_h = max(goal_h, conn_h)
-        total = PAD_TOP + stage_h + GAP + row_h + PAD_BOTTOM
+        return {"inner": inner, "left_w": left_w, "left": left, "stage_h": stage_h, "col": col,
+                "goal_note": goal_note, "conns": conns, "row_h": row_h,
+                "total": PAD_TOP + stage_h + GAP + row_h + PAD_BOTTOM}
+
+    def _render(self, width: float, scale: float, t: Translator, state) -> K.Rendered:
+        lay = self._layout(width, scale, t, state)
+        inner, left_w, left, stage_h, col = lay["inner"], lay["left_w"], lay["left"], lay["stage_h"], lay["col"]
+        goal_note, conns, row_h, total = lay["goal_note"], lay["conns"], lay["row_h"], lay["total"]
 
         p = K.Painter(width, total, scale)
         regions: list[K.Region] = []
@@ -222,10 +264,12 @@ class DashboardPage:
             return
         p.icon("down", bx + bw - 14 - 13, y + 10.5, 13, K.TEXT, stroke=2.2)
         options = [("hour", t("pause_hour")), ("forever", t("pause_forever"))]
+        zoom, dx = self._place      # ampliado em tela cheia, a lista cresce junto e abre no mesmo lugar
 
         def open_menu():
             if self.host:
-                self.host.open_menu(bx + bw - 220, y + 34 + 4, 220, options, None, self._pause, above=y - 4)
+                self.host.open_menu(dx + (bx + bw - 220) * zoom, (y + 34 + 4) * zoom, 220, options, None, self._pause,
+                                    above=(y - 4) * zoom, zoom=zoom)
         regions.append(K.Region(bx, y, bx + bw, y + 34, open_menu, "pause"))
 
     # ---- o cartão, à direita ----
